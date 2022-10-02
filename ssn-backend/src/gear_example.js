@@ -1,4 +1,4 @@
-{
+let json_data = {
     "data": {
         "gesotown": {
             "pickupBrand": {
@@ -378,3 +378,5 @@
         }
     }
 }
+
+export default json_data;

@@ -14,8 +14,9 @@ const GEAR_TYPE_WILDCARD = "TypeWildcard";
 const GEAR_BRAND_WILDCARD = "BrandWildcard";
 const GEAR_ABILITY_WILDCARD = "AbilityWildcard";
 const EXPIRATION = "Expiration";
-const GEAR_TYPES = ["Headgear", "Clothing", "Shoes"];
-// TODO: Some SQL requests may fail if gear brands + abilities have spaces in them.
+// The expiration time of the last item this user was notified about.
+const LAST_NOTIFIED_EXPIRATION = "LastNotifiedExpiration";
+const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 const GEAR_BRANDS = [
     "amiibo",
     "Annaki",
@@ -128,29 +129,34 @@ class Filter {
     }
 }
 
+/**Removes whitespace from column names.*/
+function formatCol(input: string): string {
+    return input.replace(" ", "");
+}
+
 /**
  * 
  * @returns the given filter represented as a dictionary, where keys are column names for
  * storage in a database table with their corresponding values.
  * Can be iterated over to generate SQL queries.
  */
- function filterToTableData(filter: Filter): {[id: string] : any;} {
+function filterToTableData(filter: Filter): {[id: string] : any;} {
     let data = {
         [GEAR_NAME]: filter.gearName,
         [RARITY]: filter.minimumRarity,
-        [GEAR_TYPE_WILDCARD]: filter.gearTypes === [] ? 1 : 0, //required bc nonzero values are true
-        [GEAR_ABILITY_WILDCARD]: filter.gearAbilities === [] ? 1 : 0,
-        [GEAR_BRAND_WILDCARD]: filter.gearBrands === [] ? 1 : 0,
+        [GEAR_TYPE_WILDCARD]: filter.gearTypes === [],
+        [GEAR_ABILITY_WILDCARD]: filter.gearAbilities === [],
+        [GEAR_BRAND_WILDCARD]: filter.gearBrands === [],
     };
 
     for (var ability in GEAR_ABILITIES) {
-        data[ability] = (ability in filter.gearAbilities) ? 1 : 0;
+        data[formatCol(ability)] = (ability in filter.gearAbilities);
     }
     for (var brand in GEAR_BRANDS) {
-        data[brand] = (brand in filter.gearBrands) ? 1 : 0;
+        data[formatCol(brand)] = (brand in filter.gearBrands);
     }
     for (var type in GEAR_TYPES) {
-        data[type] = (type in filter.gearTypes) ? 1 : 0;
+        data[formatCol(type)] = (type in filter.gearTypes);
     }
     return data;
 }
@@ -158,11 +164,11 @@ class Filter {
 /**
  * @effects Initial setup the database and its tables.
  */
-function setupDatabaseTables() {
-    pool.query(`CREATE DATABASE ${DATABASE_NAME}`);
-    pool.query(
+function setupDatabaseTables(client: typeof pg.Client) {
+    client.query(`CREATE DATABASE ${DATABASE_NAME}`);
+    client.query(
         `CREATE TABLE ${USERS_TABLE} (
-            ${USER_ID} int NOT NULL AUTO_INCREMENT,
+            ${USER_ID} SERIAL,
             Email varchar(255),
             LastNotified varchar(255),
             PRIMARY KEY (${USER_ID})
@@ -170,22 +176,24 @@ function setupDatabaseTables() {
     );
 
     // TODO: Add additional user data columns
-    pool.query(`
+    client.query(`
     CREATE TABLE ${USERS_TO_FILTERS_TABLE} (
-        PairID int NOT NULL AUTO_INCREMENT,
+        PairID SERIAL,
         ${USER_ID} int(255),
         ${FILTER_ID} int(255),
+        ${LAST_NOTIFIED_EXPIRATION} varchar(255),
         PRIMARY KEY (PairID)
     );`);
 
     // Generate filter table
     // Auto-generates boolean columns for gear types, abilities, and brands.
     let joinedFilterColumnNames = GEAR_TYPES.concat(GEAR_ABILITIES).concat(GEAR_BRANDS);
+    joinedFilterColumnNames.forEach(formatCol);
     let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n") + " BOOL";
-
-    pool.query(
+    
+    client.query(
         `CREATE TABLE ${FILTERS_TABLE} (
-            ${FILTER_ID} int NOT NULL AUTO_INCREMENT,
+            ${FILTER_ID} SERIAL,
             ${GEAR_NAME} varchar(255),
             ${RARITY} tinyint(255),
             ${GEAR_TYPE_WILDCARD} BOOL,
@@ -194,65 +202,78 @@ function setupDatabaseTables() {
             ${filterColumnQuery}
         );`
     );
-
-
 }
 
 /**
  * Searches and returns the ID of the first matching filter.
- * @param filter filter to search 
- * @returns 
+ * @param filter filter to search for
+ * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-async function getMatchingFilterID(filter: Filter): Promise<number> {
+async function getMatchingFilterID(client: typeof pg.Client, filter: Filter): Promise<number> {
     // Gets the given filter from the table
-
-    // SELECT * FROM [TableName]
-    // WHERE c1=v1 AND c2=v2 AND c3=v3 AND ...;
 
     let filterData = filterToTableData(filter);
     let queryArgs: string[] = [];
 
     for (var key in filterData) {
-        //key=value
+        // 'key=value'
         queryArgs.push(`${key}=${filterData[key]}`);
     }
 
-    let results = await pool.query(`
+    // syntax: SELECT * FROM [TableName]
+    // WHERE c1=v1 AND c2=v2 AND c3=v3 AND ...;
+    let results = await client.query(`
         SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
         WHERE ${queryArgs.join(" AND ")};
     `);
-    
 
+    if (results.rowCount > 0) {
+        return results[0][FILTER_ID];
+    }
     return -1;
 }
 
 /**
  * Attempts to add a given filter to the table, if it does not already exist.
- * @return {number} Returns the ID of the filter.
+ * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-function tryAddFilter(filter: Filter): number{
-    // INSERT INTO [table_name] ([col1], [col2], [col3]) VALUES ([val1], [val2], [val3])
-    
-    let filterData = filterToTableData(filter);
+async function tryAddFilter(client: typeof pg.Client, filter: Filter): Promise<number>{
+    let filterID = await getMatchingFilterID(client, filter);
 
+    if (filterID === -1) {
+        let filterData = filterToTableData(filter);
+        
+        // INSERT INTO [table_name] ([col1], [col2], ...) VALUES ([val1], [val2], ...)
+        // RETURNING clause gets the specified columns of any created/modified rows.
+        let result = await client.query(`
+            INSERT INTO ${FILTERS_TABLE} (${filterData.keys.join(", ")})
+            VALUES (${filterData.values.join(", ")}) RETURNING ${FILTER_ID};`
+        );
+        filterID = result.rows[0][FILTER_ID];
+    } 
     // Return new filter ID
-    return -1;
+    return filterID;
 }
 
 /**
- * Attempts to remove a filter specified by its uuid.
+ * Attempts to remove a filter specified by its id.
  * @param {number} filterID 
  * @return {boolean} whether the operation was successfully completed.
  */
- function removeFilter(filterID: number) {
+async function removeFilter(client: typeof pg.Client, filterID: number) {
+    let result = await client.query(`DELETE FROM ${FILTERS_TABLE} WHERE ${FILTER_ID}=${filterID}`);
+}
+
+async function isUserSubscribedToFilter(client: typeof pg.Client, userID: number, filterID: number): Promise<boolean> {
+    client.query(``)
+    return false;
+}
+
+async function subscribeUserToFilter(client: typeof pg.Client, userID: number, filterID: number) {
 
 }
 
-function subscribeUserToFilter() {
-
-}
-
-function unsubscribeUserToFilter() {
+async function unsubscribeUserToFilter(client: typeof pg.Client, userID: number, filterID: number) {
 
 }
 
@@ -260,7 +281,7 @@ function unsubscribeUserToFilter() {
  * Gets a list of all filters subscribed to by a designated user.
  * @param {*} user 
  */
-function getUserSubscriptions(user) {
+function getUserSubscriptions(userID: number) {
 
 }
 

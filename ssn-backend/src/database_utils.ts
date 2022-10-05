@@ -1,20 +1,20 @@
-import { Pool, Client } from 'pg';
+import { Pool, PoolClient, Query, QueryResult} from 'pg';
 import { Gear } from './gear_loader';
 
 // TODO: Move to a shared global definitions file for backend/frontend
 // TODO: Separate headgear, clothing, and shoes gear name lists?
 const DATABASE_NAME = "SplatnetShopAlerts";
-const FILTER_ID = "FilterID";
-const USER_ID = "UserID";
-const GEAR_NAME = "Name";
+const FILTER_ID = "filterid";
+const USER_ID = "userid";
+const GEAR_NAME = "name";
 // TODO: Get complete list of gear from Splatoon Wiki.
-const GEAR_NAMES = [""];
-const GEAR_TYPE_WILDCARD = "TypeWildcard";
-const GEAR_BRAND_WILDCARD = "BrandWildcard";
-const GEAR_ABILITY_WILDCARD = "AbilityWildcard";
-const EXPIRATION = "Expiration";
+const GEAR_NAMES = ["Fresh Fish Head"];
+const GEAR_TYPE_WILDCARD = "typewildcard";
+const GEAR_BRAND_WILDCARD = "brandwildcard";
+const GEAR_ABILITY_WILDCARD = "abilitywildcard";
+const EXPIRATION = "expiration";
 // The expiration time of the last item this user was notified about.
-const LAST_NOTIFIED_EXPIRATION = "LastNotifiedExpiration";
+const LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
 const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 const GEAR_BRANDS = [
     "amiibo",
@@ -39,8 +39,8 @@ const GEAR_BRANDS = [
     "Zink"
 ];
 const RARITY = "Rarity";
-const MAX_RARITY = 3;
-const MIN_RARITY = 1;
+const MAX_RARITY = 5;
+const MIN_RARITY = 0;
 const GEAR_ABILITIES = [
     "Ink Saver (Main)",
     "Ink Saver (Sub)",
@@ -101,21 +101,21 @@ class Filter {
         if (gearName !== "" && GEAR_NAMES.indexOf(gearName) === -1) {
             throw new IllegalArgumentError(`No known gear '${gearName}'.`);
         }
-        for (var brand in gearBrands) {
-            if (GEAR_BRANDS.indexOf(brand) === -1) {
+        for (var brand of gearBrands) {
+            if (!GEAR_BRANDS.includes(brand)) {
                 throw new IllegalArgumentError(`Gear brand '${brand}' is not recognized.`);
             }
         }
-        for (var type in gearTypes) {
-            if (GEAR_TYPES.indexOf(type) === -1) {
+        for (var type of gearTypes) {
+            if (!GEAR_TYPES.includes(type)) {
                 throw new IllegalArgumentError(`Gear type '${type}' is not recognized.`);
             }
         }
         if (minimumRarity < MIN_RARITY || minimumRarity > MAX_RARITY) {
             throw new IllegalArgumentError(`Gear rarity must be between ${MIN_RARITY} and ${MAX_RARITY} (provided '${minimumRarity}')`);
         }
-        for (var ability in gearAbilities) {
-            if (GEAR_ABILITIES.indexOf(ability) === -1) {
+        for (var ability of gearAbilities) {
+            if (!GEAR_ABILITIES.includes(ability)) {
                 throw new IllegalArgumentError(`Gear ability '${ability}' is not recognized.`);
             }
         }
@@ -130,7 +130,7 @@ class Filter {
 
 /**Removes whitespace from column names.*/
 function formatCol(input: string): string {
-    return input.replace(/\(| |\)|-/g, ""); // Remove (, ), whitespace, and - characters.
+    return input.replace(/\(| |\)|-/g, "").toLowerCase(); // Remove (, ), whitespace, and - characters.
 }
 
 function arrayEqual(arr1: any[], arr2: any[]): boolean {
@@ -145,6 +145,17 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
     return false;
 }
 
+async function queryAndLog(client: Pool | PoolClient, query: string): Promise<void | QueryResult> {
+    try {
+        const result = await client.query(query);
+        return result;
+    } catch (err) {
+        console.log(query);
+        console.log(err);
+    }
+    return;
+}
+
 /**
  * 
  * @returns the given filter represented as a dictionary, where keys are column names for
@@ -153,21 +164,21 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
  */
 function filterToTableData(filter: Filter): {[id: string] : any;} {
     let data: {[key:string]:any} = {
-        [GEAR_NAME]: filter.gearName,
+        [GEAR_NAME]: `'${filter.gearName}'`,
         [RARITY]: filter.minimumRarity,
         [GEAR_TYPE_WILDCARD]: arrayEqual(filter.gearTypes, []),
         [GEAR_ABILITY_WILDCARD]: arrayEqual(filter.gearAbilities, []),
         [GEAR_BRAND_WILDCARD]: arrayEqual(filter.gearBrands, []),
     };
 
-    for (var ability in GEAR_ABILITIES) {
-        data[formatCol(ability)] = (ability in filter.gearAbilities);
+    for (var ability of GEAR_ABILITIES) {
+        data[formatCol(ability)] = (filter.gearAbilities.includes(ability));
     }
-    for (var brand in GEAR_BRANDS) {
-        data[formatCol(brand)] = (brand in filter.gearBrands);
+    for (var brand of GEAR_BRANDS) {
+        data[formatCol(brand)] = (filter.gearBrands.includes(brand));
     }
-    for (var type in GEAR_TYPES) {
-        data[formatCol(type)] = (type in filter.gearTypes);
+    for (var type of GEAR_TYPES) {
+        data[formatCol(type)] = (filter.gearTypes.includes(type));
     }
     return data;
 }
@@ -175,7 +186,7 @@ function filterToTableData(filter: Filter): {[id: string] : any;} {
 /**
  * @effects Initial setup the database and its tables.
  */
-function setupDatabaseTables(client: Pool | Client) {
+function setupDatabaseTables(client: Pool | PoolClient) {
     client.query(
         `CREATE TABLE IF NOT EXISTS ${USERS_TABLE} (
             ${USER_ID} SERIAL,
@@ -210,11 +221,7 @@ function setupDatabaseTables(client: Pool | Client) {
         ${GEAR_BRAND_WILDCARD} BOOL,
         ${GEAR_ABILITY_WILDCARD} BOOL,
         ${filterColumnQuery}
-    );`
-    ,(err, res) => {
-        console.log(err, res);
-        pool.end();
-    });
+    );`);
 }
 
 /**
@@ -222,26 +229,26 @@ function setupDatabaseTables(client: Pool | Client) {
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-async function getMatchingFilterID(client: any, filter: Filter): Promise<number> {
+async function getMatchingFilterID(client: PoolClient, filter: Filter): Promise<number> {
     // Gets the given filter from the table
 
     let filterData = filterToTableData(filter);
     let queryArgs: string[] = [];
-
     for (var key in filterData) {
         // 'key=value'
-        queryArgs.push(`${key}=${filterData[key]}`);
+        queryArgs.push(`${key} = ${filterData[key]}`);
     }
 
     // syntax: SELECT * FROM [TableName]
     // WHERE c1=v1 AND c2=v2 AND c3=v3 AND ...;
-    let results = await client.query(`
+    let results = await queryAndLog(client, `
         SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
         WHERE ${queryArgs.join(" AND ")};
     `);
-
-    if (results.rowCount > 0) {
-        return results[0][FILTER_ID];
+    if (results) {
+        if (results.rowCount > 0) {
+            return results.rows[0][FILTER_ID];
+        }
     }
     return -1;
 }
@@ -250,7 +257,7 @@ async function getMatchingFilterID(client: any, filter: Filter): Promise<number>
  * Attempts to add a given filter to the table, if it does not already exist.
  * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-async function tryAddFilter(client: any, filter: Filter): Promise<number>{
+async function tryAddFilter(client: PoolClient, filter: Filter): Promise<number>{
     let filterID = await getMatchingFilterID(client, filter);
 
     if (filterID === -1) {
@@ -259,9 +266,9 @@ async function tryAddFilter(client: any, filter: Filter): Promise<number>{
         // INSERT INTO [table_name] ([col1], [col2], ...) VALUES ([val1], [val2], ...)
         // RETURNING clause gets the specified columns of any created/modified rows.
         let result = await client.query(`
-            INSERT INTO ${FILTERS_TABLE} (${filterData.keys.join(", ")})
-            VALUES (${filterData.values.join(", ")}) RETURNING ${FILTER_ID};`
-        );
+            INSERT INTO ${FILTERS_TABLE} (${Object.keys(filterData).join(", ")})
+            VALUES (${Object.values(filterData).join(", ")}) RETURNING ${FILTER_ID};`
+        )
         filterID = result.rows[0][FILTER_ID];
     } 
     // Return new filter ID
@@ -273,13 +280,14 @@ async function tryAddFilter(client: any, filter: Filter): Promise<number>{
  * @param {number} filterID 
  * @return {boolean} whether the operation was successfully completed.
  */
-async function removeFilter(client: any, filterID: number): Promise<boolean> {
+async function removeFilter(client: PoolClient, filterID: number): Promise<boolean> {
+    // TODO: Only allow deletion if the filter has no paired users?
     let result = await client.query(`DELETE FROM ${FILTERS_TABLE} WHERE ${FILTER_ID}=${filterID}`);
     // TODO: Change return type based on result?
     return false;
 }
 
-async function isUserSubscribedToFilter(client: any, userID: number, filterID: number): Promise<boolean> {
+async function isUserSubscribedToFilter(client: PoolClient, userID: number, filterID: number): Promise<boolean> {
     let result = await client.query(`
         SELECT * FROM ${USERS_TO_FILTERS_TABLE}
         WHERE ${FILTER_ID} = ${filterID} AND ${USER_ID} = ${userID};`
@@ -287,11 +295,11 @@ async function isUserSubscribedToFilter(client: any, userID: number, filterID: n
     return result.rowCount > 0;
 }
 
-async function subscribeUserToFilter(client: any, userID: number, filterID: number) {
+async function subscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
 
 }
 
-async function unsubscribeUserToFilter(client: any, userID: number, filterID: number) {
+async function unsubscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
 
 }
 
@@ -299,7 +307,7 @@ async function unsubscribeUserToFilter(client: any, userID: number, filterID: nu
  * Gets a list of all filters the user is subscribed to.
  * @param {*} user 
  */
-function getUserSubscriptions(userID: number) {
+function getUserSubscriptions(client: PoolClient, userID: number) {
 
 }
 
@@ -307,7 +315,7 @@ function getUserSubscriptions(userID: number) {
  * Gets a list of all the IDs of filters who match the current gear item.
  * @param {*} gearData 
  */
-async function getMatchingFilters(client: any, gear: Gear): Promise<number[]> {
+async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<number[]> {
     let result = await client.query(`SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
     WHERE ${RARITY} <= ${gear.rarity}
     AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = ${gear.name})
@@ -339,3 +347,22 @@ pool.query('SELECT NOW()', (err, res) => {
 */
 
 setupDatabaseTables(pool);
+
+let testAnyFilter = new Filter("", 2, [], ["Rockenberg"], ["Run Speed Up"]);
+//let testFindGear = new Filter("Fresh Fish Head", 0, [], [], []);
+
+pool.connect((err, client, done) => {
+    if (err) throw err;
+    
+    removeFilter(client, 6).then((result) => {
+        done();
+    });
+});
+
+pool.connect((err, client, done) => {
+    if (err) throw err;
+    
+    tryAddFilter(client, testAnyFilter).then((result) => {
+        done();
+    });
+});

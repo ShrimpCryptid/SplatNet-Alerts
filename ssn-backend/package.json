@@ -3,6 +3,7 @@
   "dependencies": {
     "base64url": "^3.0.1",
     "node-fetch": "^3.2.10",
+    "pg": "^8.8.0",
     "request-promise-native": "^1.0.9",
     "uuid": "^9.0.0"
   }

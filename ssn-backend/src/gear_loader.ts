@@ -8,7 +8,7 @@ var cachedGearJSON = json_data;
 /**
  * Data class for gear items
  */
-class Gear {
+export class Gear {
     id: string;
     price: number;
     brand: string;
@@ -72,6 +72,7 @@ function getGearList(gearData): Gear[] {
         newGear.brand = gearJSON["gear"]["brand"]["name"];
         newGear.expiration = Date.parse(gearJSON["saleEndTime"]);
         newGear.name = gearJSON["gear"]["name"];
+        // rarity is defined by number of additional slots - 1
         newGear.rarity = gearJSON["gear"]["additionalGearPowers"].length - 1;
         newGear.price = gearJSON["price"];
         newGear.type = gearJSON["gear"]["__typename"];

@@ -1,4 +1,6 @@
 import pg from 'pg';
+import { Gear } from './gear_loader';
+
 // TODO: Singleton for pool?
 const pool = new pg.Pool();
 
@@ -260,13 +262,18 @@ async function tryAddFilter(client: typeof pg.Client, filter: Filter): Promise<n
  * @param {number} filterID 
  * @return {boolean} whether the operation was successfully completed.
  */
-async function removeFilter(client: typeof pg.Client, filterID: number) {
+async function removeFilter(client: typeof pg.Client, filterID: number): Promise<boolean> {
     let result = await client.query(`DELETE FROM ${FILTERS_TABLE} WHERE ${FILTER_ID}=${filterID}`);
+    // TODO: Change return type based on result?
+    return false;
 }
 
 async function isUserSubscribedToFilter(client: typeof pg.Client, userID: number, filterID: number): Promise<boolean> {
-    client.query(``)
-    return false;
+    let result = await client.query(`
+        SELECT * FROM ${USERS_TO_FILTERS_TABLE}
+        WHERE ${FILTER_ID} = ${filterID} AND ${USER_ID} = ${userID};`
+    );
+    return result.rowCount > 0;
 }
 
 async function subscribeUserToFilter(client: typeof pg.Client, userID: number, filterID: number) {
@@ -286,16 +293,23 @@ function getUserSubscriptions(userID: number) {
 }
 
 /**
- * 
+ * Gets a list of all the IDs of filters who match the current gear item.
  * @param {*} gearData 
  */
-function getUsersWithMatchingFilters(gearData) {
+async function getMatchingFilters(client: typeof pg.Client, gear: Gear): Promise<number[]> {
+    let result = await client.query(`SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
+    WHERE ${RARITY} <= ${gear.rarity}
+    AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = ${gear.name})
+    AND (${GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
+    AND (${GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
+    AND (${GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
+    `);
 
+    let flattenedResult = result.rows.flat(); // turn into array of JSON, [{FILTER_ID: id1}, ...]
+    let filterList: number[] = [];
+    for (var resultsJSON in flattenedResult) {
+        filterList.push(resultsJSON[FILTER_ID]);
+    }
+
+    return filterList;
 }
-
-function tryUpdateGearRegistry(gearData) {
-    // Gear registry contains all seen gear items
-    // Name, Type, Brand, Image link
-
-}
-

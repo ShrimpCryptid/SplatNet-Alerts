@@ -9,16 +9,16 @@ var cachedGearJSON = json_data;
  * Data class for gear items
  */
 export class Gear {
-    id: string;
-    price: number;
-    brand: string;
-    type: string;
-    name: string;
-    ability: string;
+    id: string = "";
+    price: number = 0;
+    brand: string = "";
+    type: string = "";
+    name: string = "";
+    ability: string = "";
     /**The number of rarity stars, ranging from 0-2 (or the number sub ability slots - 1).*/
-    rarity: number;
+    rarity: number = 0;
     /**Expiration timestamp, as parsed by Date.parse()*/
-    expiration: number;
+    expiration: number = 0;
 }
 
 /**
@@ -53,18 +53,23 @@ async function getLatestGearData(): Promise<Object> {
     return cachedGearJSON;
 }
 
+interface GearJSON {
+    [key: string]: any
+}
+
 /**
  * Formats gear data as a single array, sorted by expiration (ascending).
  */
-function getGearList(gearData): Gear[] {
+function getGearList(gearData: {[key: string]: any}): Gear[] {
     // combine the 'pickupBrand' (daily drop) and normal items into one array of JSON objects
-    let jsonGearList = gearData.data.gesotown.limitedGears;
+    let jsonGearList: GearJSON[] = gearData.data.gesotown.limitedGears;
     jsonGearList = jsonGearList.concat(gearData.data.gesotown.pickupBrand.brandGears);
 
     // Parse into gear data objects
     let parsedGearList: Gear[] = []
     
-    for (var gearJSON in jsonGearList) {
+    for (var i = 0; i < jsonGearList.length; i++) {
+        let gearJSON = jsonGearList[i];
         let newGear = new Gear();
 
         newGear.id = gearJSON["id"];
@@ -86,6 +91,3 @@ function getGearList(gearData): Gear[] {
     });
     return parsedGearList;
 }
-
-
-let sortedGearList = getGearList(await getLatestGearData())

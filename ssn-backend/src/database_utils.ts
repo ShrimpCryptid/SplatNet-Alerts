@@ -1,8 +1,5 @@
-import pg from 'pg';
+import { Pool, Client } from 'pg';
 import { Gear } from './gear_loader';
-
-// TODO: Singleton for pool?
-const pool = new pg.Pool();
 
 // TODO: Move to a shared global definitions file for backend/frontend
 // TODO: Separate headgear, clothing, and shoes gear name lists?
@@ -133,7 +130,19 @@ class Filter {
 
 /**Removes whitespace from column names.*/
 function formatCol(input: string): string {
-    return input.replace(" ", "");
+    return input.replace(/\(| |\)|-/g, ""); // Remove (, ), whitespace, and - characters.
+}
+
+function arrayEqual(arr1: any[], arr2: any[]): boolean {
+    if (arr1.length === arr2.length) {
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -143,12 +152,12 @@ function formatCol(input: string): string {
  * Can be iterated over to generate SQL queries.
  */
 function filterToTableData(filter: Filter): {[id: string] : any;} {
-    let data = {
+    let data: {[key:string]:any} = {
         [GEAR_NAME]: filter.gearName,
         [RARITY]: filter.minimumRarity,
-        [GEAR_TYPE_WILDCARD]: filter.gearTypes === [],
-        [GEAR_ABILITY_WILDCARD]: filter.gearAbilities === [],
-        [GEAR_BRAND_WILDCARD]: filter.gearBrands === [],
+        [GEAR_TYPE_WILDCARD]: arrayEqual(filter.gearTypes, []),
+        [GEAR_ABILITY_WILDCARD]: arrayEqual(filter.gearAbilities, []),
+        [GEAR_BRAND_WILDCARD]: arrayEqual(filter.gearBrands, []),
     };
 
     for (var ability in GEAR_ABILITIES) {
@@ -166,44 +175,46 @@ function filterToTableData(filter: Filter): {[id: string] : any;} {
 /**
  * @effects Initial setup the database and its tables.
  */
-function setupDatabaseTables(client: typeof pg.Client) {
-    client.query(`CREATE DATABASE ${DATABASE_NAME}`);
+function setupDatabaseTables(client: Pool | Client) {
     client.query(
-        `CREATE TABLE ${USERS_TABLE} (
+        `CREATE TABLE IF NOT EXISTS ${USERS_TABLE} (
             ${USER_ID} SERIAL,
             Email varchar(255),
             LastNotified varchar(255),
             PRIMARY KEY (${USER_ID})
-        );`
-    );
+        );`);
 
     // TODO: Add additional user data columns
     client.query(`
-    CREATE TABLE ${USERS_TO_FILTERS_TABLE} (
+    CREATE TABLE IF NOT EXISTS ${USERS_TO_FILTERS_TABLE} (
         PairID SERIAL,
-        ${USER_ID} int(255),
-        ${FILTER_ID} int(255),
-        ${LAST_NOTIFIED_EXPIRATION} varchar(255),
+        ${USER_ID} int4,
+        ${FILTER_ID} int4,
+        ${LAST_NOTIFIED_EXPIRATION} int8,
         PRIMARY KEY (PairID)
     );`);
 
     // Generate filter table
     // Auto-generates boolean columns for gear types, abilities, and brands.
     let joinedFilterColumnNames = GEAR_TYPES.concat(GEAR_ABILITIES).concat(GEAR_BRANDS);
-    joinedFilterColumnNames.forEach(formatCol);
-    let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n") + " BOOL";
+    for (let i = 0; i < joinedFilterColumnNames.length; i++) {
+        joinedFilterColumnNames[i] = formatCol(joinedFilterColumnNames[i]);
+    }
+    let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n\t") + " BOOL";
     
-    client.query(
-        `CREATE TABLE ${FILTERS_TABLE} (
-            ${FILTER_ID} SERIAL,
-            ${GEAR_NAME} varchar(255),
-            ${RARITY} tinyint(255),
-            ${GEAR_TYPE_WILDCARD} BOOL,
-            ${GEAR_BRAND_WILDCARD} BOOL,
-            ${GEAR_ABILITY_WILDCARD} BOOL,
-            ${filterColumnQuery}
-        );`
-    );
+    client.query(`CREATE TABLE IF NOT EXISTS ${FILTERS_TABLE} (
+        ${FILTER_ID} SERIAL,
+        ${GEAR_NAME} varchar(255),
+        ${RARITY} int2,
+        ${GEAR_TYPE_WILDCARD} BOOL,
+        ${GEAR_BRAND_WILDCARD} BOOL,
+        ${GEAR_ABILITY_WILDCARD} BOOL,
+        ${filterColumnQuery}
+    );`
+    ,(err, res) => {
+        console.log(err, res);
+        pool.end();
+    });
 }
 
 /**
@@ -211,7 +222,7 @@ function setupDatabaseTables(client: typeof pg.Client) {
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-async function getMatchingFilterID(client: typeof pg.Client, filter: Filter): Promise<number> {
+async function getMatchingFilterID(client: any, filter: Filter): Promise<number> {
     // Gets the given filter from the table
 
     let filterData = filterToTableData(filter);
@@ -239,7 +250,7 @@ async function getMatchingFilterID(client: typeof pg.Client, filter: Filter): Pr
  * Attempts to add a given filter to the table, if it does not already exist.
  * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-async function tryAddFilter(client: typeof pg.Client, filter: Filter): Promise<number>{
+async function tryAddFilter(client: any, filter: Filter): Promise<number>{
     let filterID = await getMatchingFilterID(client, filter);
 
     if (filterID === -1) {
@@ -262,13 +273,13 @@ async function tryAddFilter(client: typeof pg.Client, filter: Filter): Promise<n
  * @param {number} filterID 
  * @return {boolean} whether the operation was successfully completed.
  */
-async function removeFilter(client: typeof pg.Client, filterID: number): Promise<boolean> {
+async function removeFilter(client: any, filterID: number): Promise<boolean> {
     let result = await client.query(`DELETE FROM ${FILTERS_TABLE} WHERE ${FILTER_ID}=${filterID}`);
     // TODO: Change return type based on result?
     return false;
 }
 
-async function isUserSubscribedToFilter(client: typeof pg.Client, userID: number, filterID: number): Promise<boolean> {
+async function isUserSubscribedToFilter(client: any, userID: number, filterID: number): Promise<boolean> {
     let result = await client.query(`
         SELECT * FROM ${USERS_TO_FILTERS_TABLE}
         WHERE ${FILTER_ID} = ${filterID} AND ${USER_ID} = ${userID};`
@@ -276,16 +287,16 @@ async function isUserSubscribedToFilter(client: typeof pg.Client, userID: number
     return result.rowCount > 0;
 }
 
-async function subscribeUserToFilter(client: typeof pg.Client, userID: number, filterID: number) {
+async function subscribeUserToFilter(client: any, userID: number, filterID: number) {
 
 }
 
-async function unsubscribeUserToFilter(client: typeof pg.Client, userID: number, filterID: number) {
+async function unsubscribeUserToFilter(client: any, userID: number, filterID: number) {
 
 }
 
 /**
- * Gets a list of all filters subscribed to by a designated user.
+ * Gets a list of all filters the user is subscribed to.
  * @param {*} user 
  */
 function getUserSubscriptions(userID: number) {
@@ -296,7 +307,7 @@ function getUserSubscriptions(userID: number) {
  * Gets a list of all the IDs of filters who match the current gear item.
  * @param {*} gearData 
  */
-async function getMatchingFilters(client: typeof pg.Client, gear: Gear): Promise<number[]> {
+async function getMatchingFilters(client: any, gear: Gear): Promise<number[]> {
     let result = await client.query(`SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
     WHERE ${RARITY} <= ${gear.rarity}
     AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = ${gear.name})
@@ -305,11 +316,26 @@ async function getMatchingFilters(client: typeof pg.Client, gear: Gear): Promise
     AND (${GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
     `);
 
-    let flattenedResult = result.rows.flat(); // turn into array of JSON, [{FILTER_ID: id1}, ...]
     let filterList: number[] = [];
-    for (var resultsJSON in flattenedResult) {
-        filterList.push(resultsJSON[FILTER_ID]);
+    for (var i = 0; i < result.rowCount; i++) {
+        filterList.push(result.rows[i][FILTER_ID]);
     }
 
     return filterList;
 }
+
+// TODO: Singleton for pool?
+const pool = new Pool({
+    host: 'localhost',
+    user: 'postgres',
+    port: 5433
+});
+
+/**
+pool.query('SELECT NOW()', (err, res) => {
+    console.log(err, res)
+    pool.end()
+});
+*/
+
+setupDatabaseTables(pool);

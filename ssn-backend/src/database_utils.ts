@@ -6,6 +6,7 @@ import { Gear } from './gear_loader';
 const DATABASE_NAME = "SplatnetShopAlerts";
 const FILTER_ID = "filterid";
 const USER_ID = "userid";
+const PAIR_ID = "pairid";
 const GEAR_NAME = "name";
 // TODO: Get complete list of gear from Splatoon Wiki.
 const GEAR_NAMES = ["Fresh Fish Head"];
@@ -74,8 +75,20 @@ const USERS_TABLE = "Users";
 const USERS_TO_FILTERS_TABLE = "UsersToFilters";
 const FILTERS_TABLE = "Filters";
 
+// ==============
+// HELPER METHODS
+// ==============
+// #region 
+
 // TODO: Move to separate definitions file?
 class IllegalArgumentError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
+
+class NotYetImplementedError extends Error {
     constructor(message: string) {
         super(message);
         this.name = this.constructor.name;
@@ -183,6 +196,14 @@ function filterToTableData(filter: Filter): {[id: string] : any;} {
     return data;
 }
 
+//#endregion
+
+
+// ==============
+// DATABASE SETUP
+// ==============
+// #region
+
 /**
  * @effects Initial setup the database and its tables.
  */
@@ -198,11 +219,11 @@ function setupDatabaseTables(client: Pool | PoolClient) {
     // TODO: Add additional user data columns
     client.query(`
     CREATE TABLE IF NOT EXISTS ${USERS_TO_FILTERS_TABLE} (
-        PairID SERIAL,
+        ${PAIR_ID} SERIAL,
         ${USER_ID} int4,
         ${FILTER_ID} int4,
         ${LAST_NOTIFIED_EXPIRATION} int8,
-        PRIMARY KEY (PairID)
+        PRIMARY KEY (${PAIR_ID})
     );`);
 
     // Generate filter table
@@ -224,30 +245,36 @@ function setupDatabaseTables(client: Pool | PoolClient) {
     );`);
 }
 
+// #endregion
+
+// ==============
+// DATABASE ACCESS
+// ==============
+// #region
 /**
  * Searches and returns the ID of the first matching filter.
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
 async function getMatchingFilterID(client: PoolClient, filter: Filter): Promise<number> {
-    // Gets the given filter from the table
-
+    // format filter parameters
     let filterData = filterToTableData(filter);
     let queryArgs: string[] = [];
     for (var key in filterData) {
-        // 'key=value'
-        queryArgs.push(`${key} = ${filterData[key]}`);
+        queryArgs.push(`${key} = ${filterData[key]}`); // 'key = value'
     }
 
+    // parse arguments into a SQL query
     // syntax: SELECT * FROM [TableName]
     // WHERE c1=v1 AND c2=v2 AND c3=v3 AND ...;
     let results = await queryAndLog(client, `
         SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
         WHERE ${queryArgs.join(" AND ")};
     `);
+
     if (results) {
         if (results.rowCount > 0) {
-            return results.rows[0][FILTER_ID];
+            return results.rows[0][FILTER_ID]; // get first matching filter ID
         }
     }
     return -1;
@@ -287,6 +314,26 @@ async function removeFilter(client: PoolClient, filterID: number): Promise<boole
     return false;
 }
 
+async function addUser(client: PoolClient | Pool) {
+    throw new NotYetImplementedError("");
+}
+
+async function getUserID(client: PoolClient | Pool): Promise<number> {
+    throw new NotYetImplementedError("");
+}
+
+async function updateUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
+    throw new NotYetImplementedError("");
+}
+
+async function removeUser(client: PoolClient | Pool, userID: number) {
+    // Check if user exists
+    // Remove all filters user is subscribed to
+    // Finally remove user
+    throw new NotYetImplementedError("");
+
+}
+
 async function isUserSubscribedToFilter(client: PoolClient, userID: number, filterID: number): Promise<boolean> {
     let result = await client.query(`
         SELECT * FROM ${USERS_TO_FILTERS_TABLE}
@@ -296,19 +343,20 @@ async function isUserSubscribedToFilter(client: PoolClient, userID: number, filt
 }
 
 async function subscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
-
+    throw new NotYetImplementedError("");
 }
 
 async function unsubscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
-
+    throw new NotYetImplementedError("");
 }
 
 /**
  * Gets a list of all filters the user is subscribed to.
  * @param {*} user 
  */
-function getUserSubscriptions(client: PoolClient, userID: number) {
-
+async function getUserSubscriptions(client: PoolClient, userID: number): Promise<number[]> {
+    throw new NotYetImplementedError("");
+    return [];
 }
 
 /**
@@ -332,10 +380,13 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
     return filterList;
 }
 
+// #endregion
+
 // TODO: Singleton for pool?
 const pool = new Pool({
     host: 'localhost',
     user: 'postgres',
+    password: '2Nu^4nRW7H7$',
     port: 5433
 });
 

@@ -95,6 +95,20 @@ class NotYetImplementedError extends Error {
     }
 }
 
+class NoSuchUserError extends Error {
+    constructor(userID: number) {
+        super("No such user with id: '" + userID + "'.");
+        this.name = this.constructor.name;
+    }
+}
+
+class NoSuchFilterError extends Error {
+    constructor(filterID: number) {
+        super("No such filter with id: '" + filterID + "'.");
+        this.name = this.constructor.name;
+    }
+}
+
 class Filter {
     gearName: string;
     minimumRarity: number;
@@ -170,7 +184,6 @@ async function queryAndLog(client: Pool | PoolClient, query: string): Promise<vo
 }
 
 /**
- * 
  * @returns the given filter represented as a dictionary, where keys are column names for
  * storage in a database table with their corresponding values.
  * Can be iterated over to generate SQL queries.
@@ -196,6 +209,56 @@ function filterToTableData(filter: Filter): {[id: string] : any;} {
     return data;
 }
 
+/**
+ * Makes a mapping from the formatted column names to their unformatted counterparts.
+ */
+function mapFromColumnName(unformattedColumns: string[] ): {[key: string]: string} {
+    let map: {[key: string]: string} = {};
+    for (var col of unformattedColumns) {
+        map[formatCol(col)] = col;
+    }
+    return map;
+}
+
+function rowDataToFilter(rowData: {[key: string]: any}): Filter {
+    let types: string[] = [];
+    let abilities: string[] = [];
+    let brands: string[] = [];
+    let rarity = rowData[RARITY];
+    let name = rowData[GEAR_NAME];
+
+    // The property names of columns have been formatted-- for example, 'Last-Ditch Effort' becomes
+    // 'lastditcheffort'. However, they need to be stored in the filter properties as unconverted
+    // names, so we make a mapping from their converted to their unconverted names. This also
+    // lets us programmatically get all the filter data for gear types, abilities, and brands.
+    if (!rowData[GEAR_TYPE_WILDCARD]) {
+        let typesMap = mapFromColumnName(GEAR_TYPES);
+        for (var type of typesMap.keys) {
+            if (rowData[type]) {
+                types.push(typesMap[type]);
+            }
+        }
+    }
+    if (!rowData[GEAR_ABILITY_WILDCARD]) {
+        let abilitiesMap = mapFromColumnName(GEAR_ABILITIES);
+        for (var ability of abilitiesMap.keys) {
+            if (rowData[ability]) {
+                abilities.push(abilitiesMap[ability]);
+            }
+        }
+    }
+    if (!rowData[GEAR_BRAND_WILDCARD]) {
+        let brandsMap = mapFromColumnName(GEAR_BRANDS);
+        for (var brand of brandsMap.keys) {
+            if (rowData[brand]) {
+                brands.push(brandsMap[brand]);
+            }
+        }
+    }
+
+    return new Filter(name, rarity, types, brands, abilities);
+}
+
 //#endregion
 
 
@@ -212,7 +275,7 @@ function setupDatabaseTables(client: Pool | PoolClient) {
         `CREATE TABLE IF NOT EXISTS ${USERS_TABLE} (
             ${USER_ID} SERIAL,
             Email varchar(255),
-            LastNotified varchar(255),
+            ${LAST_NOTIFIED_EXPIRATION} varchar(255),
             PRIMARY KEY (${USER_ID})
         );`);
 
@@ -222,7 +285,6 @@ function setupDatabaseTables(client: Pool | PoolClient) {
         ${PAIR_ID} SERIAL,
         ${USER_ID} int4,
         ${FILTER_ID} int4,
-        ${LAST_NOTIFIED_EXPIRATION} int8,
         PRIMARY KEY (${PAIR_ID})
     );`);
 
@@ -256,7 +318,7 @@ function setupDatabaseTables(client: Pool | PoolClient) {
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-async function getMatchingFilterID(client: PoolClient, filter: Filter): Promise<number> {
+async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): Promise<number> {
     // format filter parameters
     let filterData = filterToTableData(filter);
     let queryArgs: string[] = [];
@@ -284,7 +346,7 @@ async function getMatchingFilterID(client: PoolClient, filter: Filter): Promise<
  * Attempts to add a given filter to the table, if it does not already exist.
  * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-async function tryAddFilter(client: PoolClient, filter: Filter): Promise<number>{
+async function tryAddFilter(client: PoolClient | Pool, filter: Filter): Promise<number>{
     let filterID = await getMatchingFilterID(client, filter);
 
     if (filterID === -1) {
@@ -307,14 +369,18 @@ async function tryAddFilter(client: PoolClient, filter: Filter): Promise<number>
  * @param {number} filterID 
  * @return {boolean} whether the operation was successfully completed.
  */
-async function removeFilter(client: PoolClient, filterID: number): Promise<boolean> {
+async function removeFilter(client: PoolClient | Pool, filterID: number): Promise<boolean> {
     // TODO: Only allow deletion if the filter has no paired users?
-    let result = await client.query(`DELETE FROM ${FILTERS_TABLE} WHERE ${FILTER_ID}=${filterID}`);
+    // Note: can use returning to get deleted rows
+    let result = await client.query(`
+        DELETE FROM ${FILTERS_TABLE}
+        WHERE ${FILTER_ID}=${filterID} RETURNING *;`);
+    
     // TODO: Change return type based on result?
     return false;
 }
 
-async function addUser(client: PoolClient | Pool) {
+async function addUser(client: PoolClient | Pool): Promise<boolean> {
     throw new NotYetImplementedError("");
 }
 
@@ -326,15 +392,26 @@ async function updateUser(client: PoolClient | Pool, userID: number): Promise<bo
     throw new NotYetImplementedError("");
 }
 
+/**
+ * 
+ */
 async function removeUser(client: PoolClient | Pool, userID: number) {
     // Check if user exists
     // Remove all filters user is subscribed to
     // Finally remove user
-    throw new NotYetImplementedError("");
+    if (!await hasUser(client, userID)) {
+        throw new NoSuchUserError(userID);
+    }
 
+    throw new NotYetImplementedError("");
 }
 
-async function isUserSubscribedToFilter(client: PoolClient, userID: number, filterID: number): Promise<boolean> {
+async function hasUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
+    let result = await client.query(`SELECT FROM ${USERS_TABLE} WHERE ${USER_ID} = ${userID}`);
+    return result.rowCount > 0;
+}
+
+async function isUserSubscribedToFilter(client: PoolClient | Pool, userID: number, filterID: number): Promise<boolean> {
     let result = await client.query(`
         SELECT * FROM ${USERS_TO_FILTERS_TABLE}
         WHERE ${FILTER_ID} = ${filterID} AND ${USER_ID} = ${userID};`
@@ -342,38 +419,70 @@ async function isUserSubscribedToFilter(client: PoolClient, userID: number, filt
     return result.rowCount > 0;
 }
 
-async function subscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
-    throw new NotYetImplementedError("");
+/**
+ * Subscribes the user to the given filter, if they are not already subscribed.
+ * @throws {NoSuchFilterError} if the filter does not exist.
+ * @throws {NoSuchUserError} if the user does not exist.
+ */
+async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, filterID: number) {
+    // TODO: Check that filter exists
+    if (!(await hasUser(client, userID))) {
+        throw new NoSuchUserError(userID);
+    }
+
+    if (!(await isUserSubscribedToFilter(client, userID, filterID))) {
+        await client.query(
+            `INSERT INTO ${USERS_TO_FILTERS_TABLE} (${USER_ID}, ${FILTER_ID})
+            VALUES (${userID}, ${filterID});
+        `);
+    }
 }
 
-async function unsubscribeUserToFilter(client: PoolClient, userID: number, filterID: number) {
-    throw new NotYetImplementedError("");
+/**
+ * Unsubscribe user from a filter, if they are currently subscribed to it.
+ */
+async function unsubscribeUserFromFilter(client: PoolClient | Pool, userID: number, filterID: number) {
+    if (await isUserSubscribedToFilter(client, userID, filterID)) {
+        await client.query(
+            `DELETE FROM ${USERS_TO_FILTERS_TABLE}
+            WHERE ${USER_ID} = ${userID} AND ${FILTER_ID} = ${filterID});`
+        );
+        // TODO: Check if filter should be deleted if no other users reference it?
+    }
 }
 
 /**
  * Gets a list of all filters the user is subscribed to.
  * @param {*} user 
  */
-async function getUserSubscriptions(client: PoolClient, userID: number): Promise<number[]> {
+async function getUserSubscriptions(client: PoolClient, userID: number): Promise<Filter[]> {
+    
+    return [];
+}
+
+async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promise<number[]> {
     throw new NotYetImplementedError("");
     return [];
 }
+
 
 /**
  * Gets a list of all the IDs of filters who match the current gear item.
  * @param {*} gearData 
  */
 async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<number[]> {
+    // TODO: Gear Name input must be sanitized
+
     let result = await client.query(`SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
     WHERE ${RARITY} <= ${gear.rarity}
-    AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = ${gear.name})
+    AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = '${gear.name}')
     AND (${GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
     AND (${GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
     AND (${GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
     `);
 
     let filterList: number[] = [];
-    for (var i = 0; i < result.rowCount; i++) {
+    for (var i in result.rows) {
         filterList.push(result.rows[i][FILTER_ID]);
     }
 
@@ -382,11 +491,9 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
 
 // #endregion
 
-// TODO: Singleton for pool?
 const pool = new Pool({
     host: 'localhost',
     user: 'postgres',
-    password: '2Nu^4nRW7H7$',
     port: 5433
 });
 
@@ -401,6 +508,8 @@ setupDatabaseTables(pool);
 
 let testAnyFilter = new Filter("", 2, [], ["Rockenberg"], ["Run Speed Up"]);
 //let testFindGear = new Filter("Fresh Fish Head", 0, [], [], []);
+
+removeFilter(pool, 6);
 
 pool.connect((err, client, done) => {
     if (err) throw err;

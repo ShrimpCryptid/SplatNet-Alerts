@@ -1,0 +1,61 @@
+.itemContainer {
+    width: 10vmin;
+    margin: 5px;
+    position: relative;
+    background-color: lightgrey;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 22.5px 22.5px;
+    border-width: 2px;
+    border-color: white;
+}
+
+.itemContainer:hover {
+    opacity: 75%;
+}
+
+.itemContainer.disabled:hover {
+    opacity: 1;
+}
+
+
+.selected {
+    border-color: aqua;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.disabled {
+    filter: brightness(50%);
+}
+
+.itemIcon {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    height: 100%;
+    width: 100%;
+    user-select: none;
+    background-color: black;
+    border-radius: 40%;
+}
+
+.itemLabelText {
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 0;
+    opacity: 1;
+}
+
+.itemLabelContainer {
+    align-self: center;
+    padding: 4px 8px;
+    margin-top: 4px;    
+}
+
+.itemDisplay {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}

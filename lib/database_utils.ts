@@ -109,7 +109,7 @@ class NoSuchFilterError extends Error {
     }
 }
 
-class Filter {
+export class Filter {
     gearName: string;
     minimumRarity: number;
     gearTypes: string[];
@@ -274,8 +274,9 @@ function setupDatabaseTables(client: Pool | PoolClient) {
     client.query(
         `CREATE TABLE IF NOT EXISTS ${USERS_TABLE} (
             ${USER_ID} SERIAL,
-            Email varchar(255),
+            UserCode varchar(255),
             ${LAST_NOTIFIED_EXPIRATION} varchar(255),
+            ServiceWorkerURL varchar(255),
             PRIMARY KEY (${USER_ID})
         );`);
 

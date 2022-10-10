@@ -1,7 +1,9 @@
 import { addUserAgent } from 'nxapi';
-import CoralApi from 'nxapi/coral';
+import CoralApi, { CoralAuthData } from 'nxapi/coral';
 
 addUserAgent('test-script/1.0.0 (+https://github.com/ShrimpCryptid)');
+
+
 
 let coral;
 

@@ -5,4 +5,7 @@ node_modules/
 
 # Optional npm cache directory
 */.npm
+
 .next
+package-lock.json
+next-env.d.ts

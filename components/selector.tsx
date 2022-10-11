@@ -1,10 +1,9 @@
 import styles from './selector.module.css';
 import { FunctionComponent } from 'react';
 import Image from 'next/image';
+import { FE_WILDCARD } from '../constants';
 
 let defaultImage = '/icons/unknown.png';
-
-export const WILDCARD_DEFAULT = 'Any';
 
 type SelectorItemProps = {
     id: number,
@@ -58,11 +57,11 @@ type Props = {
 const Selector: FunctionComponent<Props> = ({ items, selected, wildcard, search, onChanged }) => {
     // check if items includes wildcard. if not, insert into our list of items and map of what
     // items are selected.
-    if (wildcard && items.indexOf(WILDCARD_DEFAULT)) {
-        items = [WILDCARD_DEFAULT].concat(items);
-        if (!selected.has(WILDCARD_DEFAULT)) {
+    if (wildcard && items.indexOf(FE_WILDCARD) !== 0) {
+        items = [FE_WILDCARD].concat(items);
+        if (!selected.has(FE_WILDCARD)) {
             let newSelected = new Map(selected);
-            newSelected.set(WILDCARD_DEFAULT, true);
+            newSelected.set(FE_WILDCARD, true);
             if (onChanged) { onChanged(newSelected); } // update map upstream
         }
     }
@@ -85,7 +84,7 @@ const Selector: FunctionComponent<Props> = ({ items, selected, wildcard, search,
                 let isSelected = selected.get(item);
                 let disabled = false;
                 // Disable every other item if wildcard is active and selected.
-                if (wildcard && selected.get(WILDCARD_DEFAULT) && index !== 0) {
+                if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
                     isSelected = false;
                     disabled = true;
                 }

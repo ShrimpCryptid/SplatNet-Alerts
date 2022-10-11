@@ -4,21 +4,21 @@ import {
 	GEAR_NAMES,
 	GEAR_BRANDS,
 	GEAR_TYPES,
-	MIN_RARITY,
-	MAX_RARITY,
+	GEAR_RARITY_MIN,
+	GEAR_RARITY_MAX,
 	GEAR_ABILITIES,
-	GEAR_NAME,
-	RARITY,
-	GEAR_TYPE_WILDCARD,
-	GEAR_ABILITY_WILDCARD,
-	GEAR_BRAND_WILDCARD,
-	FILTERS_TABLE,
-	FILTER_ID,
-	LAST_NOTIFIED_EXPIRATION,
-	PAIR_ID,
-	USERS_TABLE,
-	USERS_TO_FILTERS_TABLE,
-	USER_ID,
+	DB_GEAR_NAME,
+	GEAR_RARITY,
+	DB_GEAR_TYPE_WILDCARD,
+	DB_GEAR_ABILITY_WILDCARD,
+	DB_GEAR_BRAND_WILDCARD,
+	DB_TABLE_FILTERS,
+	DB_FILTER_ID,
+	DB_LAST_NOTIFIED_EXPIRATION,
+	DB_PAIR_ID,
+	DB_TABLE_USERS,
+	DB_TABLE_USERS_TO_FILTERS,
+	DB_USER_ID,
 } from "../constants";
 
 // ==============
@@ -90,9 +90,9 @@ export class Filter {
 				throw new IllegalArgumentError(`Gear type '${type}' is not recognized.`);
 			}
 		}
-		if (minimumRarity < MIN_RARITY || minimumRarity > MAX_RARITY) {
+		if (minimumRarity < GEAR_RARITY_MIN || minimumRarity > GEAR_RARITY_MAX) {
 			throw new IllegalArgumentError(
-				`Gear rarity must be between ${MIN_RARITY} and ${MAX_RARITY} (provided '${minimumRarity}')`
+				`Gear rarity must be between ${GEAR_RARITY_MIN} and ${GEAR_RARITY_MAX} (provided '${minimumRarity}')`
 			);
 		}
 		for (var ability of gearAbilities) {
@@ -144,11 +144,11 @@ async function queryAndLog(client: Pool | PoolClient, query: string): Promise<vo
  */
 function filterToTableData(filter: Filter): { [id: string]: any } {
 	let data: { [key: string]: any } = {
-		[GEAR_NAME]: `'${filter.gearName}'`,
-		[RARITY]: filter.minimumRarity,
-		[GEAR_TYPE_WILDCARD]: arrayEqual(filter.gearTypes, []),
-		[GEAR_ABILITY_WILDCARD]: arrayEqual(filter.gearAbilities, []),
-		[GEAR_BRAND_WILDCARD]: arrayEqual(filter.gearBrands, []),
+		[DB_GEAR_NAME]: `'${filter.gearName}'`,
+		[GEAR_RARITY]: filter.minimumRarity,
+		[DB_GEAR_TYPE_WILDCARD]: arrayEqual(filter.gearTypes, []),
+		[DB_GEAR_ABILITY_WILDCARD]: arrayEqual(filter.gearAbilities, []),
+		[DB_GEAR_BRAND_WILDCARD]: arrayEqual(filter.gearBrands, []),
 	};
 
 	for (var ability of GEAR_ABILITIES) {
@@ -178,14 +178,14 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 	let types: string[] = [];
 	let abilities: string[] = [];
 	let brands: string[] = [];
-	let rarity = rowData[RARITY];
-	let name = rowData[GEAR_NAME];
+	let rarity = rowData[GEAR_RARITY];
+	let name = rowData[DB_GEAR_NAME];
 
 	// The property names of columns have been formatted-- for example, 'Last-Ditch Effort' becomes
 	// 'lastditcheffort'. However, they need to be stored in the filter properties as unconverted
 	// names, so we make a mapping from their converted to their unconverted names. This also
 	// lets us programmatically get all the filter data for gear types, abilities, and brands.
-	if (!rowData[GEAR_TYPE_WILDCARD]) {
+	if (!rowData[DB_GEAR_TYPE_WILDCARD]) {
 		let typesMap = mapFromColumnName(GEAR_TYPES);
 		for (var type of typesMap.keys) {
 			if (rowData[type]) {
@@ -193,7 +193,7 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 			}
 		}
 	}
-	if (!rowData[GEAR_ABILITY_WILDCARD]) {
+	if (!rowData[DB_GEAR_ABILITY_WILDCARD]) {
 		let abilitiesMap = mapFromColumnName(GEAR_ABILITIES);
 		for (var ability of abilitiesMap.keys) {
 			if (rowData[ability]) {
@@ -201,7 +201,7 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 			}
 		}
 	}
-	if (!rowData[GEAR_BRAND_WILDCARD]) {
+	if (!rowData[DB_GEAR_BRAND_WILDCARD]) {
 		let brandsMap = mapFromColumnName(GEAR_BRANDS);
 		for (var brand of brandsMap.keys) {
 			if (rowData[brand]) {
@@ -225,22 +225,22 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
  */
 function setupDatabaseTables(client: Pool | PoolClient) {
 	client.query(
-		`CREATE TABLE IF NOT EXISTS ${USERS_TABLE} (
-            ${USER_ID} SERIAL,
+		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
+            ${DB_USER_ID} SERIAL,
             UserCode varchar(255),
-            ${LAST_NOTIFIED_EXPIRATION} varchar(255),
+            ${DB_LAST_NOTIFIED_EXPIRATION} varchar(255),
             ServiceWorkerURL varchar(255),
-            PRIMARY KEY (${USER_ID})
+            PRIMARY KEY (${DB_USER_ID})
         );`
 	);
 
 	// TODO: Add additional user data columns
 	client.query(`
-    CREATE TABLE IF NOT EXISTS ${USERS_TO_FILTERS_TABLE} (
-        ${PAIR_ID} SERIAL,
-        ${USER_ID} int4,
-        ${FILTER_ID} int4,
-        PRIMARY KEY (${PAIR_ID})
+    CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
+        ${DB_PAIR_ID} SERIAL,
+        ${DB_USER_ID} int4,
+        ${DB_FILTER_ID} int4,
+        PRIMARY KEY (${DB_PAIR_ID})
     );`);
 
 	// Generate filter table
@@ -251,13 +251,13 @@ function setupDatabaseTables(client: Pool | PoolClient) {
 	}
 	let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n\t") + " BOOL";
 
-	client.query(`CREATE TABLE IF NOT EXISTS ${FILTERS_TABLE} (
-        ${FILTER_ID} SERIAL,
-        ${GEAR_NAME} varchar(255),
-        ${RARITY} int2,
-        ${GEAR_TYPE_WILDCARD} BOOL,
-        ${GEAR_BRAND_WILDCARD} BOOL,
-        ${GEAR_ABILITY_WILDCARD} BOOL,
+	client.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
+        ${DB_FILTER_ID} SERIAL,
+        ${DB_GEAR_NAME} varchar(255),
+        ${GEAR_RARITY} int2,
+        ${DB_GEAR_TYPE_WILDCARD} BOOL,
+        ${DB_GEAR_BRAND_WILDCARD} BOOL,
+        ${DB_GEAR_ABILITY_WILDCARD} BOOL,
         ${filterColumnQuery}
     );`);
 }
@@ -287,14 +287,14 @@ async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): P
 	let results = await queryAndLog(
 		client,
 		`
-        SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
+        SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
         WHERE ${queryArgs.join(" AND ")};
     `
 	);
 
 	if (results) {
 		if (results.rowCount > 0) {
-			return results.rows[0][FILTER_ID]; // get first matching filter ID
+			return results.rows[0][DB_FILTER_ID]; // get first matching filter ID
 		}
 	}
 	return -1;
@@ -313,9 +313,9 @@ async function tryAddFilter(client: PoolClient | Pool, filter: Filter): Promise<
 		// INSERT INTO [table_name] ([col1], [col2], ...) VALUES ([val1], [val2], ...)
 		// RETURNING clause gets the specified columns of any created/modified rows.
 		let result = await client.query(`
-            INSERT INTO ${FILTERS_TABLE} (${Object.keys(filterData).join(", ")})
-            VALUES (${Object.values(filterData).join(", ")}) RETURNING ${FILTER_ID};`);
-		filterID = result.rows[0][FILTER_ID];
+            INSERT INTO ${DB_TABLE_FILTERS} (${Object.keys(filterData).join(", ")})
+            VALUES (${Object.values(filterData).join(", ")}) RETURNING ${DB_FILTER_ID};`);
+		filterID = result.rows[0][DB_FILTER_ID];
 	}
 	// Return new filter ID
 	return filterID;
@@ -330,8 +330,8 @@ async function removeFilter(client: PoolClient | Pool, filterID: number): Promis
 	// TODO: Only allow deletion if the filter has no paired users?
 	// Note: can use returning to get deleted rows
 	let result = await client.query(`
-        DELETE FROM ${FILTERS_TABLE}
-        WHERE ${FILTER_ID}=${filterID} RETURNING *;`);
+        DELETE FROM ${DB_TABLE_FILTERS}
+        WHERE ${DB_FILTER_ID}=${filterID} RETURNING *;`);
 
 	// TODO: Change return type based on result?
 	return false;
@@ -364,7 +364,7 @@ async function removeUser(client: PoolClient | Pool, userID: number) {
 }
 
 async function hasUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
-	let result = await client.query(`SELECT FROM ${USERS_TABLE} WHERE ${USER_ID} = ${userID}`);
+	let result = await client.query(`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`);
 	return result.rowCount > 0;
 }
 
@@ -374,8 +374,8 @@ async function isUserSubscribedToFilter(
 	filterID: number
 ): Promise<boolean> {
 	let result = await client.query(`
-        SELECT * FROM ${USERS_TO_FILTERS_TABLE}
-        WHERE ${FILTER_ID} = ${filterID} AND ${USER_ID} = ${userID};`);
+        SELECT * FROM ${DB_TABLE_USERS_TO_FILTERS}
+        WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`);
 	return result.rowCount > 0;
 }
 
@@ -392,7 +392,7 @@ async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, 
 
 	if (!(await isUserSubscribedToFilter(client, userID, filterID))) {
 		await client.query(
-			`INSERT INTO ${USERS_TO_FILTERS_TABLE} (${USER_ID}, ${FILTER_ID})
+			`INSERT INTO ${DB_TABLE_USERS_TO_FILTERS} (${DB_USER_ID}, ${DB_FILTER_ID})
             VALUES (${userID}, ${filterID});
         `
 		);
@@ -409,8 +409,8 @@ async function unsubscribeUserFromFilter(
 ) {
 	if (await isUserSubscribedToFilter(client, userID, filterID)) {
 		await client.query(
-			`DELETE FROM ${USERS_TO_FILTERS_TABLE}
-            WHERE ${USER_ID} = ${userID} AND ${FILTER_ID} = ${filterID});`
+			`DELETE FROM ${DB_TABLE_USERS_TO_FILTERS}
+            WHERE ${DB_USER_ID} = ${userID} AND ${DB_FILTER_ID} = ${filterID});`
 		);
 		// TODO: Check if filter should be deleted if no other users reference it?
 	}
@@ -436,17 +436,17 @@ async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promi
 async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<number[]> {
 	// TODO: Gear Name input must be sanitized
 
-	let result = await client.query(`SELECT ${FILTER_ID} FROM ${FILTERS_TABLE}
-    WHERE ${RARITY} <= ${gear.rarity}
-    AND (${GEAR_NAME} = '' OR ${GEAR_NAME} = '${gear.name}')
-    AND (${GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
-    AND (${GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
-    AND (${GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
+	let result = await client.query(`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
+    WHERE ${GEAR_RARITY} <= ${gear.rarity}
+    AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
+    AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
+    AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
+    AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
     `);
 
 	let filterList: number[] = [];
 	for (var i in result.rows) {
-		filterList.push(result.rows[i][FILTER_ID]);
+		filterList.push(result.rows[i][DB_FILTER_ID]);
 	}
 
 	return filterList;

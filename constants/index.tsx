@@ -1,16 +1,26 @@
 export const DATABASE_NAME = "SplatnetShopAlerts";
-export const FILTER_ID = "filterid";
-export const USER_ID = "userid";
-export const PAIR_ID = "pairid";
-export const GEAR_NAME = "name";
-// TODO: Get complete list of gear from Splatoon Wiki.
-export const GEAR_NAMES = ["Fresh Fish Head"];
-export const GEAR_TYPE_WILDCARD = "typewildcard";
-export const GEAR_BRAND_WILDCARD = "brandwildcard";
-export const GEAR_ABILITY_WILDCARD = "abilitywildcard";
-export const EXPIRATION = "expiration";
+
+
+export const DB_TABLE_USERS = "Users";
+export const DB_TABLE_USERS_TO_FILTERS = "UsersToFilters";
+export const DB_TABLE_FILTERS = "Filters";
+
+export const DB_FILTER_ID = "filterid";
+export const DB_USER_ID = "userid";
+export const DB_PAIR_ID = "pairid";
+
+export const DB_GEAR_NAME = "name";
+
+export const DB_GEAR_TYPE_WILDCARD = "typewildcard";
+export const DB_GEAR_BRAND_WILDCARD = "brandwildcard";
+export const DB_GEAR_ABILITY_WILDCARD = "abilitywildcard";
 // The expiration time of the last item this user was notified about.
-export const LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
+export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
+
+// TODO: Get complete list of gear from Splatoon Wiki.
+export const GEAR_EXPIRATION = "expiration";
+export const GEAR_PRICE = "price";
+export const GEAR_NAMES = ["Fresh Fish Head"];
 export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 export const GEAR_BRANDS = [
     "amiibo",
@@ -34,9 +44,9 @@ export const GEAR_BRANDS = [
     "Zekko",
     "Zink"
 ];
-export const RARITY = "Rarity";
-export const MAX_RARITY = 5;
-export const MIN_RARITY = 0;
+export const GEAR_RARITY = "Rarity";
+export const GEAR_RARITY_MAX = 5;
+export const GEAR_RARITY_MIN = 0;
 export const GEAR_ABILITIES = [
     "Ink Saver (Main)",
     "Ink Saver (Sub)",
@@ -66,6 +76,4 @@ export const GEAR_ABILITIES = [
     "Drop Roller"
 ];
 
-export const USERS_TABLE = "Users";
-export const USERS_TO_FILTERS_TABLE = "UsersToFilters";
-export const FILTERS_TABLE = "Filters";
+export const FE_WILDCARD = "Any";

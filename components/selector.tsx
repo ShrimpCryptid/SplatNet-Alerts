@@ -1,6 +1,6 @@
 import styles from './selector.module.css';
 import { FunctionComponent } from 'react';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { FE_WILDCARD } from '../constants';
 
 let defaultImage = '/icons/unknown.png';
@@ -49,12 +49,13 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, name, selected
 type Props = {
     items: string[],
     selected: Map<string, boolean>,
+    itemImages?: Map<string, StaticImageData>,
     wildcard?: boolean,
     search?: boolean,
     onChanged?: CallableFunction,
 }
 
-const Selector: FunctionComponent<Props> = ({ items, selected, wildcard, search, onChanged }) => {
+const Selector: FunctionComponent<Props> = ({ items, selected, itemImages, wildcard, search, onChanged }) => {
     // check if items includes wildcard. if not, insert into our list of items and map of what
     // items are selected.
     if (wildcard && items.indexOf(FE_WILDCARD) !== 0) {
@@ -88,11 +89,16 @@ const Selector: FunctionComponent<Props> = ({ items, selected, wildcard, search,
                     isSelected = false;
                     disabled = true;
                 }
+                let image = null;
+                if (itemImages) {
+                    image = itemImages.get(item);
+                }
 
                 return (
                     <SelectorItem
                         id={index}
                         name={item}
+                        image={image}
                         selected={isSelected}
                         disabled={disabled}
                         onClick={onClick}

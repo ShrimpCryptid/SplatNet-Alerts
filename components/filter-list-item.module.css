@@ -1,0 +1,59 @@
+.container {
+    width: 100%;
+    background-color: #333333;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: row;
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.lcontainer {
+    margin-right: 10px;
+}
+
+.rcontainer {
+    width: 100%;
+}
+
+.brandIcon {
+    background-color: white;
+    border-radius: 10%;
+    height: 32px;
+    width: 32px;
+}
+
+.brandIcon.list {
+
+}
+
+.gearNameLabel {
+
+}
+
+.categoryLabel {
+
+}
+
+.abilityIcon {
+    background-color: black;
+    border-radius: 100%;
+    margin: 10px;
+}
+
+.abilityIconContainer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-items: left;
+    gap: 5px;
+    align-items: center;
+}
+
+.gearNameContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: fit-content;
+    background-color: gray;
+}

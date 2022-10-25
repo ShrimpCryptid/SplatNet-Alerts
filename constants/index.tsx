@@ -20,7 +20,7 @@ export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
 // TODO: Get complete list of gear from Splatoon Wiki.
 export const GEAR_EXPIRATION = "expiration";
 export const GEAR_PRICE = "price";
-export const GEAR_NAMES = ["Fresh Fish Head"];
+export const GEAR_NAMES = ["Fresh Fish Head", "Annaki Flannel Hoodie"];
 export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 export const GEAR_BRANDS = [
     "amiibo",

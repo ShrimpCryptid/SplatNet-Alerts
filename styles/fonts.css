@@ -1,0 +1,14 @@
+/* Font families taken from Splatoon3.ink */
+:root {
+  --font-family-s1: splatoon1,sans-serif;
+  --font-family-s2: splatoon2,sans-serif;
+  --font-family-ui: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,"Apple Color Emoji","Segoe UI Emoji",Segoe UI Symbol,"Noto Color Emoji";
+}
+
+@font-face {
+  font-family:splatoon1;src:url("../public/fonts/Splatoon1-common.woff2") format("woff2"),url("../public/fonts/Splatoon1-common.woff") format("woff");unicode-range:U+0000-007f,U+0080-00ff,U+0100-017f,U+0180-024f,U+02b0-02ff,U+0300-036f,U+0370-03ff,U+04??,U+2000-206f,U+2190-21ff,U+e000-f8ff;
+}
+
+@font-face {
+  font-family:splatoon2;src:url("../public/fonts/Splatoon2-common.woff2") format("woff2"),url("../public/fonts/Splatoon2-common.woff") format("woff");unicode-range:U+0000-007f,U+0080-00ff,U+0100-017f,U+0180-024f,U+02b0-02ff,U+0300-036f,U+0370-03ff,U+04??,U+2000-206f,U+2190-21ff,U+e000-f8ff;
+}

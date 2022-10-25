@@ -7,7 +7,7 @@ import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
 import Selector from "../components/selector";
 import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES } from "../constants";
-import { Filter } from "../lib/database_utils";
+import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
 import { brandIcons } from "../public/icons/brands";

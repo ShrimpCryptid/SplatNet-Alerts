@@ -1,0 +1,42 @@
+@import url('./fonts.css');
+
+body {
+  background-color: black;
+  color: white;
+  font-family: var(--font-family-s1);
+}
+
+.app-container {
+  width: 70vmin;
+  margin: 0 auto;
+}
+
+p {
+  font-family: var(--font-family-ui);
+}
+
+h1 {
+  font-family: var(--font-family-s1);
+  font-weight: 200;
+}
+
+h2 {
+  font-family: var(--font-family-s1);
+  font-weight: 200;
+}
+
+h3 {
+  font-family: var(--font-family-s2);
+  font-style: normal;
+  font-weight: 200;
+}
+
+h4 {
+  font-family: var(--font-family-s2);
+  font-weight: 200;
+}
+
+h5 {
+  font-family: var(--font-family-ui);
+  font-weight: 200;
+}

@@ -45,7 +45,7 @@ export const GEAR_BRANDS = [
     "Zink"
 ];
 export const GEAR_RARITY = "Rarity";
-export const GEAR_RARITY_MAX = 5;
+export const GEAR_RARITY_MAX = 2;
 export const GEAR_RARITY_MIN = 0;
 export const GEAR_ABILITIES = [
     "Ink Saver (Main)",

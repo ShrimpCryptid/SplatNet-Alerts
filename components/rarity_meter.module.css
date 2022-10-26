@@ -1,0 +1,55 @@
+.iconContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.bigIconContainer {
+  position: relative !important;
+  width: 5.5vmin;
+  height: 5.5vmin;
+}
+
+.bigIcon {
+  border-radius: 100%;
+  background-color: var(--ability-background);
+  border-width: 2px;
+  object-fit: cover;
+  position: relative;
+}
+
+.smallIconContainer {
+  width: 4vmin;
+  height: 4vmin;
+  position: relative !important;
+  margin-left: 2px;
+
+  border-radius: 100%;
+  border-width: 2px;
+  border-color: transparent;
+}
+
+.smallIconContainer.outline {
+  border-radius: 100%;
+  border-width: 2px;
+  border-color: white;
+  border-style: dashed;
+}
+
+.smallIconContainer.hide {
+  visibility: hidden;
+}
+
+.smallIcon {
+  border-radius: 100%;
+  background-color: var(--ability-background);
+  width: 15%;
+  object-fit: cover;
+  position: relative;
+}
+
+.smallIcon.outline {
+  visibility: hidden;
+}

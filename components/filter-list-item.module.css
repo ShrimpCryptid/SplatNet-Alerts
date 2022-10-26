@@ -1,6 +1,6 @@
 .container {
     width: 100%;
-    background-color: #333333;
+    background-color: #252525;
     border-radius: 20px;
     display: flex;
     flex-direction: row;
@@ -10,30 +10,60 @@
 
 .lcontainer {
     margin-right: 10px;
+    width: 30%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.rcontainer {
+.gearIcon {
+    margin-left: auto;
+    margin-right: auto;
+    align-self: center;
+}
+
+.gearNameContainer {
+    display: flex;
+    flex-direction: row;
     width: 100%;
+    height: fit-content;
+    gap: 10px;
+    align-items: center;
 }
 
+/*Icon that appears for named items*/
 .brandIcon {
     background-color: white;
     border-radius: 10%;
-    height: 32px;
-    width: 32px;
-}
-
-.brandIcon.list {
-
 }
 
 .gearNameLabel {
+    margin: 0 0;
+    align-self: center;
+}
 
+.rcontainer {
+    width: 70%;
 }
 
 .categoryLabel {
-
+    margin-bottom: 0;
+    margin-top: 0;
 }
+
+.brandIconList {
+    background-color: white;
+    border-radius: 10%;
+}
+
+.brandIconContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
 
 .abilityIcon {
     background-color: black;
@@ -50,10 +80,8 @@
     align-items: center;
 }
 
-.gearNameContainer {
-    display: flex;
-    flex-direction: row;
+.rarityMeter {
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    height: fit-content;
-    background-color: gray;
 }

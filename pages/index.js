@@ -6,8 +6,8 @@ import FilterListItem from '../components/filter-list-item';
 
 export default function Home() {
 
-  let demo_filter1 = new Filter("Annaki Flannel Hoodie", 0, [], ["Annaki"], []);
-  let demo_filter2 = new Filter("", 0, [], ["Barazushi", "Rockenberg"], [
+  let demo_filter1 = new Filter("Annaki Flannel Hoodie", 1, [], ["Annaki"], ["Ink Saver (Sub)", "Swim Speed Up"]);
+  let demo_filter2 = new Filter("", 0, ["ClothingGear"], ["Barazushi", "Rockenberg"], [
       "Thermal Ink",
       "Ninja Squid",
       "Respawn Punisher",
@@ -22,6 +22,7 @@ export default function Home() {
       "Quick Respawn",
       "Intensify Action"
   ]);
+  let demo_filter3 = new Filter("", 2, ["HeadGear", "ShoesGear"], [], []);
 
   return (
     <div id="app">
@@ -41,6 +42,10 @@ export default function Home() {
       />
       <FilterListItem
         filter={demo_filter2}
+        filterID={0}
+      />
+      <FilterListItem
+        filter={demo_filter3}
         filterID={0}
       />
 

@@ -1,21 +1,22 @@
 import styles from './selector.module.css';
 import { FunctionComponent } from 'react';
 import Image, { StaticImageData } from 'next/image';
-import { FE_WILDCARD } from '../constants';
+import { FE_WILDCARD, PROPERTY_CATEGORY } from '../constants';
 
 let defaultImage = '/icons/unknown.png';
 
 type SelectorItemProps = {
     id: number,
+    category: PROPERTY_CATEGORY,
     name: string,
     selected?: boolean,
     disabled?: boolean,
     imageUrl?: string,
     image?: any,
-    onClick: CallableFunction
+    onClick: CallableFunction,
 }
 
-const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, name, selected, disabled, imageUrl, image, onClick }) => {
+const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, category, name, selected, disabled, imageUrl, image, onClick }) => {
     // Use defaultImage if both url and image source are undefined
     let imageSrc = imageUrl ? imageUrl : (image ? image : defaultImage);
 
@@ -30,23 +31,25 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, name, selected
     return (
         <div className={className} onClick={onClickCallback} key={`${id}-${selected}`}>
             <Image
-                className={styles.itemIcon}
+                className={`${styles.itemIcon} ${styles[category]}`}
                 src={imageSrc}
                 alt={name}
-                layout={'responsive'} // lets image be resized
+                layout={'fixed'} // lets image be resized
                 height={'50px'}
                 width={'50px'}
             />
             <div className={styles.itemLabelContainer}>
-                <p className={styles.itemLabelText}>
+                <h3 className={styles.itemLabelText}>
                     {name}
-                </p>
+                </h3>
             </div>
         </div>
     )
 }
 
 type Props = {
+    title?: string,
+    category: PROPERTY_CATEGORY,
     items: string[],
     selected: Map<string, boolean>,
     itemImages?: Map<string, StaticImageData>,
@@ -55,7 +58,7 @@ type Props = {
     onChanged?: CallableFunction,
 }
 
-const Selector: FunctionComponent<Props> = ({ items, selected, itemImages, wildcard, search, onChanged }) => {
+const Selector: FunctionComponent<Props> = ({title, category, items, selected, itemImages, wildcard, search, onChanged }) => {
     // check if items includes wildcard. if not, insert into our list of items and map of what
     // items are selected.
     if (wildcard && items.indexOf(FE_WILDCARD) !== 0) {
@@ -79,9 +82,24 @@ const Selector: FunctionComponent<Props> = ({ items, selected, itemImages, wildc
         }
     }
 
+    // Count number of selected values
+    let selectedCount = 0;
+    let itemTotal = items.length - (wildcard ? 1 : 0);  // ignore wildcard
+    for (let value in selected.values()) {
+      selectedCount += value ? 1 : 0;
+    }
+
     return (
-        <div className={styles.itemDisplay}>
+        <div>
+          <h1 className={styles.categoryLabel}>{title} ({selectedCount}/{itemTotal})</h1>
+          <div className={styles.itemDisplay}>
             {items.map((item, index) => {
+                // Wildcard formatting
+                let itemCategory = category
+                if (wildcard && index == 0) {
+                  itemCategory = PROPERTY_CATEGORY.ABILITY;
+                }
+
                 let isSelected = selected.get(item);
                 let disabled = false;
                 // Disable every other item if wildcard is active and selected.
@@ -97,14 +115,16 @@ const Selector: FunctionComponent<Props> = ({ items, selected, itemImages, wildc
                 return (
                     <SelectorItem
                         id={index}
+                        category={itemCategory}
                         name={item}
                         image={image}
                         selected={isSelected}
                         disabled={disabled}
                         onClick={onClick}
                     />);
-            })
+              })
             }
+          </div>
         </div>
     );
 }

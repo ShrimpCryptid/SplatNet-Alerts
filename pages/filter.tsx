@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
 import Selector from "../components/selector";
-import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES } from "../constants";
+import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, PROPERTY_CATEGORY } from "../constants";
 import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
@@ -41,8 +41,9 @@ export default function FilterPage() {
 		<div id="app">
 			<Head>Splatnet Shop Alerts</Head>
 			<p>Placeholder text</p>
-			<h1>Gear Types</h1>
 			<Selector
+        title={"Gear Types"}
+        category={PROPERTY_CATEGORY.TYPE}
 				items={Array.from(selectedTypes.keys())}
 				selected={selectedTypes}
 				wildcard={true}
@@ -50,8 +51,9 @@ export default function FilterPage() {
 					setSelectedTypes(newSelected);
 				}}
 			/>
-			<h1>Gear Brands</h1>
 			<Selector
+        title={"Gear Brands"}
+        category={PROPERTY_CATEGORY.BRAND}
 				items={Array.from(selectedBrands.keys())}
 				selected={selectedBrands}
 				wildcard={true}
@@ -60,8 +62,9 @@ export default function FilterPage() {
 					setSelectedBrands(newSelected);
 				}}
 			/>
-			<h1>Gear Abilities</h1>
 			<Selector
+        title={"Gear Abilities"}
+        category={PROPERTY_CATEGORY.ABILITY}
 				items={Array.from(selectedAbilities.keys())}
 				selected={selectedAbilities}
 				wildcard={true}
@@ -70,6 +73,9 @@ export default function FilterPage() {
 					setSelectedAbilities(newSelected);
 				}}
 			/>
+      <button>
+        Save
+      </button>
 		</div>
 	);
 }

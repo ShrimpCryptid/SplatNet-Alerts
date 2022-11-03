@@ -18,6 +18,11 @@ export const DB_GEAR_ABILITY_WILDCARD = "abilitywildcard";
 export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
 
 // TODO: Get complete list of gear from Splatoon Wiki.
+export enum PROPERTY_CATEGORY {
+  TYPE = "type",
+  ABILITY = "ability",
+  BRAND = "brand"
+}
 export const GEAR_EXPIRATION = "expiration";
 export const GEAR_PRICE = "price";
 export const GEAR_NAMES = ["Fresh Fish Head", "Annaki Flannel Hoodie"];

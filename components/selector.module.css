@@ -1,10 +1,22 @@
+.itemDisplay {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  background-color: rgb(42, 42, 42);
+  border-radius: 10px;
+}
+
+.categoryLabel {
+  margin-bottom: 0;
+}
+
 .itemContainer {
-    width: 10vmin;
+    width: 100%;
     margin: 5px;
     position: relative;
-    background-color: lightgrey;
+    background-color: rgb(42, 42, 42);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     padding: 10px;
     border-radius: 22.5px 22.5px;
     border-width: 2px;
@@ -13,7 +25,7 @@
 }
 
 .itemContainer:hover {
-    opacity: 75%;
+  background-color: rgb(66, 66, 66);
 }
 
 .itemContainer.disabled:hover {
@@ -22,7 +34,7 @@
 
 
 .selected {
-    border-color: aqua;
+    border-color: rgb(220, 255, 65);
     border-width: 2px;
     border-style: solid;
 }
@@ -39,12 +51,29 @@
     width: 100%;
     user-select: none;
     background-color: white;
-    border-radius: 40%;
+    border-radius: 10%;
+}
+
+.itemIcon.brand {
+  background-color: white;
+  border-radius: 10%;
+}
+
+.itemIcon.ability {
+  background-color: black;
+  border-radius: 100%;
+}
+
+.itemIcon.type {
+  background-color: black;
+  border-radius: 100%;
 }
 
 .itemLabelText {
-    font-size: 0.8rem;
+    font-style: normal;
+    font-size: 18px;
     text-align: center;
+    line-height: 20px;
     margin: 0;
     opacity: 1;
 }
@@ -53,10 +82,4 @@
     align-self: center;
     padding: 4px 8px;
     margin-top: 4px;    
-}
-
-.itemDisplay {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
 }

@@ -4,6 +4,8 @@
   flex-wrap: wrap;
   background-color: rgb(42, 42, 42);
   border-radius: 10px;
+  padding: 5px;
+  gap: 5px;
 }
 
 .categoryLabel {
@@ -12,7 +14,6 @@
 
 .itemContainer {
     width: 100%;
-    margin: 5px;
     position: relative;
     background-color: rgb(42, 42, 42);
     display: flex;
@@ -28,13 +29,17 @@
   background-color: rgb(66, 66, 66);
 }
 
+.itemContainer:active {
+  background-color: rgb(35, 35, 35);
+}
+
 .itemContainer.disabled:hover {
     opacity: 1;
 }
 
 
 .selected {
-    border-color: rgb(220, 255, 65);
+    border-color: var(--selected-color);
     border-width: 2px;
     border-style: solid;
 }
@@ -65,8 +70,7 @@
 }
 
 .itemIcon.type {
-  background-color: black;
-  border-radius: 100%;
+  background: none;
 }
 
 .itemLabelText {

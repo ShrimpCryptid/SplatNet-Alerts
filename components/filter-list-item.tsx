@@ -20,8 +20,8 @@ const GEAR_TYPE_WIDTH = 150;
 
 type Props = {
 	filter: Filter;
-	filterID: number;
-	onClick: CallableFunction;
+	filterID?: number;
+	onClick?: CallableFunction;
 };
 
 const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick }) => {

@@ -2,6 +2,7 @@
 
 :root {
   --ability-background: black;
+  --selected-color: rgb(220, 255, 65);
 }
 
 body {
@@ -43,4 +44,14 @@ h4 {
 h5 {
   font-family: var(--font-family-ui);
   font-weight: 200;
+}
+
+button {
+  background-color: grey;
+  padding: 0 15px;
+  border-radius: 100000px;
+  color: white;
+  font-family: var(--font-family-s2);
+  font-weight: 200;
+  font-size: 3vmin;
 }

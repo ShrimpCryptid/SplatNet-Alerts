@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Selector from '../components/selector';
 import Filter from '../lib/filter';
 import FilterListItem from '../components/filter-list-item';
+import styles from '../styles/index.module.css';
 
 export default function Home() {
 
@@ -25,7 +26,7 @@ export default function Home() {
   let demo_filter3 = new Filter("", 2, ["HeadGear", "ShoesGear"], [], []);
 
   return (
-    <div id="app">
+    <div id={styles.main}>
       <Head>
         Splatnet Shop Alerts
       </Head>

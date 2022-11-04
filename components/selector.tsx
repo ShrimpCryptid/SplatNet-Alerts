@@ -2,6 +2,7 @@ import styles from './selector.module.css';
 import { FunctionComponent } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import { FE_WILDCARD, PROPERTY_CATEGORY } from '../constants';
+import { mapGetWithDefault } from '../lib/utils';
 
 let defaultImage = '/icons/unknown.png';
 
@@ -34,7 +35,7 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, category, name
                 className={`${styles.itemIcon} ${styles[category]}`}
                 src={imageSrc}
                 alt={name}
-                layout={'fixed'} // lets image be resized
+                layout={'fixed'}
                 height={'50px'}
                 width={'50px'}
             />
@@ -56,6 +57,19 @@ type Props = {
     wildcard?: boolean,
     search?: boolean,
     onChanged?: CallableFunction,
+}
+
+function countSelected(selections: Map<string, boolean>): number {
+  if (mapGetWithDefault(selections, FE_WILDCARD, false)) {
+    // Wildcard (any) is selected, return one minus total number of selections
+    return selections.size - 1;
+  }
+  // Count number of true values
+  let count = 0;
+  for (let value of selections.values()) {
+    count += value ? 1 : 0;
+  }
+  return count;
 }
 
 const Selector: FunctionComponent<Props> = ({title, category, items, selected, itemImages, wildcard, search, onChanged }) => {
@@ -91,7 +105,7 @@ const Selector: FunctionComponent<Props> = ({title, category, items, selected, i
 
     return (
         <div>
-          <h1 className={styles.categoryLabel}>{title} ({selectedCount}/{itemTotal})</h1>
+          <h1 className={styles.categoryLabel}>{title} ({countSelected(selected)}/{itemTotal})</h1>
           <div className={styles.itemDisplay}>
             {items.map((item, index) => {
                 // Wildcard formatting

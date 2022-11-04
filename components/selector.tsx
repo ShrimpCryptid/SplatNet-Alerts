@@ -1,14 +1,14 @@
 import styles from './selector.module.css';
 import { FunctionComponent } from 'react';
 import Image, { StaticImageData } from 'next/image';
-import { FE_WILDCARD, PROPERTY_CATEGORY } from '../constants';
+import { FE_WILDCARD, GEAR_PROPERTY } from '../constants';
 import { mapGetWithDefault } from '../lib/utils';
 
 let defaultImage = '/icons/unknown.png';
 
 type SelectorItemProps = {
     id: number,
-    category: PROPERTY_CATEGORY,
+    category: GEAR_PROPERTY,
     name: string,
     selected?: boolean,
     disabled?: boolean,
@@ -50,7 +50,7 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, category, name
 
 type Props = {
     title?: string,
-    category: PROPERTY_CATEGORY,
+    category: GEAR_PROPERTY,
     items: string[],
     selected: Map<string, boolean>,
     itemImages?: Map<string, StaticImageData>,
@@ -105,13 +105,13 @@ const Selector: FunctionComponent<Props> = ({title, category, items, selected, i
 
     return (
         <div>
-          <h1 className={styles.categoryLabel}>{title} ({countSelected(selected)}/{itemTotal})</h1>
+          <h2 className={styles.categoryLabel}>{title} ({countSelected(selected)}/{itemTotal})</h2>
           <div className={styles.itemDisplay}>
             {items.map((item, index) => {
                 // Wildcard formatting
                 let itemCategory = category
                 if (wildcard && index == 0) {
-                  itemCategory = PROPERTY_CATEGORY.ABILITY;
+                  itemCategory = GEAR_PROPERTY.ABILITY;
                 }
 
                 let isSelected = selected.get(item);

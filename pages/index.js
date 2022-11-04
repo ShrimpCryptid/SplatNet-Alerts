@@ -50,7 +50,19 @@ export default function Home() {
         filterID={0}
       />
 
-      
+      <h2>Settings</h2>
+      <h3>Notifications</h3>
+      <p>You currently have notifications <b>ON/OFF</b></p>
+      <button>Turn off notifications</button>
+      <h3>User ID</h3>
+      <p><b>Your unique identifier is:</b></p>
+      <textarea>uuid-8001-349d-34cd-a398</textarea>
+      <button>Copy</button>
+      <h5>Save and copy this somewhere secure! You can use it to log back in.</h5>
+
+      <h3>Change User</h3>
+      <textarea></textarea>
+      <button>Login</button>
     </div>
 )
 }

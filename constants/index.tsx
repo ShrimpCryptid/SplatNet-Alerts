@@ -18,17 +18,20 @@ export const DB_GEAR_ABILITY_WILDCARD = "abilitywildcard";
 export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
 
 // TODO: Get complete list of gear from Splatoon Wiki.
-export enum PROPERTY_CATEGORY {
+export enum GEAR_PROPERTY {
   TYPE = "type",
   ABILITY = "ability",
-  BRAND = "brand"
+  BRAND = "brand",
+  RARITY = "rarity",
+  NAME = "name"
 }
 export const GEAR_EXPIRATION = "expiration";
 export const GEAR_PRICE = "price";
 export const GEAR_NAMES = ["Fresh Fish Head", "Annaki Flannel Hoodie"];
 export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
+
+// GrizzCo and Amiibo brands removed.
 export const GEAR_BRANDS = [
-    "amiibo",
     "Annaki",
     "Barazushi",
     "Cuttlegear",
@@ -36,7 +39,6 @@ export const GEAR_BRANDS = [
     "Enperry",
     "Firefin",
     "Forge",
-    "Grizzco",
     "Inkline",
     "Krak-On",
     "Rockenberg",
@@ -52,6 +54,8 @@ export const GEAR_BRANDS = [
 export const GEAR_RARITY = "Rarity";
 export const GEAR_RARITY_MAX = 2;
 export const GEAR_RARITY_MIN = 0;
+
+// Ability Doubler removed.
 export const GEAR_ABILITIES = [
     "Ink Saver (Main)",
     "Ink Saver (Sub)",
@@ -75,7 +79,6 @@ export const GEAR_ABILITIES = [
     "Haunt",
     "Thermal Ink",
     "Respawn Punisher",
-    "Ability Doubler",
     "Stealth Jump",
     "Object Shredder",
     "Drop Roller"

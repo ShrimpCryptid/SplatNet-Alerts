@@ -3,6 +3,10 @@
 :root {
   --ability-background: black;
   --selected-color: rgb(220, 255, 65);
+  --button-hover: rgb(66, 66, 66);
+  --button-active: rgb(35, 35, 35);
+  --button-disabled-filter: brightness(50%);
+  --background-alt: rgb(42, 42, 42);
 }
 
 body {
@@ -53,5 +57,9 @@ button {
   color: white;
   font-family: var(--font-family-s2);
   font-weight: 200;
-  font-size: 3vmin;
+  font-size: 2vmin;
+}
+
+button:hover {
+
 }

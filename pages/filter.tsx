@@ -7,7 +7,7 @@ import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
 import FilterListItem from "../components/filter-list-item";
 import Selector from "../components/selector";
-import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, PROPERTY_CATEGORY } from "../constants";
+import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, GEAR_PROPERTY } from "../constants";
 import Filter from "../lib/filter";
 import { mapGetWithDefault } from "../lib/utils";
 
@@ -94,7 +94,7 @@ export default function FilterPage({filter}: FilterProps) {
   const [stateFilter, setStateFilter] = useState(filter);
 
   // Update the filter values using new state
-  const updateFilter = (category: PROPERTY_CATEGORY, updatedMap?: Map<string, boolean>, updatedName?: string, updatedRarity?: number) => {
+  const updateFilter = (category: GEAR_PROPERTY, updatedMap?: Map<string, boolean>, updatedName?: string, updatedRarity?: number) => {
     let newGearName = "";
     let newRarity = 0;
     let newAbilities = selectedAbilities;
@@ -102,13 +102,13 @@ export default function FilterPage({filter}: FilterProps) {
     let newTypes = selectedTypes;
 
     if (updatedMap) {
-      if (category == PROPERTY_CATEGORY.ABILITY) {
+      if (category == GEAR_PROPERTY.ABILITY) {
           setSelectedAbilities(updatedMap ? updatedMap : selectedAbilities);
           newAbilities = updatedMap ? updatedMap : selectedAbilities;
-      } else if (category == PROPERTY_CATEGORY.BRAND) {
+      } else if (category == GEAR_PROPERTY.BRAND) {
           setSelectedBrands(updatedMap ? updatedMap : selectedBrands);
           newBrands = updatedMap ? updatedMap : selectedBrands;
-      } else if (category == PROPERTY_CATEGORY.TYPE) {
+      } else if (category == GEAR_PROPERTY.TYPE) {
           setSelectedTypes(updatedMap ? updatedMap : selectedTypes);
           newTypes = updatedMap ? updatedMap : selectedTypes;
       }
@@ -133,35 +133,35 @@ export default function FilterPage({filter}: FilterProps) {
       <p>Select the gear properties you want to be alerted for.</p>
 			<Selector
         title={"Gear Types"}
-        category={PROPERTY_CATEGORY.TYPE}
+        category={GEAR_PROPERTY.TYPE}
 				items={Array.from(selectedTypes.keys())}
 				selected={selectedTypes}
         itemImages={typeIcons}
 				wildcard={true}
 				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(PROPERTY_CATEGORY.TYPE, newSelected);
+          updateFilter(GEAR_PROPERTY.TYPE, newSelected);
 				}}
 			/>
 			<Selector
         title={"Gear Brands"}
-        category={PROPERTY_CATEGORY.BRAND}
+        category={GEAR_PROPERTY.BRAND}
 				items={Array.from(selectedBrands.keys())}
 				selected={selectedBrands}
 				wildcard={true}
         itemImages={brandIcons}
 				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(PROPERTY_CATEGORY.BRAND, newSelected);
+          updateFilter(GEAR_PROPERTY.BRAND, newSelected);
 				}}
 			/>
 			<Selector
         title={"Gear Abilities"}
-        category={PROPERTY_CATEGORY.ABILITY}
+        category={GEAR_PROPERTY.ABILITY}
 				items={Array.from(selectedAbilities.keys())}
 				selected={selectedAbilities}
 				wildcard={true}
                 itemImages={abilityIcons}
 				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(PROPERTY_CATEGORY.ABILITY, newSelected);
+          updateFilter(GEAR_PROPERTY.ABILITY, newSelected);
 				}}
 			/>
       <FilterListItem

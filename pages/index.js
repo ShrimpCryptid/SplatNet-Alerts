@@ -1,6 +1,5 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
-import Selector from '../components/selector';
+import Link from 'next/link';
 import Filter from '../lib/filter';
 import FilterView from '../components/filter-view';
 import styles from '../styles/index.module.css';
@@ -26,7 +25,7 @@ export default function Home() {
   let demo_filter3 = new Filter("", 2, ["HeadGear", "ShoesGear"], [], []);
 
   return (
-    <div id={styles.main}>
+    <div className={styles.main}>
       <Head>
         Splatnet Shop Alerts
       </Head>
@@ -49,6 +48,7 @@ export default function Home() {
         filter={demo_filter3}
         filterID={0}
       />
+			<Link href="filter"><button>New Filter</button></Link>
 
       <h2>Settings</h2>
       <h3>Notifications</h3>

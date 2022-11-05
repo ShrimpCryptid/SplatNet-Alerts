@@ -1,8 +1,7 @@
-/**
- * Page for creating and editing filters.
- */
-
+// Page for creating and editing filters.
+ 
 import Head from "next/head";
+import Link from "next/link";
 import React from "react";
 import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
@@ -230,7 +229,7 @@ export default function FilterPage({filter}: FilterProps) {
       <button onClick={onClickSave} disabled={!canSaveFilter}>
         Save
       </button>
-      <button>Cancel</button>
+      <Link href="/"><button>Cancel</button></Link>
 		</div>
 	);
 }

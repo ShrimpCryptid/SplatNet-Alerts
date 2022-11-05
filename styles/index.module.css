@@ -1,3 +1,5 @@
 .main {
-  width: 70vmin;
+  width: 80vmin;
+  justify-self: center;
+  margin: 0 auto;
 }

@@ -16,6 +16,7 @@ type SelectorItemProps = {
 	onClick: CallableFunction;
 };
 
+/** A single selectable item entry, for internal use in a list Selector. */
 const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 	id,
 	category,
@@ -56,7 +57,7 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 	);
 };
 
-type Props = {
+type SelectorProps = {
 	title?: string;
 	category: GEAR_PROPERTY;
 	items: string[];
@@ -80,7 +81,11 @@ function countSelected(selections: Map<string, boolean>): number {
 	return count;
 }
 
-const Selector: FunctionComponent<Props> = ({
+/**
+ * Displays a list of selectable items with image icons. Includes optional
+ *  behavior for wildcard/Any selections. 
+*/
+const Selector: FunctionComponent<SelectorProps> = ({
 	title,
 	category,
 	items,
@@ -104,8 +109,8 @@ const Selector: FunctionComponent<Props> = ({
 	}
 
 	const onClick = (id: number) => {
-		// invert the selection for clicked item, then return the new selection state via callback.
-		// Must(!!!) make a copy here or React won't recognize that a change has occurred.
+		// invert selection for clicked item, then return new state via callback.
+		// MUST make a copy here or React won't recognize a change.
 		let newSelected = new Map(selected); // copy map
 		let item = items[id];
 		newSelected.set(item, !selected.get(item));

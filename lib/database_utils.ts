@@ -20,7 +20,7 @@ import {
 	DB_TABLE_USERS_TO_FILTERS,
 	DB_USER_ID,
 } from "../constants";
-import Filter from './filter';
+import Filter from "./filter";
 import { NotYetImplementedError, NoSuchUserError } from "./utils";
 
 // ==============

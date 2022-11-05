@@ -2,9 +2,8 @@ import { FunctionComponent } from "react";
 import Image from "next/image";
 
 import Filter from "../lib/filter";
-import { mapGetWithDefault } from '../lib/utils';
+import { mapGetWithDefault } from "../lib/utils";
 
-import { placeholder } from "../public/icons/gear";
 import { unknownIcon, noneIcon } from "../public/icons/utils";
 import { abilityIcons } from "../public/icons/abilities";
 import { brandIcons } from "../public/icons/brands";
@@ -23,30 +22,31 @@ type Props = {
 	filterID?: number;
 	onClick?: CallableFunction;
 
-  // Whether to show an alternative X symbol for brands, abilities, and types
-  // when they are unselected. All true by default.
-  brandsSelected?: boolean;
-  abilitiesSelected?: boolean;
-  typesSelected?: boolean;
+	// Whether to show an alternative X symbol for brands, abilities, and types
+	// when they are unselected. All true by default.
+	brandsSelected?: boolean;
+	abilitiesSelected?: boolean;
+	typesSelected?: boolean;
 };
 
-const FilterView: FunctionComponent<Props> = ({filter,
-                                               filterID,
-                                               onClick,
-                                               brandsSelected=true,
-                                               abilitiesSelected=true,
-                                               typesSelected=true}) => {
+const FilterView: FunctionComponent<Props> = ({
+	filter,
+	filterID,
+	onClick,
+	brandsSelected = true,
+	abilitiesSelected = true,
+	typesSelected = true,
+}) => {
 	let iconURL, iconAlt;
 	let gearImageElements, gearNameElements, brandElements, abilityElements;
 	let isItem = filter.gearName !== "";
 
-
-  // GEAR TYPE, IMAGE, AND BRANDS
+	// GEAR TYPE, IMAGE, AND BRANDS
 	if (isItem) {
 		// Gear has a specific image, so show it here
 		// TODO: Gear images
 		iconURL =
-		"https://cdn.wikimg.net/en/splatoonwiki/images/1/1c/S3_Gear_Clothing_Annaki_Flannel_Hoodie.png";
+			"https://cdn.wikimg.net/en/splatoonwiki/images/1/1c/S3_Gear_Clothing_Annaki_Flannel_Hoodie.png";
 
 		// Gear item has a specific name, so we show it
 		gearNameElements = (
@@ -69,15 +69,19 @@ const FilterView: FunctionComponent<Props> = ({filter,
 			iconURL = mapGetWithDefault(typeIcons, filter.gearTypes[0], GEAR_TYPE_ANY_ICON);
 		} else {
 			// 2 types
-			iconURL = mapGetWithDefault(typeIcons, filter.gearTypes[0] + filter.gearTypes[1], GEAR_TYPE_ANY_ICON);
+			iconURL = mapGetWithDefault(
+				typeIcons,
+				filter.gearTypes[0] + filter.gearTypes[1],
+				GEAR_TYPE_ANY_ICON
+			);
 		}
 
-    // Override icon if no type is defined
-    if (!typesSelected) {
-      iconURL = noneIcon;
-    }
-		
-		brandElements = (<h3 className={styles.categoryLabel}>Brands</h3>);
+		// Override icon if no type is defined
+		if (!typesSelected) {
+			iconURL = noneIcon;
+		}
+
+		brandElements = <h3 className={styles.categoryLabel}>Brands</h3>;
 		// Render list of brands
 		if (filter.gearBrands.length == 0) {
 			// any brand acceptable, so show unknown icon
@@ -92,7 +96,7 @@ const FilterView: FunctionComponent<Props> = ({filter,
 							height={BRAND_ICON_LIST_WIDTH}
 							layout={"fixed"}
 						/>
-						</div>
+					</div>
 				</>
 			);
 		} else {
@@ -109,18 +113,17 @@ const FilterView: FunctionComponent<Props> = ({filter,
 									height={BRAND_ICON_LIST_WIDTH}
 									layout={"fixed"}
 								/>
-							)})
-						}
+							);
+						})}
 					</div>
 				</>
 			);
 		}
-	}  // End Gear Types, Images, and Brands
+	} // End Gear Types, Images, and Brands
 
 	// ABILITIES SECTION
 	// Show unknown icon if any ability will work
 	if (filter.gearAbilities.length == 0) {
-    
 		abilityElements = (
 			<>
 				<Image
@@ -136,7 +139,7 @@ const FilterView: FunctionComponent<Props> = ({filter,
 		abilityElements = filter.gearAbilities.map((item, index) => {
 			return (
 				<Image
-          key={index}
+					key={index}
 					className={styles.abilityIcon}
 					src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
 					width={ABILITY_ICON_WIDTH}
@@ -158,7 +161,7 @@ const FilterView: FunctionComponent<Props> = ({filter,
 					height={GEAR_TYPE_WIDTH}
 				/>
 				<div className={styles.rarityMeter}>
-					<RarityMeter minRarity={filter.minimumRarity} maxRarity={filter.minimumRarity}/>
+					<RarityMeter minRarity={filter.minimumRarity} maxRarity={filter.minimumRarity} />
 				</div>
 			</div>
 			<div className={styles.rcontainer}>
@@ -166,9 +169,7 @@ const FilterView: FunctionComponent<Props> = ({filter,
 				{brandElements}
 
 				<h3 className={styles.categoryLabel}>Abilities</h3>
-				<div className={styles.abilityIconContainer}>
-					{abilityElements}
-				</div>
+				<div className={styles.abilityIconContainer}>{abilityElements}</div>
 			</div>
 		</div>
 	);

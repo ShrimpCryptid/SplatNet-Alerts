@@ -5,7 +5,7 @@
 import Head from "next/head";
 import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
-import FilterListItem from "../components/filter-list-item";
+import FilterView from "../components/filter-view";
 import Selector from "../components/selector";
 import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, GEAR_PROPERTY } from "../constants";
 import Filter from "../lib/filter";
@@ -40,6 +40,12 @@ function selectedListToMap(allValues: string[],
   return new Map(boolArr);
 }
 
+/**
+ * Unwraps a mapping of keys to booleans into list containing any true keys.
+ * @returns A list of any keys that mapped to true values.
+ *  If the wildcard 'Any' is true, or if no keys are true, returns an empty
+ *  array.
+ */
 function selectedMapToList(selected: Map<string, boolean>): (string[]) {
   let selectedArray: string[] = [];
   for (let key of selected.keys()) {
@@ -51,11 +57,17 @@ function selectedMapToList(selected: Map<string, boolean>): (string[]) {
       selectedArray.push(key);
     }
   }
-  if (selectedArray.length == 0) {
-    // No items were selected, including Any, so we return null.
-    //return null;
-  }
   return selectedArray;
+}
+
+/* Returns true if any key has been selected (value is true) */
+function hasSelection(selected: Map<string, boolean>): boolean {
+  for (let key of selected.keys()) {
+    if (selected.get(key)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 type FilterProps = {
@@ -65,6 +77,7 @@ type FilterProps = {
 export default function FilterPage({filter}: FilterProps) {
 	// TODO: Handle editing filters
   let initAbilities, initBrands, initTypes;
+  let initCanSaveFilter;
 
   // Load current filter properties
   // Note: converting back and forth from the filter's internal format is a bit
@@ -74,26 +87,31 @@ export default function FilterPage({filter}: FilterProps) {
 
   if (!filter) {
     // Making a new filter from scratch, so use defaults for abilities, etc.
+    // We use the GEAR_ABILITIES, etc. constants as keys in the map.
     filter = new Filter();
     initAbilities = makeSelectedMap(GEAR_ABILITIES);
     initBrands = makeSelectedMap(GEAR_BRANDS);
     initTypes = makeSelectedMap(GEAR_TYPES);
+    initCanSaveFilter = false;
   } else {
-    // Have existing filter, populate values on page.
+    // Have existing filter, populate values in page state.
     initAbilities = selectedListToMap(GEAR_ABILITIES, filter.gearAbilities);
     initBrands = selectedListToMap(GEAR_BRANDS, filter.gearBrands);
     initTypes = selectedListToMap(GEAR_TYPES, filter.gearTypes);
+    initCanSaveFilter = true;
   }
 
-  // Initialize page states
+  // Initialize page states, using existing filter values if present.
   const [selectedGearName, setSelectedGearName] = useState(filter.gearName);
   const [selectedRarity, setSelectedRarity] = useState(filter.minimumRarity);
   const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
-  const [stateFilter, setStateFilter] = useState(filter);
+  const [currFilter, setCurrFilter] = useState(filter);
+  const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
 
-  // Update the filter values using new state
+  // Update the filter values using new state. This is called whenever
+  // a selection is changed on the page.
   const updateFilter = (category: GEAR_PROPERTY, updatedMap?: Map<string, boolean>, updatedName?: string, updatedRarity?: number) => {
     let newGearName = "";
     let newRarity = 0;
@@ -101,29 +119,35 @@ export default function FilterPage({filter}: FilterProps) {
     let newBrands = selectedBrands;
     let newTypes = selectedTypes;
 
-    if (updatedMap) {
+    if (updatedMap) {  // either ability, brand, or gear types.
       if (category == GEAR_PROPERTY.ABILITY) {
-          setSelectedAbilities(updatedMap ? updatedMap : selectedAbilities);
-          newAbilities = updatedMap ? updatedMap : selectedAbilities;
+          setSelectedAbilities(updatedMap);
+          newAbilities = updatedMap;
       } else if (category == GEAR_PROPERTY.BRAND) {
-          setSelectedBrands(updatedMap ? updatedMap : selectedBrands);
-          newBrands = updatedMap ? updatedMap : selectedBrands;
+          setSelectedBrands(updatedMap);
+          newBrands = updatedMap;
       } else if (category == GEAR_PROPERTY.TYPE) {
-          setSelectedTypes(updatedMap ? updatedMap : selectedTypes);
-          newTypes = updatedMap ? updatedMap : selectedTypes;
+          setSelectedTypes(updatedMap);
+          newTypes = updatedMap;
       }
     }
 
-    // only allow creation of new filter if valid abilities, brands, and types
-    // are selected.
     let newFilter = new Filter(
-        newGearName,
-        newRarity,
-        selectedMapToList(newTypes),
-        selectedMapToList(newBrands),
-        selectedMapToList(newAbilities)
-      );
-    setStateFilter(newFilter);
+      newGearName,
+      newRarity,
+      selectedMapToList(newTypes),
+      selectedMapToList(newBrands),
+      selectedMapToList(newAbilities)
+    );
+    setCurrFilter(newFilter);
+
+    // Update whether filter can be saved
+    setCanSaveFilter(hasSelection(newTypes) && hasSelection(newBrands) && hasSelection(newAbilities));
+  } // updateFilter
+
+  const onClickSave = () => {
+    // Try saving the filter to the database.
+    // Note that no filter cleanup/validation happens here.
   }
 
 	return (
@@ -164,10 +188,13 @@ export default function FilterPage({filter}: FilterProps) {
           updateFilter(GEAR_PROPERTY.ABILITY, newSelected);
 				}}
 			/>
-      <FilterListItem
-        filter={stateFilter}
+      <FilterView
+        filter={currFilter}
+        brandsSelected={hasSelection(selectedBrands)}
+        abilitiesSelected={hasSelection(selectedAbilities)}
+        typesSelected={hasSelection(selectedTypes)}
       />
-      <button>
+      <button onClick={onClickSave} disabled={!canSaveFilter}>
         Save
       </button>
 		</div>

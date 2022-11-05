@@ -2,7 +2,7 @@ import { FunctionComponent } from "react";
 import Image from "next/image";
 
 import styles from './rarity_meter.module.css';
-import unknown from '../public/icons/unknown.png';
+import { unknownIcon } from '../public/icons/utils';
 import {GEAR_RARITY_MAX, GEAR_RARITY_MIN} from '../constants';
 
 type Props = {
@@ -15,7 +15,7 @@ export const RarityMeter: FunctionComponent<Props> = ({ minRarity, maxRarity }) 
     <div className={styles.bigIconContainer}>
     <Image
       className={`${styles.bigIcon}`}
-      src={unknown}
+      src={unknownIcon}
       layout={"fill"}
     />
   </div>
@@ -37,7 +37,7 @@ export const RarityMeter: FunctionComponent<Props> = ({ minRarity, maxRarity }) 
         <div className={`${styles.smallIconContainer} ${iconStyle}`}>
           <Image
             className={`${styles.smallIcon} ${iconStyle}`}
-            src={unknown}
+            src={unknownIcon}
             layout={"fill"}
           />
         </div>

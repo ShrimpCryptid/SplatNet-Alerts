@@ -3,10 +3,17 @@
 :root {
   --ability-background: black;
   --selected-color: rgb(220, 255, 65);
-  --button-hover: rgb(66, 66, 66);
-  --button-active: rgb(35, 35, 35);
+  
+  --button-background: rgb(55, 35, 143);
+  --button-hover: rgb(88, 72, 158);
+  --button-active: rgb(41, 25, 110);
   --button-disabled-filter: brightness(50%);
+  
   --background-alt: rgb(42, 42, 42);
+  --item-background: rgb(42, 42, 42);
+  --item-hover: rgb(66, 66, 66);
+  --item-active: rgb(35, 35, 35);
+  --item-disabled-filter: brightness(50%);
 }
 
 body {
@@ -51,15 +58,24 @@ h5 {
 }
 
 button {
-  background-color: grey;
+  background-color: var(--button-background);
   padding: 0 15px;
   border-radius: 100000px;
   color: white;
   font-family: var(--font-family-s2);
   font-weight: 200;
-  font-size: 2vmin;
+  font-size: 2.5vmin;
+  font-style: normal;
 }
 
-button:hover {
+button:hover:enabled {
+  background-color: var(--button-hover);
+}
 
+button:active:enabled {
+  background-color: var(--button-active);
+}
+
+button:disabled {
+  filter: var(--button-disabled-filter);
 }

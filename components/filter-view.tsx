@@ -5,12 +5,12 @@ import Filter from "../lib/filter";
 import { mapGetWithDefault } from '../lib/utils';
 
 import { placeholder } from "../public/icons/gear";
-import unknownIcon from "../public/icons/unknown.png";
+import { unknownIcon, noneIcon } from "../public/icons/utils";
 import { abilityIcons } from "../public/icons/abilities";
 import { brandIcons } from "../public/icons/brands";
 import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 
-import styles from "./filter-list-item.module.css";
+import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 
 const ABILITY_ICON_WIDTH = 45;
@@ -22,14 +22,26 @@ type Props = {
 	filter: Filter;
 	filterID?: number;
 	onClick?: CallableFunction;
+
+  // Whether to show an alternative X symbol for brands, abilities, and types
+  // when they are unselected. All true by default.
+  brandsSelected?: boolean;
+  abilitiesSelected?: boolean;
+  typesSelected?: boolean;
 };
 
-const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick }) => {
+const FilterView: FunctionComponent<Props> = ({filter,
+                                               filterID,
+                                               onClick,
+                                               brandsSelected=true,
+                                               abilitiesSelected=true,
+                                               typesSelected=true}) => {
 	let iconURL, iconAlt;
 	let gearImageElements, gearNameElements, brandElements, abilityElements;
 	let isItem = filter.gearName !== "";
 
 
+  // GEAR TYPE, IMAGE, AND BRANDS
 	if (isItem) {
 		// Gear has a specific image, so show it here
 		// TODO: Gear images
@@ -52,13 +64,18 @@ const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick })
 	} else {
 		// Filter is by gear TYPE, not a specific item.
 		if (filter.gearTypes.length == 0 || filter.gearTypes.length == 3) {
-			iconURL = GEAR_TYPE_ANY_ICON
+			iconURL = GEAR_TYPE_ANY_ICON;
 		} else if (filter.gearTypes.length == 1) {
 			iconURL = mapGetWithDefault(typeIcons, filter.gearTypes[0], GEAR_TYPE_ANY_ICON);
 		} else {
 			// 2 types
 			iconURL = mapGetWithDefault(typeIcons, filter.gearTypes[0] + filter.gearTypes[1], GEAR_TYPE_ANY_ICON);
 		}
+
+    // Override icon if no type is defined
+    if (!typesSelected) {
+      iconURL = noneIcon;
+    }
 		
 		brandElements = (<h3 className={styles.categoryLabel}>Brands</h3>);
 		// Render list of brands
@@ -70,7 +87,7 @@ const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick })
 					<div className={styles.brandIconContainer}>
 						<Image
 							className={styles.abilityIcon}
-							src={unknownIcon}
+							src={brandsSelected ? unknownIcon : noneIcon}
 							width={BRAND_ICON_LIST_WIDTH}
 							height={BRAND_ICON_LIST_WIDTH}
 							layout={"fixed"}
@@ -98,16 +115,17 @@ const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick })
 				</>
 			);
 		}
-	}
+	}  // End Gear Types, Images, and Brands
 
 	// ABILITIES SECTION
 	// Show unknown icon if any ability will work
 	if (filter.gearAbilities.length == 0) {
+    
 		abilityElements = (
 			<>
 				<Image
 					className={styles.abilityIcon}
-					src={unknownIcon}
+					src={abilitiesSelected ? unknownIcon : noneIcon}
 					width={ABILITY_ICON_WIDTH}
 					height={ABILITY_ICON_WIDTH}
 					layout={"fixed"}
@@ -130,7 +148,7 @@ const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick })
 	}
 
 	return (
-		<div className={styles.container}>
+		<div className={styles.container} onClick={() => onClick}>
 			<div className={styles.lcontainer}>
 				<Image
 					className={styles.gearIcon}
@@ -155,4 +173,4 @@ const FilterListItem: FunctionComponent<Props> = ({ filter, filterID, onClick })
 	);
 };
 
-export default FilterListItem;
+export default FilterView;

@@ -1,3 +1,5 @@
+// Utility methods shared across backend and frontend.
+
 export class IllegalArgumentError extends Error {
 	constructor(message: string) {
 		super(message);

@@ -3,8 +3,7 @@ import { FunctionComponent } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import { FE_WILDCARD, GEAR_PROPERTY } from '../constants';
 import { mapGetWithDefault } from '../lib/utils';
-
-let defaultImage = '/icons/unknown.png';
+import { unknownIcon } from '../public/icons/utils';
 
 type SelectorItemProps = {
     id: number,
@@ -18,8 +17,8 @@ type SelectorItemProps = {
 }
 
 const SelectorItem: FunctionComponent<SelectorItemProps> = ({ id, category, name, selected, disabled, imageUrl, image, onClick }) => {
-    // Use defaultImage if both url and image source are undefined
-    let imageSrc = imageUrl ? imageUrl : (image ? image : defaultImage);
+    // Use unknownIcon if both url and image source are undefined
+    let imageSrc = imageUrl ? imageUrl : (image ? image : unknownIcon);
 
     let className = `${styles.itemContainer} ${selected ? styles.selected : ""} ${disabled ? styles.disabled : ""}`
 

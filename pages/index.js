@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import Selector from '../components/selector';
 import Filter from '../lib/filter';
-import FilterListItem from '../components/filter-list-item';
+import FilterView from '../components/filter-view';
 import styles from '../styles/index.module.css';
 
 export default function Home() {
@@ -37,30 +37,33 @@ export default function Home() {
         </div>
       </div>
       <h2>Your Filters</h2>
-      <FilterListItem
+      <FilterView
         filter={demo_filter1}
         filterID={0}
       />
-      <FilterListItem
+      <FilterView
         filter={demo_filter2}
         filterID={0}
       />
-      <FilterListItem
+      <FilterView
         filter={demo_filter3}
         filterID={0}
       />
 
       <h2>Settings</h2>
       <h3>Notifications</h3>
-      <p>You currently have notifications <b>ON/OFF</b></p>
+      <p>You currently have notifications <b>ON/OFF</b>.</p>
+      <p>SSA sends push notifications via your browser. You can turn off notifications at any time.</p>
       <button>Turn off notifications</button>
       <h3>User ID</h3>
+      <p>This is your unique user ID. Save and copy this somewhere secure!</p>
+      <p>You can use it to make changes to your notifications if you clear your cookies or use another browser.</p>
       <p><b>Your unique identifier is:</b></p>
       <textarea>uuid-8001-349d-34cd-a398</textarea>
-      <button>Copy</button>
-      <h5>Save and copy this somewhere secure! You can use it to log back in.</h5>
+      <button>📄</button>
 
       <h3>Change User</h3>
+      <p>Paste in your user ID to sync your notification settings across devices.</p>
       <textarea></textarea>
       <button>Login</button>
     </div>

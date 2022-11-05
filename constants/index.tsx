@@ -30,11 +30,10 @@ export const GEAR_PRICE = "price";
 export const GEAR_NAMES = ["Fresh Fish Head", "Annaki Flannel Hoodie"];
 export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 
-// GrizzCo and Amiibo brands removed.
+// GrizzCo, Cuttlegear, and Amiibo brands removed.
 export const GEAR_BRANDS = [
     "Annaki",
     "Barazushi",
-    "Cuttlegear",
     "Emberz",
     "Enperry",
     "Firefin",

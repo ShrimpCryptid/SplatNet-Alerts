@@ -2,5 +2,41 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
+  flex-wrap: wrap;
+  width: fit-content;
+  margin: auto auto;
+}
+
+.selectorGroup {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.directionRow {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.directionColumn {
+  flex-direction: column;
+  align-items: center;
+}
+
+.directionColumn .selectorContainer {
+  width: 80vmin;
+  max-width: 100%;
+}
+
+.directionRow .selectorContainer {
+  width: 100%;
+  max-width: 30vw;
+}
+
+.filterViewContainer {
+  width: 100%;
+  max-width: 90vmin;
 }

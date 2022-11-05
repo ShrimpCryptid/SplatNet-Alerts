@@ -136,6 +136,7 @@ const FilterView: FunctionComponent<Props> = ({filter,
 		abilityElements = filter.gearAbilities.map((item, index) => {
 			return (
 				<Image
+          key={index}
 					className={styles.abilityIcon}
 					src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
 					width={ABILITY_ICON_WIDTH}

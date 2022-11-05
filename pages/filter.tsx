@@ -3,6 +3,7 @@
  */
 
 import Head from "next/head";
+import React from "react";
 import { useState, useEffect, SetStateAction } from "react";
 import { FunctionComponent } from "react";
 import FilterView from "../components/filter-view";
@@ -72,6 +73,7 @@ function hasSelection(selected: Map<string, boolean>): boolean {
 
 type FilterProps = {
 	filter?: Filter;
+  uuid?: string;
 };
 
 export default function FilterPage({filter}: FilterProps) {
@@ -80,11 +82,6 @@ export default function FilterPage({filter}: FilterProps) {
   let initCanSaveFilter;
 
   // Load current filter properties
-  // Note: converting back and forth from the filter's internal format is a bit
-  // of a pain, but does allow for the page to have no values selected when
-  // first loaded. Some of these functions might need to be moved to the filter
-  // class if they're frequently used.
-
   if (!filter) {
     // Making a new filter from scratch, so use defaults for abilities, etc.
     // We use the GEAR_ABILITIES, etc. constants as keys in the map.
@@ -150,53 +147,90 @@ export default function FilterPage({filter}: FilterProps) {
     // Note that no filter cleanup/validation happens here.
   }
 
+  // Resize the group of selectors so they are either a row or column based on
+  // the window width.
+  const handleResize = () => {
+    const selectorGroup = document.querySelector("." + styles.selectorGroup);
+    if (selectorGroup) {
+      // Check the width of all the contained items. If they're too large,
+      // change the layout to a column.
+      let minDimension = Math.min(window.innerHeight, window.innerWidth);
+      let rowWidth = (3 * minDimension) * .3 + 80;
+      if (rowWidth < window.innerWidth) {  // row
+        selectorGroup.classList.remove(styles.directionColumn);
+        selectorGroup.classList.add(styles.directionRow);
+      } else {  // column
+        selectorGroup.classList.remove(styles.directionRow);
+        selectorGroup.classList.add(styles.directionColumn);
+      }
+    }
+  }
+
+  // Add as a listener for resizing
+  React.useEffect(() => {
+    handleResize();  // run once on page load.
+    window.addEventListener("resize", handleResize, false);
+  });
+  
+
 	return (
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
       <p>Select the gear properties you want to be alerted for.</p>
-			<Selector
-        title={"Gear Types"}
-        category={GEAR_PROPERTY.TYPE}
-				items={Array.from(selectedTypes.keys())}
-				selected={selectedTypes}
-        itemImages={typeIcons}
-				wildcard={true}
-				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(GEAR_PROPERTY.TYPE, newSelected);
-				}}
-			/>
-			<Selector
-        title={"Gear Brands"}
-        category={GEAR_PROPERTY.BRAND}
-				items={Array.from(selectedBrands.keys())}
-				selected={selectedBrands}
-				wildcard={true}
-        itemImages={brandIcons}
-				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(GEAR_PROPERTY.BRAND, newSelected);
-				}}
-			/>
-			<Selector
-        title={"Gear Abilities"}
-        category={GEAR_PROPERTY.ABILITY}
-				items={Array.from(selectedAbilities.keys())}
-				selected={selectedAbilities}
-				wildcard={true}
-                itemImages={abilityIcons}
-				onChanged={(newSelected: Map<string, boolean>) => {
-          updateFilter(GEAR_PROPERTY.ABILITY, newSelected);
-				}}
-			/>
-      <FilterView
-        filter={currFilter}
-        brandsSelected={hasSelection(selectedBrands)}
-        abilitiesSelected={hasSelection(selectedAbilities)}
-        typesSelected={hasSelection(selectedTypes)}
-      />
+      <div className={styles.selectorGroup}>
+        <div className={styles.selectorContainer}>
+          <Selector
+            title={"Types"}
+            category={GEAR_PROPERTY.TYPE}
+            items={Array.from(selectedTypes.keys())}
+            selected={selectedTypes}
+            itemImages={typeIcons}
+            wildcard={true}
+            onChanged={(newSelected: Map<string, boolean>) => {
+              updateFilter(GEAR_PROPERTY.TYPE, newSelected);
+            }}
+          />
+        </div>
+        <div className={styles.selectorContainer}>
+          <Selector
+            title={"Brands"}
+            category={GEAR_PROPERTY.BRAND}
+            items={Array.from(selectedBrands.keys())}
+            selected={selectedBrands}
+            wildcard={true}
+            itemImages={brandIcons}
+            onChanged={(newSelected: Map<string, boolean>) => {
+              updateFilter(GEAR_PROPERTY.BRAND, newSelected);
+            }}
+          />
+        </div>
+        <div className={styles.selectorContainer}>
+          <Selector
+            title={"Abilities"}
+            category={GEAR_PROPERTY.ABILITY}
+            items={Array.from(selectedAbilities.keys())}
+            selected={selectedAbilities}
+            wildcard={true}
+                    itemImages={abilityIcons}
+            onChanged={(newSelected: Map<string, boolean>) => {
+              updateFilter(GEAR_PROPERTY.ABILITY, newSelected);
+            }}
+          />
+        </div>
+      </div>
+      <div className={styles.filterViewContainer}>
+        <FilterView
+          filter={currFilter}
+          brandsSelected={hasSelection(selectedBrands)}
+          abilitiesSelected={hasSelection(selectedAbilities)}
+          typesSelected={hasSelection(selectedTypes)}
+        />
+      </div>
       <button onClick={onClickSave} disabled={!canSaveFilter}>
         Save
       </button>
+      <button>Cancel</button>
 		</div>
 	);
 }

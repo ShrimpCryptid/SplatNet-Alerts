@@ -12,15 +12,16 @@ import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 
-const ABILITY_ICON_WIDTH = 45;
-const BRAND_ICON_LIST_WIDTH = 45;
+const ABILITY_ICON_WIDTH = 49;
+const BRAND_ICON_LIST_WIDTH = 49;
 const BRAND_ICON_WIDTH = 40;
 const GEAR_TYPE_WIDTH = 150;
 
 type Props = {
 	filter: Filter;
 	filterID?: number;
-	onClick?: MouseEventHandler;
+	onClickEdit?: MouseEventHandler;
+  onClickDelete?: MouseEventHandler;
 
 	// Whether to show an alternative X symbol for brands, abilities, and types
 	// when they are unselected. All true by default.
@@ -32,7 +33,8 @@ type Props = {
 const FilterView: FunctionComponent<Props> = ({
 	filter,
 	filterID,
-	onClick,
+	onClickEdit,
+  onClickDelete,
 	brandsSelected = true,
 	abilitiesSelected = true,
 	typesSelected = true,
@@ -158,7 +160,8 @@ const FilterView: FunctionComponent<Props> = ({
 	return (
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
-				{onClick ? <button onClick={onClick}>Edit</button> : <></>}
+				{onClickEdit ? <button onClick={onClickEdit}>Edit</button> : <></>}
+        {onClickDelete ? <button onClick={onClickDelete}>Delete</button> : <></>}
 				<Image
 					className={styles.gearIcon}
 					src={iconURL}

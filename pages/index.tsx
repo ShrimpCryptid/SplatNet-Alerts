@@ -3,7 +3,7 @@ import Link from "next/link";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_USER_CODE } from "../constants";
+import { API_FILTER_JSON, API_USER_CODE } from "../constants";
 import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
 import Router from "next/router";
@@ -33,11 +33,11 @@ export default function Home({
 	setUserCode,
 	setEditingFilter,
 }: DefaultPageProps) {
-	// TODO: Some sort of loading menu for the default state
-	let [filterViews, setFilterViews] = useState(<></>);
+  let [filterList, setFilterList] = useState<Filter[]>([]);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
 	// setEditingFilter(null);  // clear the filter we are editing.
 
+  // Click and edit a filter.
 	const onClickFilter = (filter: Filter) => {
 		// Switch page contexts, save the editing filter to the state.
 		console.log(filter);
@@ -51,61 +51,35 @@ export default function Home({
 		}
 	});
 
+  // Click and remove a filter.
+  const onClickDeleteFilter = (filterIndex: number) => {
+    async function deleteFilter(filterIndex: number) {
+      let filter = filterList[filterIndex];
+      let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
+      url += `&${API_FILTER_JSON}=${filter.serialize()}`
+      let result = await fetch(url);
+      if (result.status == 200) {
+        // Remove filter from the list locally too
+        let newFilterList = [...filterList];  // shallow copy
+        newFilterList.splice(filterIndex, 1);
+        setFilterList(newFilterList);
+      } else {
+        // TODO: Error message
+      }
+    }
+    deleteFilter(filterIndex);
+  }
+
 	// Retrieve the user's filters from the database.
 	useEffect(() => {
 		async function updateFilterviews() {
 			if (usercode) {
 				let filterList = await getUserFilters(usercode);
-				setFilterViews(
-					<>
-						{filterList.map((filter, index) => {
-							return (
-								<FilterView
-									filter={filter}
-									key={index}
-									onClick={() => onClickFilter(filter)}
-								/>
-							);
-						})}
-					</>
-				);
-			} else {
-				// set Filter Views to empty or a default view.
-				setFilterViews(<></>);
+        setFilterList(filterList);
 			}
 		} // end updateFilterViews()
 		updateFilterviews();
 	}, []);
-
-	let demo_filter1 = new Filter(
-		"Annaki Flannel Hoodie",
-		1,
-		[],
-		["Annaki"],
-		["Ink Saver (Sub)", "Swim Speed Up"]
-	);
-	let demo_filter2 = new Filter(
-		"",
-		0,
-		["ClothingGear"],
-		["Barazushi", "Rockenberg"],
-		[
-			"Thermal Ink",
-			"Ninja Squid",
-			"Respawn Punisher",
-			"Ink Saver (Sub)",
-			"Ink Saver (Main)",
-			"Ink Recovery Up",
-			"Swim Speed Up",
-			"Run Speed Up",
-			"Special Power Up",
-			"Special Charge Up",
-			"Special Saver",
-			"Quick Respawn",
-			"Intensify Action",
-		]
-	);
-	let demo_filter3 = new Filter("", 2, ["HeadGear", "ShoesGear"], [], []);
 
 	return (
 		<div className={styles.main}>
@@ -117,7 +91,18 @@ export default function Home({
 				</div>
 			</div>
 			<h2>Your Filters</h2>
-			{filterViews}
+			<>
+        {filterList.map((filter, index) => {
+          return (
+            <FilterView
+              onClickEdit={() => onClickFilter}
+              onClickDelete={() => onClickDeleteFilter(index)}
+              filter={filter}
+              key={index}
+            />
+          );
+        })}
+      </>
 			<Link href="filter">
 				<button>New Filter</button>
 			</Link>

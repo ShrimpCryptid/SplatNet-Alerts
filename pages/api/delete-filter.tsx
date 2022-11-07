@@ -5,16 +5,18 @@ import {
 	getUserIDFromCode,
 	tryAddFilter,
 	subscribeUserToFilter,
+  getMatchingFilterID,
+  unsubscribeUserFromFilter,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
 /**
- * Saves a new user-created filter.
+ * Removes a filter from the user's list.
  *
  * @param req http request. Requires the following parameters, as defined in
  *  `/constants`:
  *  - `API_USER_CODE` string
- *  - `API_FILTER_JSON` string: serialized JSON data for new filter.
+ *  - `API_FILTER_JSON` string: serialized JSON data for the filter to be removed.
  *
  * @return A response with one of the following response codes:
  *  - 200 if filter was successfully updated.
@@ -53,13 +55,12 @@ export default async function handler(
       return res.end();
 		}
 
-		// Find or create matching filter and subscribe user to it.
+		// Find the matching filter and unsubscribe the user from it.
 		let filter = Filter.deserialize(req.query[API_FILTER_JSON]);
-		let filterID = await tryAddFilter(client, filter);
-		await subscribeUserToFilter(client, userID, filterID);
+		let filterID = await getMatchingFilterID(client, filter);
+    await unsubscribeUserFromFilter(client, userID, filterID);
 
-		res.status(200).json("{}"); // ok
-		return res.end();
+		return res.status(200).end(); // ok
 	} catch (err) {
 		return res.status(500).end(); // internal server error
 	}

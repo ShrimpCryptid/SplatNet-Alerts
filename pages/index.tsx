@@ -13,63 +13,69 @@ import Router from "next/router";
  * @param userCode the unique string identifier for this user.
  */
 async function getUserFilters(userCode: string): Promise<Filter[]> {
-  // TODO: Use SWR fetcher?
-  let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
-  let response = await fetch(url);
-  if (response.status == 200) {  // ok
-    let jsonList = await response.json();
-    let filterList = []
-    for (let json of jsonList) {
-      filterList.push(Filter.deserializeObject(json));
-    }
-    return filterList;
-  }
-  return [];
-};
+	// TODO: Use SWR fetcher?
+	let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
+	let response = await fetch(url);
+	if (response.status == 200) {
+		// ok
+		let jsonList = await response.json();
+		let filterList = [];
+		for (let json of jsonList) {
+			filterList.push(Filter.deserializeObject(json));
+		}
+		return filterList;
+	}
+	return [];
+}
 
-export default function Home({usercode, setUserCode, setEditingFilter}: DefaultPageProps) {
-  // TODO: Some sort of loading menu for the default state
-  let [filterViews, setFilterViews] = useState(<></>);
-  let [pageSwitchReady, setPageSwitchReady] = useState(false);
-  // setEditingFilter(null);  // clear the filter we are editing.
+export default function Home({
+	usercode,
+	setUserCode,
+	setEditingFilter,
+}: DefaultPageProps) {
+	// TODO: Some sort of loading menu for the default state
+	let [filterViews, setFilterViews] = useState(<></>);
+	let [pageSwitchReady, setPageSwitchReady] = useState(false);
+	// setEditingFilter(null);  // clear the filter we are editing.
 
-  const onClickFilter = (filter: Filter) => {
-    // Switch page contexts, save the editing filter to the state.
-    console.log(filter);
-    setEditingFilter(filter);
-    setPageSwitchReady(true);
-  }
+	const onClickFilter = (filter: Filter) => {
+		// Switch page contexts, save the editing filter to the state.
+		console.log(filter);
+		setEditingFilter(filter);
+		setPageSwitchReady(true);
+	};
 
-  useEffect(() => {
-    if (pageSwitchReady) {
-      Router.push("/filter");
-    }
-  })
+	useEffect(() => {
+		if (pageSwitchReady) {
+			Router.push("/filter");
+		}
+	});
 
-  // Retrieve the user's filters from the database.
-  useEffect(() => {
-    async function updateFilterviews() {
-      if (usercode) { 
-        let filterList = await getUserFilters(usercode);
-        setFilterViews(
-        <>
-          {filterList.map((filter, index) => {
-              return (
-              <FilterView
-                filter={filter}
-                key={index}
-                onClick={() => onClickFilter(filter)}
-              />);})
-          }
-        </>
-        );
-      } else {
-        // set Filter Views to empty or a default view.
-        setFilterViews(<></>);
-      }
-    }  // end updateFilterViews()
-    updateFilterviews();
-  }, []);
+	// Retrieve the user's filters from the database.
+	useEffect(() => {
+		async function updateFilterviews() {
+			if (usercode) {
+				let filterList = await getUserFilters(usercode);
+				setFilterViews(
+					<>
+						{filterList.map((filter, index) => {
+							return (
+								<FilterView
+									filter={filter}
+									key={index}
+									onClick={() => onClickFilter(filter)}
+								/>
+							);
+						})}
+					</>
+				);
+			} else {
+				// set Filter Views to empty or a default view.
+				setFilterViews(<></>);
+			}
+		} // end updateFilterViews()
+		updateFilterviews();
+	}, []);
 
 	let demo_filter1 = new Filter(
 		"Annaki Flannel Hoodie",
@@ -122,14 +128,15 @@ export default function Home({usercode, setUserCode, setEditingFilter}: DefaultP
 				You currently have notifications <b>ON/OFF</b>.
 			</p>
 			<p>
-				SSA sends push notifications via your browser. You can turn off notifications at any time.
+				SSA sends push notifications via your browser. You can turn off
+				notifications at any time.
 			</p>
 			<button>Turn off notifications</button>
 			<h3>User ID</h3>
 			<p>This is your unique user ID. Save and copy this somewhere secure!</p>
 			<p>
-				You can use it to make changes to your notifications if you clear your cookies or use
-				another browser.
+				You can use it to make changes to your notifications if you clear your
+				cookies or use another browser.
 			</p>
 			<p>
 				<b>Your unique identifier is:</b>
@@ -138,7 +145,9 @@ export default function Home({usercode, setUserCode, setEditingFilter}: DefaultP
 			<button>📄</button>
 
 			<h3>Change User</h3>
-			<p>Paste in your user ID to sync your notification settings across devices.</p>
+			<p>
+				Paste in your user ID to sync your notification settings across devices.
+			</p>
 			<textarea></textarea>
 			<button>Login</button>
 		</div>

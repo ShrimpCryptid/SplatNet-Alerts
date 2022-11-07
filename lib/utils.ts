@@ -32,9 +32,11 @@ export class NoSuchFilterError extends Error {
  * Gets a matching value for any key from a map with a default if the value is
  * undefined.
  */
-export function mapGetWithDefault<T>(map: Map<string, T>,
-																		 key: string,
-																		 defaultValue: T): T {
+export function mapGetWithDefault<T>(
+	map: Map<string, T>,
+	key: string,
+	defaultValue: T
+): T {
 	let value = map.get(key);
 	if (value) {
 		return value;

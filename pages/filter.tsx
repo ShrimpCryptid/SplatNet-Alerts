@@ -4,10 +4,19 @@ import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
 import React from "react";
-import { useState, useEffect, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import FilterView from "../components/filter-view";
 import Selector from "../components/selector";
-import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, GEAR_PROPERTY, API_USER_CODE, API_FILTER_JSON, API_PREVIOUS_FILTER_JSON } from "../constants";
+import {
+	FE_WILDCARD,
+	GEAR_ABILITIES,
+	GEAR_BRANDS,
+	GEAR_TYPES,
+	GEAR_PROPERTY,
+	API_USER_CODE,
+	API_FILTER_JSON,
+	API_PREVIOUS_FILTER_JSON,
+} from "../constants";
 import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
@@ -15,7 +24,6 @@ import { brandIcons } from "../public/icons/brands";
 import { typeIcons } from "../public/icons/gear-type";
 import styles from "../styles/filter.module.css";
 import { DefaultPageProps } from "./_app";
-
 
 const MAKE_USER_ATTEMPTS = 3;
 
@@ -33,13 +41,18 @@ function makeSelectedMap(allValues: string[]): Map<string, boolean> {
 	return new Map(boolArr);
 }
 
-function selectedListToMap(allValues: string[], selectedValues: string[]): Map<string, boolean> {
+function selectedListToMap(
+	allValues: string[],
+	selectedValues: string[]
+): Map<string, boolean> {
 	let boolArr: [string, boolean][] = allValues.map((value) => {
 		return [value, selectedValues.includes(value)];
 	});
 
 	// Wildcard is set to true if selected values is empty
-	let wildcardArr: [string, boolean][] = [[FE_WILDCARD, selectedValues.length == 0]];
+	let wildcardArr: [string, boolean][] = [
+		[FE_WILDCARD, selectedValues.length == 0],
+	];
 	boolArr = wildcardArr.concat(boolArr);
 
 	return new Map(boolArr);
@@ -75,27 +88,37 @@ function hasSelection(selected: Map<string, boolean>): boolean {
 	return false;
 }
 
-async function trySaveFilter(userCode: string, filter: Filter): Promise<number> {
-  let url = `/api/add-filter`;
-  url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
-  let response = await fetch(url);
-  return response.status;
+async function trySaveFilter(
+	userCode: string,
+	filter: Filter
+): Promise<number> {
+	let url = `/api/add-filter`;
+	url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
+	let response = await fetch(url);
+	return response.status;
 }
 
-async function tryUpdateFilter(userCode: string, newFilter: Filter, oldFilter: Filter): Promise<number> {
-  let url = `/api/update-filter?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${newFilter.serialize()}&${API_PREVIOUS_FILTER_JSON}=${oldFilter.serialize()}`;
-  let response = await fetch(url);
-  return response.status;
+async function tryUpdateFilter(
+	userCode: string,
+	newFilter: Filter,
+	oldFilter: Filter
+): Promise<number> {
+	let url = `/api/update-filter?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${newFilter.serialize()}&${API_PREVIOUS_FILTER_JSON}=${oldFilter.serialize()}`;
+	let response = await fetch(url);
+	return response.status;
 }
 
-
-export default function FilterPage({ usercode, setUserCode, editingFilter }: DefaultPageProps) {
+export default function FilterPage({
+	usercode,
+	setUserCode,
+	editingFilter,
+}: DefaultPageProps) {
 	// TODO: Handle editing filters
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
-  let initFilter = editingFilter || new Filter();
+	let initFilter = editingFilter || new Filter();
 
-  console.log(editingFilter);
+	console.log(editingFilter);
 
 	// Load current filter properties
 	if (!editingFilter) {
@@ -107,7 +130,10 @@ export default function FilterPage({ usercode, setUserCode, editingFilter }: Def
 		initCanSaveFilter = false;
 	} else {
 		// Have existing filter, populate values in page state.
-		initAbilities = selectedListToMap(GEAR_ABILITIES, editingFilter.gearAbilities);
+		initAbilities = selectedListToMap(
+			GEAR_ABILITIES,
+			editingFilter.gearAbilities
+		);
 		initBrands = selectedListToMap(GEAR_BRANDS, editingFilter.gearBrands);
 		initTypes = selectedListToMap(GEAR_TYPES, editingFilter.gearTypes);
 		initCanSaveFilter = true;
@@ -115,7 +141,9 @@ export default function FilterPage({ usercode, setUserCode, editingFilter }: Def
 
 	// Initialize page states, using existing filter values if present.
 	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
+	const [selectedRarity, setSelectedRarity] = useState(
+		initFilter.minimumRarity
+	);
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
@@ -149,12 +177,12 @@ export default function FilterPage({ usercode, setUserCode, editingFilter }: Def
 				newTypes = updatedMap;
 			}
 		} else if (updatedName && category == GEAR_PROPERTY.NAME) {
-      newGearName = updatedName;
-      setSelectedGearName(updatedName);
-    } else if (updatedRarity && category == GEAR_PROPERTY.RARITY) {
-      newRarity = updatedRarity;
-      setSelectedRarity(updatedRarity);
-    }
+			newGearName = updatedName;
+			setSelectedGearName(updatedName);
+		} else if (updatedRarity && category == GEAR_PROPERTY.RARITY) {
+			newRarity = updatedRarity;
+			setSelectedRarity(updatedRarity);
+		}
 		let newFilter = new Filter(
 			newGearName,
 			newRarity,
@@ -166,7 +194,9 @@ export default function FilterPage({ usercode, setUserCode, editingFilter }: Def
 
 		// Update whether filter can be saved
 		setCanSaveFilter(
-			hasSelection(newTypes) && hasSelection(newBrands) && hasSelection(newAbilities)
+			hasSelection(newTypes) &&
+				hasSelection(newBrands) &&
+				hasSelection(newAbilities)
 		);
 	}; // updateFilter
 
@@ -174,43 +204,51 @@ export default function FilterPage({ usercode, setUserCode, editingFilter }: Def
 		// Try saving the filter to the database.
 		// Note that no filter cleanup/validation happens here.
 
-    async function saveFilter() {
-      // Generate a user code
-      let tempUserCode = usercode;
-      if (!usercode) {
-        // Try making a new user. If it doesn't work, display an error message.
-        for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
-          let response = await fetch(`/api/new-user`);
-          if (response.status == 200) {
-            let tempUserCode = response.json();
-            useEffect(() => {setUserCode(tempUserCode)});  // store new code
-            break;
-          }
-        }
-      }
-      
-      if (!tempUserCode) {
-        // TODO: Display an error message
-        return;
-      } else {
-        let responseCode = 0;
-        if (editingFilter) {  // we are editing an existing filter, must update
-          responseCode = await tryUpdateFilter(tempUserCode, currFilter, editingFilter);
-        } else {  // we are making a new filter
-          responseCode = await trySaveFilter(tempUserCode, currFilter);
-        }
-        if (responseCode == 200) {
-          // Successfully saved; return to main page
-          Router.push('/')
-        } else {
-          // TODO: Display an error message.
-          console.log("Response code: " + responseCode)
-          console.error("Could not complete request.")
-          return;
-        }
-      }
-    }
-    saveFilter();
+		async function saveFilter() {
+			// Generate a user code
+			let tempUserCode = usercode;
+			if (!usercode) {
+				// Try making a new user. If it doesn't work, display an error message.
+				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
+					let response = await fetch(`/api/new-user`);
+					if (response.status == 200) {
+						let tempUserCode = response.json();
+						useEffect(() => {
+							setUserCode(tempUserCode);
+						}); // store new code
+						break;
+					}
+				}
+			}
+
+			if (!tempUserCode) {
+				// TODO: Display an error message
+				return;
+			} else {
+				let responseCode = 0;
+				if (editingFilter) {
+					// we are editing an existing filter, must update
+					responseCode = await tryUpdateFilter(
+						tempUserCode,
+						currFilter,
+						editingFilter
+					);
+				} else {
+					// we are making a new filter
+					responseCode = await trySaveFilter(tempUserCode, currFilter);
+				}
+				if (responseCode == 200) {
+					// Successfully saved; return to main page
+					Router.push("/");
+				} else {
+					// TODO: Display an error message.
+					console.log("Response code: " + responseCode);
+					console.error("Could not complete request.");
+					return;
+				}
+			}
+		}
+		saveFilter();
 	};
 
 	// Resize the group of selectors so they are either a row or column based on

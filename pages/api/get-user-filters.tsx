@@ -20,10 +20,16 @@ import Filter from "../../lib/filter";
  *  - 404 if no matching user was found.
  *  - 500 if any other errors encountered.
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+	req: NextApiRequest,
+	res: NextApiResponse
+) {
 	// Validate input
-	if (!(req.query[API_USER_CODE] && typeof req.query[API_USER_CODE] === "string")) {
-		return res.status(400).json({ err: "Missing one or more required arguments." });
+	if (
+		!(req.query[API_USER_CODE] && typeof req.query[API_USER_CODE] === "string")
+	) {
+		res.status(400).json({ err: "Missing one or more required arguments." });
+		return res.end();
 	}
 
 	try {
@@ -35,18 +41,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			// no matching user
 			return res
 				.status(404)
-				.json({ err: `Could not find user with code '${req.query[API_USER_CODE]}'.` });
+				.json({
+					err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
+				});
 		}
 
 		// Get list of filters owned by user
 		let filters = await getUserSubscriptions(client, userID);
 
-		res.status(200);
-		res.json(filters);
-		res.end();
+		res.status(200).json(filters);
+		return res.end();
 	} catch (err) {
-    console.log(err);
-		res.status(500);
-		res.end(); // internal server error
+		console.log(err);
+		return res.status(500).end(); // internal server error
 	}
 }

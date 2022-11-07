@@ -9,7 +9,7 @@ import {
 import { IllegalArgumentError } from "./utils";
 
 /**
- * Data class representing a single filter for gear properties. 
+ * Data class representing a single filter for gear properties.
  */
 export default class Filter {
 	gearName: string;
@@ -20,15 +20,15 @@ export default class Filter {
 
 	/**
 	 * @param {string} gearName string name of gear. If empty, any gear may match.
-   *    If not empty, the minimum rarity and gear brands are overriden to match
-   *    the selected gear item.
+	 *    If not empty, the minimum rarity and gear brands are overriden to match
+	 *    the selected gear item.
 	 * @param {string[]} gearTypes string names of gear types (Clothing, Shoes,
-   *    Headgear). If empty, any gear may match.
+	 *    Headgear). If empty, any gear may match.
 	 * @param {string[]} gearBrands string names of accepted brands. If empty, any
-   *    brand is accepted.
+	 *    brand is accepted.
 	 * @param {int} minimumRarity minimum required rarity, as int (1, 2, 3).
 	 * @param {string[]} gearAbilities string names of accepted abilities. If
-   *    empty, any ability may match.
+	 *    empty, any ability may match.
 	 */
 	constructor(
 		gearName: string = "",
@@ -43,12 +43,16 @@ export default class Filter {
 		}
 		for (var brand of gearBrands) {
 			if (!GEAR_BRANDS.includes(brand)) {
-				throw new IllegalArgumentError(`Gear brand '${brand}' is not recognized.`);
+				throw new IllegalArgumentError(
+					`Gear brand '${brand}' is not recognized.`
+				);
 			}
 		}
 		for (var type of gearTypes) {
 			if (!GEAR_TYPES.includes(type)) {
-				throw new IllegalArgumentError(`Gear type '${type}' is not recognized.`);
+				throw new IllegalArgumentError(
+					`Gear type '${type}' is not recognized.`
+				);
 			}
 		}
 		if (minimumRarity < GEAR_RARITY_MIN || minimumRarity > GEAR_RARITY_MAX) {
@@ -58,7 +62,9 @@ export default class Filter {
 		}
 		for (var ability of gearAbilities) {
 			if (!GEAR_ABILITIES.includes(ability)) {
-				throw new IllegalArgumentError(`Gear ability '${ability}' is not recognized.`);
+				throw new IllegalArgumentError(
+					`Gear ability '${ability}' is not recognized.`
+				);
 			}
 		}
 
@@ -69,22 +75,22 @@ export default class Filter {
 		this.gearAbilities = gearAbilities;
 	}
 
-  public serialize(): string {
-    return JSON.stringify(this);
-  }
+	public serialize(): string {
+		return JSON.stringify(this);
+	}
 
-  public static deserialize(jsonString: string): Filter {
-    let jsonObject = JSON.parse(jsonString);
-    return Filter.deserializeObject(jsonObject);
-  }
+	public static deserialize(jsonString: string): Filter {
+		let jsonObject = JSON.parse(jsonString);
+		return Filter.deserializeObject(jsonObject);
+	}
 
-  public static deserializeObject(jsonObject: any): Filter {
-    return new Filter(
-      jsonObject.gearName,
-      jsonObject.minimumRarity,
-      jsonObject.gearTypes,
-      jsonObject.gearBrands,
-      jsonObject.gearAbilities
-    );
-  }
+	public static deserializeObject(jsonObject: any): Filter {
+		return new Filter(
+			jsonObject.gearName,
+			jsonObject.minimumRarity,
+			jsonObject.gearTypes,
+			jsonObject.gearBrands,
+			jsonObject.gearAbilities
+		);
+	}
 }

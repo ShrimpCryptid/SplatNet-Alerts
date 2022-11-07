@@ -1,12 +1,9 @@
-import { Client, Pool, PoolClient, Query, QueryResult } from "pg";
+import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear_loader";
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from "uuid";
 import {
-	GEAR_NAMES,
 	GEAR_BRANDS,
 	GEAR_TYPES,
-	GEAR_RARITY_MIN,
-	GEAR_RARITY_MAX,
 	GEAR_ABILITIES,
 	DB_GEAR_NAME,
 	DB_GEAR_RARITY,
@@ -20,12 +17,17 @@ import {
 	DB_TABLE_USERS,
 	DB_TABLE_USERS_TO_FILTERS,
 	DB_USER_ID,
-  DB_USER_CODE,
-  DB_LAST_MODIFIED,
-  DB_SERVICE_WORKER_URL,
+	DB_USER_CODE,
+	DB_LAST_MODIFIED,
+	DB_SERVICE_WORKER_URL,
 } from "../constants";
 import Filter from "./filter";
-import { NotYetImplementedError, NoSuchUserError, NoSuchFilterError, mapGetWithDefault } from "./utils";
+import {
+	NotYetImplementedError,
+	NoSuchUserError,
+	NoSuchFilterError,
+	mapGetWithDefault,
+} from "./utils";
 
 // ==============
 // HELPER METHODS
@@ -49,14 +51,17 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
 	return false;
 }
 
-async function queryAndLog(client: Pool | PoolClient, query: string): Promise<void | QueryResult> {
+async function queryAndLog(
+	client: Pool | PoolClient,
+	query: string
+): Promise<void | QueryResult> {
 	try {
 		const result = await client.query(query);
 		return result;
 	} catch (err) {
-    console.log("ENCOUNTERED ERROR:")
+		console.log("ENCOUNTERED ERROR:");
 		console.log(query);
-    console.log(err);
+		console.log(err);
 	}
 	return;
 }
@@ -171,7 +176,8 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 
 	// Generate filter table
 	// Auto-generates boolean columns for gear types, abilities, and brands.
-	let joinedFilterColumnNames = GEAR_TYPES.concat(GEAR_ABILITIES).concat(GEAR_BRANDS);
+	let joinedFilterColumnNames =
+		GEAR_TYPES.concat(GEAR_ABILITIES).concat(GEAR_BRANDS);
 	for (let i = 0; i < joinedFilterColumnNames.length; i++) {
 		joinedFilterColumnNames[i] = formatCol(joinedFilterColumnNames[i]);
 	}
@@ -199,7 +205,10 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-export async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): Promise<number> {
+export async function getMatchingFilterID(
+	client: PoolClient | Pool,
+	filter: Filter
+): Promise<number> {
 	// format filter parameters
 	let filterData = filterToTableData(filter);
 	let queryArgs: string[] = [];
@@ -225,20 +234,26 @@ export async function getMatchingFilterID(client: PoolClient | Pool, filter: Fil
 }
 
 /** Returns whether this filter ID exists in the database. */
-async function hasFilterID(client: PoolClient | Pool, filterID: number): Promise<boolean> {
-  let result = await queryAndLog(
-    client,
-    `SELECT FROM ${DB_TABLE_FILTERS} WHERE ${DB_FILTER_ID} = ${filterID}`
-  );
-  // Check where there are any rows in the results.
-  return result ? result.rowCount > 0 : false;
+async function hasFilterID(
+	client: PoolClient | Pool,
+	filterID: number
+): Promise<boolean> {
+	let result = await queryAndLog(
+		client,
+		`SELECT FROM ${DB_TABLE_FILTERS} WHERE ${DB_FILTER_ID} = ${filterID}`
+	);
+	// Check where there are any rows in the results.
+	return result ? result.rowCount > 0 : false;
 }
 
 /**
  * Attempts to add a given filter to the table, if it does not already exist.
  * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-export async function tryAddFilter(client: PoolClient | Pool, filter: Filter): Promise<number> {
+export async function tryAddFilter(
+	client: PoolClient | Pool,
+	filter: Filter
+): Promise<number> {
 	let filterID = await getMatchingFilterID(client, filter);
 
 	if (filterID === -1) {
@@ -247,8 +262,12 @@ export async function tryAddFilter(client: PoolClient | Pool, filter: Filter): P
 		// INSERT INTO [table_name] ([col1], [col2], ...) VALUES ([val1], [val2], ...)
 		// RETURNING clause gets the specified columns of any created/modified rows.
 		let result = await client.query(`
-            INSERT INTO ${DB_TABLE_FILTERS} (${Object.keys(filterData).join(", ")})
-            VALUES (${Object.values(filterData).join(", ")}) RETURNING ${DB_FILTER_ID};`);
+            INSERT INTO ${DB_TABLE_FILTERS} (${Object.keys(filterData).join(
+			", "
+		)})
+            VALUES (${Object.values(filterData).join(
+							", "
+						)}) RETURNING ${DB_FILTER_ID};`);
 		filterID = result.rows[0][DB_FILTER_ID];
 	}
 	// Return new filter ID
@@ -260,7 +279,10 @@ export async function tryAddFilter(client: PoolClient | Pool, filter: Filter): P
  * @param {number} filterID
  * @return {boolean} whether the operation was successfully completed.
  */
-async function removeFilter(client: PoolClient | Pool, filterID: number): Promise<boolean> {
+async function removeFilter(
+	client: PoolClient | Pool,
+	filterID: number
+): Promise<boolean> {
 	// TODO: Only allow deletion if the filter has no paired users?
 	// Note: can use returning to get deleted rows
 	let result = await client.query(`
@@ -273,32 +295,36 @@ async function removeFilter(client: PoolClient | Pool, filterID: number): Promis
 
 export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 	let newUserCode = await generateUserCode(client);
-  // TODO: add creation timestamp
-  let result = await queryAndLog(client, 
-      `INSERT INTO ${DB_TABLE_USERS} (${DB_USER_CODE}) VALUES ('${newUserCode}');`
-    );
-  return newUserCode;
+	// TODO: add creation timestamp
+	let result = await queryAndLog(
+		client,
+		`INSERT INTO ${DB_TABLE_USERS} (${DB_USER_CODE}) VALUES ('${newUserCode}');`
+	);
+	return newUserCode;
 }
 
 async function generateUserCode(client: PoolClient | Pool): Promise<string> {
-  // generate number
-  let userCode = "";
-  // repeat until there is no user with this existing user code.
-  do {
-    userCode = uuidv4();
-  } while (await getUserIDFromCode(client, userCode) !== -1)
-  return userCode;
+	// generate number
+	let userCode = "";
+	// repeat until there is no user with this existing user code.
+	do {
+		userCode = uuidv4();
+	} while ((await getUserIDFromCode(client, userCode)) !== -1);
+	return userCode;
 }
 
 /**
  * INCOMPLETE: Used to update client data (push notifs, etc.)
  */
-async function updateUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
+async function updateUser(
+	client: PoolClient | Pool,
+	userID: number
+): Promise<boolean> {
 	throw new NotYetImplementedError("");
 }
 
 /**
- * 
+ *
  */
 async function removeUser(client: PoolClient | Pool, userID: number) {
 	// Check if user exists
@@ -311,26 +337,35 @@ async function removeUser(client: PoolClient | Pool, userID: number) {
 	throw new NotYetImplementedError("");
 }
 
-async function hasUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
-	let result = await queryAndLog(client, `SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`);
+async function hasUser(
+	client: PoolClient | Pool,
+	userID: number
+): Promise<boolean> {
+	let result = await queryAndLog(
+		client,
+		`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`
+	);
 	return result ? result.rowCount > 0 : false;
 }
 
 /**
  * Returns the user's internal ID from their public-facing, string user ID code.
- * @param userCode 
+ * @param userCode
  * @return the user's internal ID (as an int) if found. Otherwise, returns -1.
  */
-export async function getUserIDFromCode(client: PoolClient | Pool, userCode: string): Promise<number> {
-  let result = await client.query(
-      `SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS}
+export async function getUserIDFromCode(
+	client: PoolClient | Pool,
+	userCode: string
+): Promise<number> {
+	let result = await client.query(
+		`SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS}
       WHERE ${DB_USER_CODE} = '${userCode}'`
-    );
-  if (result.rowCount == 0) {
-    return -1;
-  } else {
-    return result.rows[0][DB_USER_ID];
-  }
+	);
+	if (result.rowCount == 0) {
+		return -1;
+	} else {
+		return result.rows[0][DB_USER_ID];
+	}
 }
 
 async function isUserSubscribedToFilter(
@@ -338,14 +373,17 @@ async function isUserSubscribedToFilter(
 	userID: number,
 	filterID: number
 ): Promise<boolean> {
-	let result = await queryAndLog(client, `
+	let result = await queryAndLog(
+		client,
+		`
         SELECT FROM ${DB_TABLE_USERS_TO_FILTERS}
-        WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`);
+        WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`
+	);
 	if (result) {
-    return result.rowCount > 0;
-  } else {
-    return false;
-  }
+		return result.rowCount > 0;
+	} else {
+		return false;
+	}
 }
 
 /**
@@ -353,17 +391,21 @@ async function isUserSubscribedToFilter(
  * @throws {NoSuchFilterError} if the filter does not exist.
  * @throws {NoSuchUserError} if the user does not exist.
  */
-export async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, filterID: number) {
+export async function subscribeUserToFilter(
+	client: PoolClient | Pool,
+	userID: number,
+	filterID: number
+) {
 	if (!(await hasUser(client, userID))) {
 		throw new NoSuchUserError(userID);
 	}
-  if (!(await hasFilterID(client, filterID))) {
-    throw new NoSuchFilterError(filterID);
-  }
+	if (!(await hasFilterID(client, filterID))) {
+		throw new NoSuchFilterError(filterID);
+	}
 
 	if (!(await isUserSubscribedToFilter(client, userID, filterID))) {
 		await queryAndLog(
-      client, 
+			client,
 			`INSERT INTO ${DB_TABLE_USERS_TO_FILTERS} (${DB_USER_ID}, ${DB_FILTER_ID})
             VALUES (${userID}, ${filterID});`
 		);
@@ -377,49 +419,54 @@ export async function unsubscribeUserFromFilter(
 	client: PoolClient | Pool,
 	userID: number,
 	filterID: number
-    ) {
-  if (await isUserSubscribedToFilter(client, userID, filterID)) {
-    await queryAndLog(client, 
-      `DELETE FROM ${DB_TABLE_USERS_TO_FILTERS}
+) {
+	if (await isUserSubscribedToFilter(client, userID, filterID)) {
+		await queryAndLog(
+			client,
+			`DELETE FROM ${DB_TABLE_USERS_TO_FILTERS}
             WHERE ${DB_USER_ID} = ${userID} AND ${DB_FILTER_ID} = ${filterID};`
-    );
-  }
-  // TODO: Check if filter should be deleted if no other users reference it?
+		);
+	}
+	// TODO: Check if filter should be deleted if no other users reference it?
 }
 
 /**
  * Gets a list of all filters the user is subscribed to.
  * @throws {NoSuchUserError} is the user does not exist.
  */
-export async function getUserSubscriptions(client: PoolClient | Pool,
-                                           userID: number
-    ): Promise<Filter[]> {
+export async function getUserSubscriptions(
+	client: PoolClient | Pool,
+	userID: number
+): Promise<Filter[]> {
 	// TODO: Sort list by edited timestamp
-  if (!(await hasUser(client, userID))) {
-    throw new NoSuchUserError(userID);
-  }
-  // Get all filter IDs the user is subscribed to
-  let results = await queryAndLog(
-    client,
-    // userFilters is a temporary table used to index into the Filters table
-    `WITH userFilters(${DB_FILTER_ID}) AS 
+	if (!(await hasUser(client, userID))) {
+		throw new NoSuchUserError(userID);
+	}
+	// Get all filter IDs the user is subscribed to
+	let results = await queryAndLog(
+		client,
+		// userFilters is a temporary table used to index into the Filters table
+		`WITH userFilters(${DB_FILTER_ID}) AS 
         (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}
         WHERE ${DB_USER_ID} = ${userID})
       SELECT * FROM ${DB_TABLE_FILTERS}, userFilters
       WHERE ${DB_TABLE_FILTERS}.${DB_FILTER_ID} = userFilters.${DB_FILTER_ID}`
-  );
-  // Go through each filterID and retrieve it as a Filter object.
-  if (results) {
-    let filters: Filter[] = [];
-    for (let rowData of results.rows) {
-      filters.push(rowDataToFilter(rowData));
-    }
-    return filters;
-  }
-  return [];
+	);
+	// Go through each filterID and retrieve it as a Filter object.
+	if (results) {
+		let filters: Filter[] = [];
+		for (let rowData of results.rows) {
+			filters.push(rowDataToFilter(rowData));
+		}
+		return filters;
+	}
+	return [];
 }
 
-async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promise<number[]> {
+async function getUserSubscriptionIDs(
+	client: PoolClient,
+	userID: number
+): Promise<number[]> {
 	throw new NotYetImplementedError("");
 	return [];
 }
@@ -428,16 +475,19 @@ async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promi
  * Gets a list of all the IDs of filters who match the current gear item.
  * @param {*} gearData
  */
-async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<number[]> {
+async function getMatchingFilters(
+	client: PoolClient,
+	gear: Gear
+): Promise<number[]> {
 	// TODO: Gear Name input must be sanitized
 	let result = await client.query(
-      `SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
+		`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
         WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
         AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
         AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
         AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
         AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})`
-    );
+	);
 
 	let filterList: number[] = [];
 	for (var i in result.rows) {
@@ -450,14 +500,14 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
 // #endregion
 
 export function getDBClient(): Pool {
-  // TODO: Retrieve values from an environment variable
-  // I love storing passwords in plaintext in my public github repo :]
-  return new Pool({
-    host: "localhost",
-    user: "postgres",
-    password: "2Nu^4nRW7H7$",
-    port: 5433,
-  }); 
+	// TODO: Retrieve values from an environment variable
+	// I love storing passwords in plaintext in my public github repo :]
+	return new Pool({
+		host: "localhost",
+		user: "postgres",
+		password: "2Nu^4nRW7H7$",
+		port: 5433,
+	});
 }
 
 const pool = getDBClient();

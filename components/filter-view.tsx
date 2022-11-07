@@ -66,7 +66,11 @@ const FilterView: FunctionComponent<Props> = ({
 		if (filter.gearTypes.length == 0 || filter.gearTypes.length == 3) {
 			iconURL = GEAR_TYPE_ANY_ICON;
 		} else if (filter.gearTypes.length == 1) {
-			iconURL = mapGetWithDefault(typeIcons, filter.gearTypes[0], GEAR_TYPE_ANY_ICON);
+			iconURL = mapGetWithDefault(
+				typeIcons,
+				filter.gearTypes[0],
+				GEAR_TYPE_ANY_ICON
+			);
 		} else {
 			// 2 types
 			iconURL = mapGetWithDefault(
@@ -154,9 +158,7 @@ const FilterView: FunctionComponent<Props> = ({
 	return (
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
-        { onClick ? (
-          <button onClick={onClick}>Edit</button>
-        ) : <></>}
+				{onClick ? <button onClick={onClick}>Edit</button> : <></>}
 				<Image
 					className={styles.gearIcon}
 					src={iconURL}
@@ -164,7 +166,10 @@ const FilterView: FunctionComponent<Props> = ({
 					height={GEAR_TYPE_WIDTH}
 				/>
 				<div className={styles.rarityMeter}>
-					<RarityMeter minRarity={filter.minimumRarity} maxRarity={filter.minimumRarity} />
+					<RarityMeter
+						minRarity={filter.minimumRarity}
+						maxRarity={filter.minimumRarity}
+					/>
 				</div>
 			</div>
 			<div className={styles.rcontainer}>

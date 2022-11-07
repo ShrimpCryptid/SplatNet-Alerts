@@ -8,6 +8,9 @@ import {
 } from "../constants";
 import { IllegalArgumentError } from "./utils";
 
+/**
+ * Data class representing a single filter for gear properties. 
+ */
 export default class Filter {
 	gearName: string;
 	minimumRarity: number;
@@ -17,10 +20,13 @@ export default class Filter {
 
 	/**
 	 * @param {string} gearName string name of gear. If empty, any gear may match.
-	 * @param {string[]} gearTypes string names of gear types (Clothing, Shoes, Headgear). If empty, any gear may match.
-	 * @param {string[]} gearBrands string names of accepted brands. If empty, any brand is accepted.
+	 * @param {string[]} gearTypes string names of gear types (Clothing, Shoes,
+   *    Headgear). If empty, any gear may match.
+	 * @param {string[]} gearBrands string names of accepted brands. If empty, any
+   *    brand is accepted.
 	 * @param {int} minimumRarity minimum required rarity, as int (1, 2, 3).
-	 * @param {string[]} gearAbilities string names of accepted abilities. If empty, any ability may match.
+	 * @param {string[]} gearAbilities string names of accepted abilities. If
+   *    empty, any ability may match.
 	 */
 	constructor(
 		gearName: string = "",
@@ -60,4 +66,19 @@ export default class Filter {
 		this.minimumRarity = minimumRarity;
 		this.gearAbilities = gearAbilities;
 	}
+
+  public serialize(): string {
+    return JSON.stringify(this);
+  }
+
+  public static deserialize(jsonString: string): Filter {
+    let jsonObject = JSON.parse(jsonString);
+    return new Filter(
+      jsonObject.minimumRarity,
+      jsonObject.gearName,
+      jsonObject.gearTypes,
+      jsonObject.gearBrands,
+      jsonObject.gearAbilities
+    );
+  }
 }

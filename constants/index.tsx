@@ -5,16 +5,28 @@ export const DB_TABLE_USERS_TO_FILTERS = "UsersToFilters";
 export const DB_TABLE_FILTERS = "Filters";
 
 export const DB_FILTER_ID = "filterid";
+/** User's unique internal integer index in the database. */
 export const DB_USER_ID = "userid";
 export const DB_PAIR_ID = "pairid";
+/** User's unique user code. */
+export const DB_USER_CODE = "usercode";
+export const DB_LAST_MODIFIED = "lastmodified";
+export const DB_SERVICE_WORKER_URL = "serviceworkerurl";
 
 export const DB_GEAR_NAME = "name";
-
+export const DB_GEAR_RARITY = "rarity";
 export const DB_GEAR_TYPE_WILDCARD = "typewildcard";
 export const DB_GEAR_BRAND_WILDCARD = "brandwildcard";
 export const DB_GEAR_ABILITY_WILDCARD = "abilitywildcard";
 // The expiration time of the last item this user was notified about.
 export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
+
+export const API_USER_CODE = "usercode";
+export const API_FILTER_JSON = "filter";
+export const API_PREVIOUS_FILTER_JSON = "prev-filter";
+export const API_FILTER_ID = DB_FILTER_ID;
+
+export const API_RESPONSE_FILTER_LIST = "filters";
 
 // TODO: Get complete list of gear from Splatoon Wiki.
 export enum GEAR_PROPERTY {
@@ -49,7 +61,6 @@ export const GEAR_BRANDS = [
 	"Zekko",
 	"Zink",
 ];
-export const GEAR_RARITY = "Rarity";
 export const GEAR_RARITY_MAX = 2;
 export const GEAR_RARITY_MIN = 0;
 
@@ -83,3 +94,4 @@ export const GEAR_ABILITIES = [
 ];
 
 export const FE_WILDCARD = "Any";
+export const FE_COOKIE_USER_ID = DB_USER_ID;

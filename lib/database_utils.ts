@@ -1,4 +1,4 @@
-import { Pool, PoolClient, Query, QueryResult } from "pg";
+import { Client, Pool, PoolClient, Query, QueryResult } from "pg";
 import { Gear } from "./gear_loader";
 import {
 	GEAR_NAMES,
@@ -8,7 +8,7 @@ import {
 	GEAR_RARITY_MAX,
 	GEAR_ABILITIES,
 	DB_GEAR_NAME,
-	GEAR_RARITY,
+	DB_GEAR_RARITY,
 	DB_GEAR_TYPE_WILDCARD,
 	DB_GEAR_ABILITY_WILDCARD,
 	DB_GEAR_BRAND_WILDCARD,
@@ -19,6 +19,9 @@ import {
 	DB_TABLE_USERS,
 	DB_TABLE_USERS_TO_FILTERS,
 	DB_USER_ID,
+  DB_USER_CODE,
+  DB_LAST_MODIFIED,
+  DB_SERVICE_WORKER_URL,
 } from "../constants";
 import Filter from "./filter";
 import { NotYetImplementedError, NoSuchUserError } from "./utils";
@@ -64,7 +67,7 @@ async function queryAndLog(client: Pool | PoolClient, query: string): Promise<vo
 function filterToTableData(filter: Filter): { [id: string]: any } {
 	let data: { [key: string]: any } = {
 		[DB_GEAR_NAME]: `'${filter.gearName}'`,
-		[GEAR_RARITY]: filter.minimumRarity,
+		[DB_GEAR_RARITY]: filter.minimumRarity,
 		[DB_GEAR_TYPE_WILDCARD]: arrayEqual(filter.gearTypes, []),
 		[DB_GEAR_ABILITY_WILDCARD]: arrayEqual(filter.gearAbilities, []),
 		[DB_GEAR_BRAND_WILDCARD]: arrayEqual(filter.gearBrands, []),
@@ -97,7 +100,7 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 	let types: string[] = [];
 	let abilities: string[] = [];
 	let brands: string[] = [];
-	let rarity = rowData[GEAR_RARITY];
+	let rarity = rowData[DB_GEAR_RARITY];
 	let name = rowData[DB_GEAR_NAME];
 
 	// The property names of columns have been formatted-- for example, 'Last-Ditch Effort' becomes
@@ -146,9 +149,10 @@ function setupDatabaseTables(client: Pool | PoolClient) {
 	client.query(
 		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
             ${DB_USER_ID} SERIAL,
-            UserCode varchar(255),
+            ${DB_USER_CODE} varchar(255),
             ${DB_LAST_NOTIFIED_EXPIRATION} varchar(255),
-            ServiceWorkerURL varchar(255),
+            ${DB_LAST_MODIFIED} varchar(255),
+            ${DB_SERVICE_WORKER_URL} varchar(255),
             PRIMARY KEY (${DB_USER_ID})
         );`
 	);
@@ -159,6 +163,7 @@ function setupDatabaseTables(client: Pool | PoolClient) {
         ${DB_PAIR_ID} SERIAL,
         ${DB_USER_ID} int4,
         ${DB_FILTER_ID} int4,
+        ${DB_LAST_MODIFIED} varchar(255),
         PRIMARY KEY (${DB_PAIR_ID})
     );`);
 
@@ -173,7 +178,7 @@ function setupDatabaseTables(client: Pool | PoolClient) {
 	client.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
         ${DB_FILTER_ID} SERIAL,
         ${DB_GEAR_NAME} varchar(255),
-        ${GEAR_RARITY} int2,
+        ${DB_GEAR_RARITY} int2,
         ${DB_GEAR_TYPE_WILDCARD} BOOL,
         ${DB_GEAR_BRAND_WILDCARD} BOOL,
         ${DB_GEAR_ABILITY_WILDCARD} BOOL,
@@ -192,7 +197,7 @@ function setupDatabaseTables(client: Pool | PoolClient) {
  * @param filter filter to search for
  * @returns The Filter ID of the first matching filter, if one exists. Otherwise, returns -1.
  */
-async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): Promise<number> {
+export async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): Promise<number> {
 	// format filter parameters
 	let filterData = filterToTableData(filter);
 	let queryArgs: string[] = [];
@@ -223,7 +228,7 @@ async function getMatchingFilterID(client: PoolClient | Pool, filter: Filter): P
  * Attempts to add a given filter to the table, if it does not already exist.
  * @return {number} Returns the ID of newly created filter, or a matching existing filter.
  */
-async function tryAddFilter(client: PoolClient | Pool, filter: Filter): Promise<number> {
+export async function tryAddFilter(client: PoolClient | Pool, filter: Filter): Promise<number> {
 	let filterID = await getMatchingFilterID(client, filter);
 
 	if (filterID === -1) {
@@ -264,12 +269,15 @@ async function getUserID(client: PoolClient | Pool): Promise<number> {
 	throw new NotYetImplementedError("");
 }
 
+/**
+ * INCOMPLETE: Used to update client data (push notifs, etc.)
+ */
 async function updateUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
 	throw new NotYetImplementedError("");
 }
 
 /**
- *
+ * 
  */
 async function removeUser(client: PoolClient | Pool, userID: number) {
 	// Check if user exists
@@ -285,6 +293,24 @@ async function removeUser(client: PoolClient | Pool, userID: number) {
 async function hasUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
 	let result = await client.query(`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`);
 	return result.rowCount > 0;
+}
+
+/**
+ * Returns the user's internal ID from their public-facing, string user ID code.
+ * @param userCode 
+ * @return the user's internal ID (as an int) if found. Otherwise, returns -1.
+ */
+export async function getUserIDFromCode(client: PoolClient | Pool, userCode: string): Promise<number> {
+  let result = await client.query(`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_CODE} = ${userCode}`);
+  if (result.rowCount == 0) {
+    return -1;
+  } else {
+    return result.rows[0][DB_USER_ID];
+  }
+}
+
+export async function generateUserCode(client: PoolClient | Pool): Promise<string> {
+  throw new NotYetImplementedError("");
 }
 
 async function isUserSubscribedToFilter(
@@ -303,7 +329,7 @@ async function isUserSubscribedToFilter(
  * @throws {NoSuchFilterError} if the filter does not exist.
  * @throws {NoSuchUserError} if the user does not exist.
  */
-async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, filterID: number) {
+export async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, filterID: number) {
 	// TODO: Check that filter exists
 	if (!(await hasUser(client, userID))) {
 		throw new NoSuchUserError(userID);
@@ -321,7 +347,7 @@ async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, 
 /**
  * Unsubscribe user from a filter, if they are currently subscribed to it.
  */
-async function unsubscribeUserFromFilter(
+export async function unsubscribeUserFromFilter(
 	client: PoolClient | Pool,
 	userID: number,
 	filterID: number
@@ -356,7 +382,7 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
 	// TODO: Gear Name input must be sanitized
 
 	let result = await client.query(`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
-    WHERE ${GEAR_RARITY} <= ${gear.rarity}
+    WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
     AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
     AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
     AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
@@ -373,13 +399,16 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
 
 // #endregion
 
-const pool = new Pool({
-	host: "localhost",
-	user: "postgres",
-	password: "2Nu^4nRW7H7$",
-	port: 5433,
-});
+export function getDBClient(): Pool {
+  return new Pool({
+    host: "localhost",
+    user: "postgres",
+    password: "2Nu^4nRW7H7$",
+    port: 5433,
+  }); 
+}
 
+const pool = getDBClient();
 /**
 pool.query('SELECT NOW()', (err, res) => {
     console.log(err, res)

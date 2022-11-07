@@ -12,7 +12,7 @@ export type DefaultPageProps = {
 };
 
 export default function App({ Component, pageProps }: AppProps) {
-	const [usercode, setUserCode] = useState<null | string>("1234");
+	const [usercode, setUserCode] = useState<null | string>(null);
 	const [editingFilter, setEditingFilter] = useState<null | Filter>(null);
 
 	return (
@@ -24,7 +24,6 @@ export default function App({ Component, pageProps }: AppProps) {
 				editingFilter={editingFilter}
 				setEditingFilter={(filter: Filter) => {
 					setEditingFilter(filter);
-					console.log(filter);
 				}}
 			/>
 		</Layout>

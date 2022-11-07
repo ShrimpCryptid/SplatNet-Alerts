@@ -149,6 +149,7 @@ export default function FilterPage({
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
 	const [currFilter, setCurrFilter] = useState(initFilter);
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
+  const [pageSwitchReady, setPageSwitchReady] = useState(false);
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.
@@ -212,10 +213,8 @@ export default function FilterPage({
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
 					let response = await fetch(`/api/new-user`);
 					if (response.status == 200) {
-						let tempUserCode = response.json();
-						useEffect(() => {
-							setUserCode(tempUserCode);
-						}); // store new code
+						let tempUserCode = await response.json();
+            setUserCode(tempUserCode);  // store new code
 						break;
 					}
 				}
@@ -239,7 +238,7 @@ export default function FilterPage({
 				}
 				if (responseCode == 200) {
 					// Successfully saved; return to main page
-					Router.push("/");
+          setPageSwitchReady(true);
 				} else {
 					// TODO: Display an error message.
 					console.log("Response code: " + responseCode);
@@ -250,6 +249,13 @@ export default function FilterPage({
 		}
 		saveFilter();
 	};
+
+  // handle page switch only after page update has happened.
+  useEffect(() => {
+    if (pageSwitchReady) {
+      Router.push("/");
+    }
+  });
 
 	// Resize the group of selectors so they are either a row or column based on
 	// the window width.

@@ -5,12 +5,15 @@ import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
 import { API_USER_CODE } from "../constants";
 import { useEffect, useState } from "react";
+import { DefaultPageProps } from "./_app";
+import Router from "next/router";
 
 /**
  * Retrieves a list of the user's current filters from the database.
  * @param userCode the unique string identifier for this user.
  */
-  async function getUserFilters(userCode: string): Promise<Filter[]> {
+async function getUserFilters(userCode: string): Promise<Filter[]> {
+  // TODO: Use SWR fetcher?
   let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
   let response = await fetch(url);
   if (response.status == 200) {  // ok
@@ -24,25 +27,47 @@ import { useEffect, useState } from "react";
   return [];
 };
 
-export default function Home() {
-  // TODO: Some sort of loading/default state?
+export default function Home({usercode, setUserCode, setEditingFilter}: DefaultPageProps) {
+  // TODO: Some sort of loading menu for the default state
   let [filterViews, setFilterViews] = useState(<></>);
+  let [pageSwitchReady, setPageSwitchReady] = useState(false);
+  // setEditingFilter(null);  // clear the filter we are editing.
+
+  const onClickFilter = (filter: Filter) => {
+    // Switch page contexts, save the editing filter to the state.
+    console.log(filter);
+    setEditingFilter(filter);
+    setPageSwitchReady(true);
+  }
 
   useEffect(() => {
-    async function updateFilterviews() {
-      let filterList = await getUserFilters("1234");
-      console.log(filterList);
-
-      setFilterViews(
-      <>
-        {filterList.map((filter, index) => {
-            return (<FilterView filter={filter} key={index}></FilterView>);
-          })
-        }
-      </>
-      );
-
+    if (pageSwitchReady) {
+      Router.push("/filter");
     }
+  })
+
+  // Retrieve the user's filters from the database.
+  useEffect(() => {
+    async function updateFilterviews() {
+      if (usercode) { 
+        let filterList = await getUserFilters(usercode);
+        setFilterViews(
+        <>
+          {filterList.map((filter, index) => {
+              return (
+              <FilterView
+                filter={filter}
+                key={index}
+                onClick={() => onClickFilter(filter)}
+              />);})
+          }
+        </>
+        );
+      } else {
+        // set Filter Views to empty or a default view.
+        setFilterViews(<></>);
+      }
+    }  // end updateFilterViews()
     updateFilterviews();
   }, []);
 
@@ -109,7 +134,7 @@ export default function Home() {
 			<p>
 				<b>Your unique identifier is:</b>
 			</p>
-			<textarea>uuid-8001-349d-34cd-a398</textarea>
+			<textarea>{usercode}</textarea>
 			<button>📄</button>
 
 			<h3>Change User</h3>

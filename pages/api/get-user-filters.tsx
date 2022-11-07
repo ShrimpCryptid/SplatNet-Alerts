@@ -1,10 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { API_FILTER_JSON, API_USER_CODE } from "../../constants";
+import { API_USER_CODE } from "../../constants";
 import {
 	getDBClient,
 	getUserIDFromCode,
-	tryAddFilter,
-	subscribeUserToFilter,
 	getUserSubscriptions,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";

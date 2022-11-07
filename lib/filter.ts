@@ -20,6 +20,8 @@ export default class Filter {
 
 	/**
 	 * @param {string} gearName string name of gear. If empty, any gear may match.
+   *    If not empty, the minimum rarity and gear brands are overriden to match
+   *    the selected gear item.
 	 * @param {string[]} gearTypes string names of gear types (Clothing, Shoes,
    *    Headgear). If empty, any gear may match.
 	 * @param {string[]} gearBrands string names of accepted brands. If empty, any

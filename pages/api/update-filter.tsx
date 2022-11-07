@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Validate user
     let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
+    console.log(`'${req.query[API_USER_CODE]}'`);
     if (userID == -1) {  // no matching user
       return res.status(404).json({ err: `Could not find user with code '${req.query[API_USER_CODE]}'.`});
     }
@@ -49,9 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       subscribeUserToFilter(client, userID, filterID);
     }  // else, filters are the same and no action is needed
   
-    return res.status(200);  // ok
+    res.status(200);  // ok
+    res.end();
   } catch (err) {
-    return res.status(500);  // internal server error
+    console.log(err);
+    res.status(500);  // internal server error
+    res.end();
   }
 
 }

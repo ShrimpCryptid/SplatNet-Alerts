@@ -1,10 +1,8 @@
-import {FunctionComponent} from 'react';
-
 type LayoutProps = {
     children: JSX.Element
 }
 
-export const DefaultLayout: FunctionComponent<LayoutProps>= ({children}) => {
+export default function Layout({ children }: LayoutProps) {
     return (
         <div className="container">
             {children}

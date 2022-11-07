@@ -1,5 +1,6 @@
 import { Client, Pool, PoolClient, Query, QueryResult } from "pg";
 import { Gear } from "./gear_loader";
+import { v4 as uuidv4 } from 'uuid'; 
 import {
 	GEAR_NAMES,
 	GEAR_BRANDS,
@@ -53,6 +54,7 @@ async function queryAndLog(client: Pool | PoolClient, query: string): Promise<vo
 		const result = await client.query(query);
 		return result;
 	} catch (err) {
+    console.log("ENCOUNTERED ERROR:")
 		console.log(query);
     console.log(err);
 	}
@@ -270,11 +272,22 @@ async function removeFilter(client: PoolClient | Pool, filterID: number): Promis
 }
 
 export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
-	throw new NotYetImplementedError("");
+	let newUserCode = await generateUserCode(client);
+  // TODO: add creation timestamp
+  let result = await queryAndLog(client, 
+      `INSERT INTO ${DB_TABLE_USERS} (${DB_USER_CODE}) VALUES ('${newUserCode}');`
+    );
+  return newUserCode;
 }
 
-async function getUserID(client: PoolClient | Pool): Promise<number> {
-	throw new NotYetImplementedError("");
+async function generateUserCode(client: PoolClient | Pool): Promise<string> {
+  // generate number
+  let userCode = "";
+  // repeat until there is no user with this existing user code.
+  do {
+    userCode = uuidv4();
+  } while (await getUserIDFromCode(client, userCode) !== -1)
+  return userCode;
 }
 
 /**
@@ -309,7 +322,10 @@ async function hasUser(client: PoolClient | Pool, userID: number): Promise<boole
  * @return the user's internal ID (as an int) if found. Otherwise, returns -1.
  */
 export async function getUserIDFromCode(client: PoolClient | Pool, userCode: string): Promise<number> {
-  let result = await client.query(`SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS} WHERE ${DB_USER_CODE} = '${userCode}'`);
+  let result = await client.query(
+      `SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS}
+      WHERE ${DB_USER_CODE} = '${userCode}'`
+    );
   if (result.rowCount == 0) {
     return -1;
   } else {
@@ -317,19 +333,19 @@ export async function getUserIDFromCode(client: PoolClient | Pool, userCode: str
   }
 }
 
-export async function generateUserCode(client: PoolClient | Pool): Promise<string> {
-  throw new NotYetImplementedError("");
-}
-
 async function isUserSubscribedToFilter(
 	client: PoolClient | Pool,
 	userID: number,
 	filterID: number
 ): Promise<boolean> {
-	let result = await client.query(`
+	let result = await queryAndLog(client, `
         SELECT FROM ${DB_TABLE_USERS_TO_FILTERS}
         WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`);
-	return result.rowCount > 0;
+	if (result) {
+    return result.rowCount > 0;
+  } else {
+    return false;
+  }
 }
 
 /**
@@ -361,14 +377,14 @@ export async function unsubscribeUserFromFilter(
 	client: PoolClient | Pool,
 	userID: number,
 	filterID: number
-) {
-	if (await isUserSubscribedToFilter(client, userID, filterID)) {
-		await client.query(
-			`DELETE FROM ${DB_TABLE_USERS_TO_FILTERS}
-            WHERE ${DB_USER_ID} = ${userID} AND ${DB_FILTER_ID} = ${filterID});`
-		);
-		// TODO: Check if filter should be deleted if no other users reference it?
-	}
+    ) {
+  if (await isUserSubscribedToFilter(client, userID, filterID)) {
+    await queryAndLog(client, 
+      `DELETE FROM ${DB_TABLE_USERS_TO_FILTERS}
+            WHERE ${DB_USER_ID} = ${userID} AND ${DB_FILTER_ID} = ${filterID};`
+    );
+  }
+  // TODO: Check if filter should be deleted if no other users reference it?
 }
 
 /**

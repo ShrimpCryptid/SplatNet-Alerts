@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, MouseEventHandler } from "react";
 import Image from "next/image";
 
 import Filter from "../lib/filter";
@@ -20,7 +20,7 @@ const GEAR_TYPE_WIDTH = 150;
 type Props = {
 	filter: Filter;
 	filterID?: number;
-	onClick?: CallableFunction;
+	onClick?: MouseEventHandler;
 
 	// Whether to show an alternative X symbol for brands, abilities, and types
 	// when they are unselected. All true by default.
@@ -152,8 +152,11 @@ const FilterView: FunctionComponent<Props> = ({
 	}
 
 	return (
-		<div className={styles.container} onClick={() => onClick}>
+		<div className={styles.container}>
 			<div className={styles.lcontainer}>
+        { onClick ? (
+          <button onClick={onClick}>Edit</button>
+        ) : <></>}
 				<Image
 					className={styles.gearIcon}
 					src={iconURL}

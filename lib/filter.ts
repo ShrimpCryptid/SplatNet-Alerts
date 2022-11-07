@@ -73,9 +73,13 @@ export default class Filter {
 
   public static deserialize(jsonString: string): Filter {
     let jsonObject = JSON.parse(jsonString);
+    return Filter.deserializeObject(jsonObject);
+  }
+
+  public static deserializeObject(jsonObject: any): Filter {
     return new Filter(
-      jsonObject.minimumRarity,
       jsonObject.gearName,
+      jsonObject.minimumRarity,
       jsonObject.gearTypes,
       jsonObject.gearBrands,
       jsonObject.gearAbilities

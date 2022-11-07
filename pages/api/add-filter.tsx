@@ -36,10 +36,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
     // Find or create matching filter and subscribe user to it.
     let filter = Filter.deserialize(req.query[API_FILTER_JSON]);
-    let filterID = await tryAddFilter(client, filter)
+    let filterID = await tryAddFilter(client, filter);
     await subscribeUserToFilter(client, userID, filterID);
   
-    return res.status(200);  // ok
+    return res.status(200).json("{}");  // ok
   } catch (err) {
     return res.status(500);  // internal server error
   }

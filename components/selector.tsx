@@ -154,6 +154,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 
 					return (
 						<SelectorItem
+              key={index}
 							id={index}
 							category={itemCategory}
 							name={item}

@@ -24,14 +24,14 @@ import {
   DB_SERVICE_WORKER_URL,
 } from "../constants";
 import Filter from "./filter";
-import { NotYetImplementedError, NoSuchUserError } from "./utils";
+import { NotYetImplementedError, NoSuchUserError, NoSuchFilterError, mapGetWithDefault } from "./utils";
 
 // ==============
 // HELPER METHODS
 // ==============
 // #region
 
-/**Removes whitespace from column names.*/
+/**Removes whitespace and other SQL-sensitive characters from column names.*/
 function formatCol(input: string): string {
 	return input.replace(/\(| |\)|-/g, "").toLowerCase(); // Remove (, ), whitespace, and - characters.
 }
@@ -54,7 +54,7 @@ async function queryAndLog(client: Pool | PoolClient, query: string): Promise<vo
 		return result;
 	} catch (err) {
 		console.log(query);
-		console.log(err);
+    console.log(err);
 	}
 	return;
 }
@@ -88,10 +88,10 @@ function filterToTableData(filter: Filter): { [id: string]: any } {
 /**
  * Makes a mapping from the formatted column names to their unformatted counterparts.
  */
-function mapFromColumnName(unformattedColumns: string[]): { [key: string]: string } {
-	let map: { [key: string]: string } = {};
+function mapFromColumnName(unformattedColumns: string[]): Map<string, string> {
+	let map = new Map<string, string>();
 	for (var col of unformattedColumns) {
-		map[formatCol(col)] = col;
+		map.set(formatCol(col), col);
 	}
 	return map;
 }
@@ -109,25 +109,25 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 	// lets us programmatically get all the filter data for gear types, abilities, and brands.
 	if (!rowData[DB_GEAR_TYPE_WILDCARD]) {
 		let typesMap = mapFromColumnName(GEAR_TYPES);
-		for (var type of typesMap.keys) {
+		for (var type of typesMap.keys()) {
 			if (rowData[type]) {
-				types.push(typesMap[type]);
+				types.push(mapGetWithDefault(typesMap, type, ""));
 			}
 		}
 	}
 	if (!rowData[DB_GEAR_ABILITY_WILDCARD]) {
 		let abilitiesMap = mapFromColumnName(GEAR_ABILITIES);
-		for (var ability of abilitiesMap.keys) {
+		for (var ability of abilitiesMap.keys()) {
 			if (rowData[ability]) {
-				abilities.push(abilitiesMap[ability]);
+				abilities.push(mapGetWithDefault(abilitiesMap, ability, ""));
 			}
 		}
 	}
 	if (!rowData[DB_GEAR_BRAND_WILDCARD]) {
 		let brandsMap = mapFromColumnName(GEAR_BRANDS);
-		for (var brand of brandsMap.keys) {
+		for (var brand of brandsMap.keys()) {
 			if (rowData[brand]) {
-				brands.push(brandsMap[brand]);
+				brands.push(mapGetWithDefault(brandsMap, brand, ""));
 			}
 		}
 	}
@@ -145,7 +145,7 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
 /**
  * @effects Initial setup the database and its tables.
  */
-function setupDatabaseTables(client: Pool | PoolClient) {
+export function setupDatabaseTables(client: Pool | PoolClient) {
 	client.query(
 		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
             ${DB_USER_ID} SERIAL,
@@ -210,10 +210,8 @@ export async function getMatchingFilterID(client: PoolClient | Pool, filter: Fil
 	// WHERE c1=v1 AND c2=v2 AND c3=v3 AND ...;
 	let results = await queryAndLog(
 		client,
-		`
-        SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
-        WHERE ${queryArgs.join(" AND ")};
-    `
+		`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS} 
+     WHERE ${queryArgs.join(" AND ")};`
 	);
 
 	if (results) {
@@ -222,6 +220,16 @@ export async function getMatchingFilterID(client: PoolClient | Pool, filter: Fil
 		}
 	}
 	return -1;
+}
+
+/** Returns whether this filter ID exists in the database. */
+async function hasFilterID(client: PoolClient | Pool, filterID: number): Promise<boolean> {
+  let result = await queryAndLog(
+    client,
+    `SELECT FROM ${DB_TABLE_FILTERS} WHERE ${DB_FILTER_ID} = ${filterID}`
+  );
+  // Check where there are any rows in the results.
+  return result ? result.rowCount > 0 : false;
 }
 
 /**
@@ -261,7 +269,7 @@ async function removeFilter(client: PoolClient | Pool, filterID: number): Promis
 	return false;
 }
 
-async function addUser(client: PoolClient | Pool): Promise<boolean> {
+export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 	throw new NotYetImplementedError("");
 }
 
@@ -291,8 +299,8 @@ async function removeUser(client: PoolClient | Pool, userID: number) {
 }
 
 async function hasUser(client: PoolClient | Pool, userID: number): Promise<boolean> {
-	let result = await client.query(`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`);
-	return result.rowCount > 0;
+	let result = await queryAndLog(client, `SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`);
+	return result ? result.rowCount > 0 : false;
 }
 
 /**
@@ -301,7 +309,7 @@ async function hasUser(client: PoolClient | Pool, userID: number): Promise<boole
  * @return the user's internal ID (as an int) if found. Otherwise, returns -1.
  */
 export async function getUserIDFromCode(client: PoolClient | Pool, userCode: string): Promise<number> {
-  let result = await client.query(`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_CODE} = ${userCode}`);
+  let result = await client.query(`SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS} WHERE ${DB_USER_CODE} = '${userCode}'`);
   if (result.rowCount == 0) {
     return -1;
   } else {
@@ -319,7 +327,7 @@ async function isUserSubscribedToFilter(
 	filterID: number
 ): Promise<boolean> {
 	let result = await client.query(`
-        SELECT * FROM ${DB_TABLE_USERS_TO_FILTERS}
+        SELECT FROM ${DB_TABLE_USERS_TO_FILTERS}
         WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`);
 	return result.rowCount > 0;
 }
@@ -330,16 +338,18 @@ async function isUserSubscribedToFilter(
  * @throws {NoSuchUserError} if the user does not exist.
  */
 export async function subscribeUserToFilter(client: PoolClient | Pool, userID: number, filterID: number) {
-	// TODO: Check that filter exists
 	if (!(await hasUser(client, userID))) {
 		throw new NoSuchUserError(userID);
 	}
+  if (!(await hasFilterID(client, filterID))) {
+    throw new NoSuchFilterError(filterID);
+  }
 
 	if (!(await isUserSubscribedToFilter(client, userID, filterID))) {
-		await client.query(
+		await queryAndLog(
+      client, 
 			`INSERT INTO ${DB_TABLE_USERS_TO_FILTERS} (${DB_USER_ID}, ${DB_FILTER_ID})
-            VALUES (${userID}, ${filterID});
-        `
+            VALUES (${userID}, ${filterID});`
 		);
 	}
 }
@@ -363,10 +373,34 @@ export async function unsubscribeUserFromFilter(
 
 /**
  * Gets a list of all filters the user is subscribed to.
- * @param {*} user
+ * @throws {NoSuchUserError} is the user does not exist.
  */
-async function getUserSubscriptions(client: PoolClient, userID: number): Promise<Filter[]> {
-	return [];
+export async function getUserSubscriptions(client: PoolClient | Pool,
+                                           userID: number
+    ): Promise<Filter[]> {
+	// TODO: Sort list by edited timestamp
+  if (!(await hasUser(client, userID))) {
+    throw new NoSuchUserError(userID);
+  }
+  // Get all filter IDs the user is subscribed to
+  let results = await queryAndLog(
+    client,
+    // userFilters is a temporary table used to index into the Filters table
+    `WITH userFilters(${DB_FILTER_ID}) AS 
+        (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}
+        WHERE ${DB_USER_ID} = ${userID})
+      SELECT * FROM ${DB_TABLE_FILTERS}, userFilters
+      WHERE ${DB_TABLE_FILTERS}.${DB_FILTER_ID} = userFilters.${DB_FILTER_ID}`
+  );
+  // Go through each filterID and retrieve it as a Filter object.
+  if (results) {
+    let filters: Filter[] = [];
+    for (let rowData of results.rows) {
+      filters.push(rowDataToFilter(rowData));
+    }
+    return filters;
+  }
+  return [];
 }
 
 async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promise<number[]> {
@@ -380,14 +414,14 @@ async function getUserSubscriptionIDs(client: PoolClient, userID: number): Promi
  */
 async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<number[]> {
 	// TODO: Gear Name input must be sanitized
-
-	let result = await client.query(`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
-    WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
-    AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
-    AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
-    AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
-    AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
-    `);
+	let result = await client.query(
+      `SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
+        WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
+        AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
+        AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
+        AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
+        AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})`
+    );
 
 	let filterList: number[] = [];
 	for (var i in result.rows) {
@@ -400,6 +434,8 @@ async function getMatchingFilters(client: PoolClient, gear: Gear): Promise<numbe
 // #endregion
 
 export function getDBClient(): Pool {
+  // TODO: Retrieve values from an environment variable
+  // I love storing passwords in plaintext in my public github repo :]
   return new Pool({
     host: "localhost",
     user: "postgres",
@@ -409,12 +445,6 @@ export function getDBClient(): Pool {
 }
 
 const pool = getDBClient();
-/**
-pool.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    pool.end()
-});
-*/
 
 setupDatabaseTables(pool);
 

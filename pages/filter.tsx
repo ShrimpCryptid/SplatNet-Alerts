@@ -2,11 +2,12 @@
 
 import Head from "next/head";
 import Link from "next/link";
+import Router from "next/router";
 import React from "react";
 import { useState, useEffect, SetStateAction } from "react";
 import FilterView from "../components/filter-view";
 import Selector from "../components/selector";
-import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, GEAR_PROPERTY } from "../constants";
+import { FE_WILDCARD, GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES, GEAR_PROPERTY, API_USER_CODE, API_FILTER_JSON } from "../constants";
 import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
@@ -14,6 +15,9 @@ import { brandIcons } from "../public/icons/brands";
 import { typeIcons } from "../public/icons/gear-type";
 import styles from "../styles/filter.module.css";
 
+// ==============
+// Helper Methods
+// ==============
 function makeSelectedMap(allValues: string[]): Map<string, boolean> {
 	let boolArr: [string, boolean][] = allValues.map((value) => {
 		return [value, false];
@@ -76,12 +80,12 @@ export default function FilterPage({ filter }: FilterProps) {
 	// TODO: Handle editing filters
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
+  let initFilter = filter || new Filter();
 
 	// Load current filter properties
 	if (!filter) {
 		// Making a new filter from scratch, so use defaults for abilities, etc.
 		// We use the GEAR_ABILITIES, etc. constants as keys in the map.
-		filter = new Filter();
 		initAbilities = makeSelectedMap(GEAR_ABILITIES);
 		initBrands = makeSelectedMap(GEAR_BRANDS);
 		initTypes = makeSelectedMap(GEAR_TYPES);
@@ -95,12 +99,12 @@ export default function FilterPage({ filter }: FilterProps) {
 	}
 
 	// Initialize page states, using existing filter values if present.
-	const [selectedGearName, setSelectedGearName] = useState(filter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(filter.minimumRarity);
+	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
+	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
-	const [currFilter, setCurrFilter] = useState(filter);
+	const [currFilter, setCurrFilter] = useState(initFilter);
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
 
 	// Update the filter values using new state. This is called whenever
@@ -149,6 +153,15 @@ export default function FilterPage({ filter }: FilterProps) {
 	const onClickSave = () => {
 		// Try saving the filter to the database.
 		// Note that no filter cleanup/validation happens here.
+    async function trySaveFilter(userCode: string, filter: Filter) {
+      let url = `/api/add-filter`;
+      url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
+      let response = await fetch(url);
+      if (response.status == 200) {
+        Router.push("/");
+      }
+    }
+    trySaveFilter("1234", currFilter);
 	};
 
 	// Resize the group of selectors so they are either a row or column based on

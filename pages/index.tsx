@@ -3,8 +3,49 @@ import Link from "next/link";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
+import { API_USER_CODE } from "../constants";
+import { useEffect, useState } from "react";
+
+/**
+ * Retrieves a list of the user's current filters from the database.
+ * @param userCode the unique string identifier for this user.
+ */
+  async function getUserFilters(userCode: string): Promise<Filter[]> {
+  let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
+  let response = await fetch(url);
+  if (response.status == 200) {  // ok
+    let jsonList = await response.json();
+    let filterList = []
+    for (let json of jsonList) {
+      filterList.push(Filter.deserializeObject(json));
+    }
+    return filterList;
+  }
+  return [];
+};
 
 export default function Home() {
+  // TODO: Some sort of loading/default state?
+  let [filterViews, setFilterViews] = useState(<></>);
+
+  useEffect(() => {
+    async function updateFilterviews() {
+      let filterList = await getUserFilters("1234");
+      console.log(filterList);
+
+      setFilterViews(
+      <>
+        {filterList.map((filter, index) => {
+            return (<FilterView filter={filter} key={index}></FilterView>);
+          })
+        }
+      </>
+      );
+
+    }
+    updateFilterviews();
+  }, []);
+
 	let demo_filter1 = new Filter(
 		"Annaki Flannel Hoodie",
 		1,
@@ -45,9 +86,7 @@ export default function Home() {
 				</div>
 			</div>
 			<h2>Your Filters</h2>
-			<FilterView filter={demo_filter1} filterID={0} />
-			<FilterView filter={demo_filter2} filterID={0} />
-			<FilterView filter={demo_filter3} filterID={0} />
+			{filterViews}
 			<Link href="filter">
 				<button>New Filter</button>
 			</Link>

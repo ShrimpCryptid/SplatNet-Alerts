@@ -3,10 +3,12 @@ import Link from "next/link";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_FILTER_JSON, API_USER_CODE } from "../constants";
+import { API_FILTER_JSON, API_SUBSCRIPTION, API_USER_CODE } from "../constants";
 import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
 import Router from "next/router";
+import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
+import { SERVER } from "../config";
 
 /**
  * Retrieves a list of the user's current filters from the database.
@@ -35,7 +37,19 @@ export default function Home({
 }: DefaultPageProps) {
   let [filterList, setFilterList] = useState<Filter[]>([]);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
+  let [notificationsToggle, setNotificationsToggle] = useState(false);
 	// setEditingFilter(null);  // clear the filter we are editing.
+
+	// Retrieve the user's filters from the database.
+  const updateFilterviews = async () => {
+    if (usercode) {
+      let filterList = await getUserFilters(usercode);
+      setFilterList(filterList);
+    }
+  }
+  if (filterList.length == 0) {
+    updateFilterviews();  // run only once during initial page render
+  }
 
   // Click and edit a filter.
 	const onClickFilter = (filter: Filter) => {
@@ -45,13 +59,15 @@ export default function Home({
 		setPageSwitchReady(true);
 	};
 
+  // Switches page to the filter edit/creation, but only when state has finished
+  // changing.
 	useEffect(() => {
 		if (pageSwitchReady) {
 			Router.push("/filter");
 		}
 	});
 
-  // Click and remove a filter.
+  // Click and remove a filter-- callback function
   const onClickDeleteFilter = (filterIndex: number) => {
     async function deleteFilter(filterIndex: number) {
       let filter = filterList[filterIndex];
@@ -70,16 +86,28 @@ export default function Home({
     deleteFilter(filterIndex);
   }
 
-	// Retrieve the user's filters from the database.
-	useEffect(() => {
-		async function updateFilterviews() {
-			if (usercode) {
-				let filterList = await getUserFilters(usercode);
-        setFilterList(filterList);
-			}
-		} // end updateFilterViews()
-		updateFilterviews();
-	}, []);
+  const toggleNotifications = async () => {
+    if (notificationsToggle) {
+      // Turn OFF notifications
+      setNotificationsToggle(false);
+    } else {
+      // Turn ON notifications
+      // Start a local service worker
+      await requestNotificationPermission();
+      await registerServiceWorker();
+
+      let subscription = await createNotificationSubscription();
+      console.log(subscription);
+      let subscriptionString = JSON.stringify(subscription);
+      console.log(subscriptionString);
+      // Send to the server and save.
+      let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
+      url += `&${API_USER_CODE}=${usercode}`;
+      let result = await fetch(url);
+      console.log(result.status);
+    }
+  }
+
 
 	return (
 		<div className={styles.main}>
@@ -95,7 +123,7 @@ export default function Home({
         {filterList.map((filter, index) => {
           return (
             <FilterView
-              onClickEdit={() => onClickFilter}
+              onClickEdit={() => onClickFilter(filter)}
               onClickDelete={() => onClickDeleteFilter(index)}
               filter={filter}
               key={index}
@@ -116,7 +144,9 @@ export default function Home({
 				SSA sends push notifications via your browser. You can turn off
 				notifications at any time.
 			</p>
-			<button>Turn off notifications</button>
+			<button disabled={false} onClick={toggleNotifications}>
+        Turn on notifications
+      </button>
 			<h3>User ID</h3>
 			<p>This is your unique user ID. Save and copy this somewhere secure!</p>
 			<p>

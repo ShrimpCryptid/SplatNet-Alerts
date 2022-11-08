@@ -7,6 +7,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import FilterView from "../components/filter-view";
 import Selector from "../components/selector";
+import { SERVER } from "../config";
 import {
 	FE_WILDCARD,
 	GEAR_ABILITIES,
@@ -211,7 +212,7 @@ export default function FilterPage({
 			if (!usercode) {
 				// Try making a new user. If it doesn't work, display an error message.
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
-					let response = await fetch(`/api/new-user`);
+					let response = await fetch(`${SERVER}/api/new-user`);
 					if (response.status == 200) {
 						let tempUserCode = await response.json();
             setUserCode(tempUserCode);  // store new code

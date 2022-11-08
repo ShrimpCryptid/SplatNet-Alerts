@@ -19,7 +19,7 @@ import {
 	DB_USER_ID,
 	DB_USER_CODE,
 	DB_LAST_MODIFIED,
-	DB_SERVICE_WORKER_URL,
+	DB_SUBSCRIPTION,
 } from "../constants";
 import Filter from "./filter";
 import {
@@ -159,7 +159,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
             ${DB_USER_CODE} varchar(255),
             ${DB_LAST_NOTIFIED_EXPIRATION} varchar(255),
             ${DB_LAST_MODIFIED} varchar(255),
-            ${DB_SERVICE_WORKER_URL} varchar(255),
+            ${DB_SUBSCRIPTION} varchar(3000),
             PRIMARY KEY (${DB_USER_ID})
         );`
 	);
@@ -313,14 +313,37 @@ async function generateUserCode(client: PoolClient | Pool): Promise<string> {
 	return userCode;
 }
 
-/**
- * INCOMPLETE: Used to update client data (push notifs, etc.)
- */
-async function updateUser(
+export async function updateUserSubscription(
 	client: PoolClient | Pool,
-	userID: number
-): Promise<boolean> {
-	throw new NotYetImplementedError("");
+	userID: number,
+  subscription: string
+) {
+  if (!(await hasUser(client, userID))) {
+    throw new NoSuchUserError(userID);
+  }
+
+  queryAndLog(client,
+    `UPDATE ${DB_TABLE_USERS}
+      SET ${DB_SUBSCRIPTION} = '${subscription}'
+      WHERE ${DB_USER_ID} = ${userID}`);
+}
+
+/**
+ * Returns the string subscription data for the given user. Returns an empty
+ * string if no subscription could be found.
+ */
+export async function getUserSubscription(client: PoolClient | Pool,
+	  userID: number): Promise<string> {
+  if (!(await hasUser(client, userID))) {
+    throw new NoSuchUserError(userID);
+  }
+  let result = await queryAndLog(client,
+    `SELECT ${DB_SUBSCRIPTION} FROM ${DB_TABLE_USERS}
+      WHERE ${DB_USER_ID} = ${userID}`);
+  if (result && result.rowCount > 0) {
+    return result.rows[0][DB_SUBSCRIPTION];
+  }
+  return "";
 }
 
 /**

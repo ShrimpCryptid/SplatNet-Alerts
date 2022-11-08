@@ -24,8 +24,10 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "pages/_app.tsx"  ],
+    "**/*.tsx",
+    "pages/_app.tsx",
+    "public/serviceworker.js"
+  ],
   "exclude": [
     "node_modules"
   ]

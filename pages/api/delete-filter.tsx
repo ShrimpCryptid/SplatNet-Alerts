@@ -19,7 +19,7 @@ import Filter from "../../lib/filter";
  *  - `API_FILTER_JSON` string: serialized JSON data for the filter to be removed.
  *
  * @return A response with one of the following response codes:
- *  - 200 if filter was successfully updated.
+ *  - 200 if filter was successfully removed.
  *  - 400 if one or more arguments was missing.
  *  - 404 if no matching user was found.
  *  - 500 if any other errors encountered.

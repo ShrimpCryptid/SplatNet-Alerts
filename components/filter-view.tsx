@@ -113,6 +113,7 @@ const FilterView: FunctionComponent<Props> = ({
 						{filter.gearBrands.map((value, index) => {
 							return (
 								<Image
+                  key={index}
 									className={styles.brandIconList}
 									src={mapGetWithDefault(brandIcons, value, unknownIcon)}
 									width={BRAND_ICON_LIST_WIDTH}
@@ -133,6 +134,7 @@ const FilterView: FunctionComponent<Props> = ({
 		abilityElements = (
 			<>
 				<Image
+          key={0}
 					className={styles.abilityIcon}
 					src={abilitiesSelected ? unknownIcon : noneIcon}
 					width={ABILITY_ICON_WIDTH}

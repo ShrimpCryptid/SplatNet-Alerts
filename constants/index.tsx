@@ -1,3 +1,5 @@
+import base64url from "base64url";
+
 export const DATABASE_NAME = "SplatnetShopAlerts";
 
 export const DB_TABLE_USERS = "Users";
@@ -11,7 +13,8 @@ export const DB_PAIR_ID = "pairid";
 /** User's unique user code. */
 export const DB_USER_CODE = "usercode";
 export const DB_LAST_MODIFIED = "lastmodified";
-export const DB_SERVICE_WORKER_URL = "serviceworkerurl";
+
+export const DB_SUBSCRIPTION = "subscription";
 
 export const DB_GEAR_NAME = "name";
 export const DB_GEAR_RARITY = "rarity";
@@ -25,6 +28,7 @@ export const API_USER_CODE = "usercode";
 export const API_FILTER_JSON = "filter";
 export const API_PREVIOUS_FILTER_JSON = "prev-filter";
 export const API_FILTER_ID = DB_FILTER_ID;
+export const API_SUBSCRIPTION = "subscription";
 
 export const API_RESPONSE_FILTER_LIST = "filters";
 
@@ -95,3 +99,9 @@ export const GEAR_ABILITIES = [
 
 export const FE_WILDCARD = "Any";
 export const FE_COOKIE_USER_ID = DB_USER_ID;
+
+// TODO: Use environmental variables in production environment; move this and
+// other example development keys to their own file. OK *ONLY* for testing. 
+// Generate using `npx web-push generate-vapid-keys --json`.
+export const VAPID_PUBLIC_KEY = "BP0f7Rhdh5eQg3mWuu7SyUptJ-MGm6f9Ci4ldL1yp4BWK_651XEiBJrDrOmTGqme8ndpETkkdqAbu-_zxCiNoyk";
+export const VAPID_PRIVATE_KEY = "kKRbyxQeGeeoEtRCij10GRZUa4DoF8FXEMK1Sxf5ChM";

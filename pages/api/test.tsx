@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { API_FILTER_JSON, API_USER_CODE, DB_TABLE_FILTERS } from "../../constants";
+import { API_FILTER_JSON, API_USER_CODE, DB_SUBSCRIPTION, DB_TABLE_FILTERS, DB_TABLE_USERS, DB_USER_CODE, VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
 import { getDBClient, getUserIDFromCode, tryAddFilter, subscribeUserToFilter, setupDatabaseTables } from '../../lib/database_utils';
 import Filter from "../../lib/filter";
+import webpush from 'web-push';
 
 
 /**
@@ -24,13 +25,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const client = getDBClient();
 
-    // Validate user
-    // let result = await getUserIDFromCode(client, "potato");
-    await subscribeUserToFilter(client, 1, 1);
-    let filter = Filter.deserialize((new Filter()).serialize());
+    let result = await client.query(`SELECT ${DB_SUBSCRIPTION} FROM ${DB_TABLE_USERS} WHERE ${DB_USER_CODE}='1234';`);
+    let subscription = JSON.parse(result.rows[0][DB_SUBSCRIPTION]);
+    let notification = { title: "Test push notification", body: "Test body", image: "https://i.kym-cdn.com/photos/images/newsfeed/000/641/298/448.jpg"};
+    webpush.setVapidDetails(
+      'mailto:shrimpcryptid@gmail.com',
+      VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY
+    );
+    await webpush.sendNotification(subscription, JSON.stringify(notification));
 
-    return res.status(200).json({"result": filter});  // ok
+    return res.status(200).end();  // ok
   } catch (err) {
-    return res.status(500);  // internal server error
+    console.log(err);
+    return res.status(500).end();  // internal server error
   }
 }

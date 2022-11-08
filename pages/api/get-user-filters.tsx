@@ -3,7 +3,7 @@ import { API_USER_CODE } from "../../constants";
 import {
 	getDBClient,
 	getUserIDFromCode,
-	getUserSubscriptions,
+	getUserFilters,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
@@ -47,7 +47,7 @@ export default async function handler(
 		}
 
 		// Get list of filters owned by user
-		let filters = await getUserSubscriptions(client, userID);
+		let filters = await getUserFilters(client, userID);
 
 		res.status(200).json(filters);
 		return res.end();

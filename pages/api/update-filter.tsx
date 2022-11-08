@@ -8,9 +8,9 @@ import {
 	getDBClient,
 	getUserIDFromCode,
 	tryAddFilter,
-	subscribeUserToFilter,
+	addFilterToUser,
 	getMatchingFilterID,
-	unsubscribeUserFromFilter,
+	removeUserFilter,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
@@ -74,8 +74,8 @@ export default async function handler(
 
 		if (filterID !== prevFilterID) {
 			// Unsubscribe user from previous filter, and subscribe to new one.
-			unsubscribeUserFromFilter(client, userID, prevFilterID);
-			subscribeUserToFilter(client, userID, filterID);
+			removeUserFilter(client, userID, prevFilterID);
+			addFilterToUser(client, userID, filterID);
 		} // else, filters are the same and no action is needed
 
 		res.status(200).end(); // ok

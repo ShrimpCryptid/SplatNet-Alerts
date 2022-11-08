@@ -4,9 +4,9 @@ import {
 	getDBClient,
 	getUserIDFromCode,
 	tryAddFilter,
-	subscribeUserToFilter,
+	addFilterToUser,
   getMatchingFilterID,
-  unsubscribeUserFromFilter,
+  removeUserFilter,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
@@ -58,7 +58,7 @@ export default async function handler(
 		// Find the matching filter and unsubscribe the user from it.
 		let filter = Filter.deserialize(req.query[API_FILTER_JSON]);
 		let filterID = await getMatchingFilterID(client, filter);
-    await unsubscribeUserFromFilter(client, userID, filterID);
+    await removeUserFilter(client, userID, filterID);
 
 		return res.status(200).end(); // ok
 	} catch (err) {

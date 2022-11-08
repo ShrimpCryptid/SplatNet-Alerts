@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { API_SUBSCRIPTION, API_USER_CODE } from "../../constants";
-import { getDBClient, getUserIDFromCode, makeNewUser, updateUserSubscription } from "../../lib/database_utils";
+import { getDBClient, getUserIDFromCode, makeNewUser, addUserPushSubscription } from "../../lib/database_utils";
+import Subscription from "../../lib/subscription";
 
 /**
  * Updates the user's notification subscription.
@@ -36,8 +37,7 @@ export default async function handler(
     
 		// Validate user
 		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
-		if (userID == -1) {
-			// no matching user
+		if (userID == -1) {  // no matching user
 			res.status(404)
 				.json({
 					err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
@@ -45,11 +45,13 @@ export default async function handler(
       return res.end();
 		}
 
-    // Validate API subscription data
+    // Parse subscription parameter
+    let subscriptionJSON = JSON.parse(req.query[API_SUBSCRIPTION]);
+    let subscription = Subscription.deserialize(subscriptionJSON);
 
-    // Update user subscription
-    let result = updateUserSubscription(client, userID, req.query[API_SUBSCRIPTION]);
-    console.log(req.query[API_SUBSCRIPTION]);
+    // Update user subscriptions
+    addUserPushSubscription(client, userID, subscription);
+
 		res.status(200);
 		return res.end();
 	} catch (err) {

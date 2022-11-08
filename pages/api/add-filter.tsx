@@ -4,7 +4,7 @@ import {
 	getDBClient,
 	getUserIDFromCode,
 	tryAddFilter,
-	subscribeUserToFilter,
+	addFilterToUser,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
@@ -56,7 +56,7 @@ export default async function handler(
 		// Find or create matching filter and subscribe user to it.
 		let filter = Filter.deserialize(req.query[API_FILTER_JSON]);
 		let filterID = await tryAddFilter(client, filter);
-		await subscribeUserToFilter(client, userID, filterID);
+		await addFilterToUser(client, userID, filterID);
 
 		res.status(200).json("{}"); // ok
 		return res.end();

@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
-import { getDBClient, getUserIDFromCode, getUserSubscriptions } from '../../lib/database_utils';
+import { getDBClient, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions } from '../../lib/database_utils';
 import Filter from "../../lib/filter";
 import webpush from 'web-push';
+import { Gear } from "../../lib/gear_loader";
 
 
 /**
@@ -24,8 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const client = getDBClient();
-    let userID = await getUserIDFromCode(client, '1234');
-    let userSubscriptions = await getUserSubscriptions(client, userID);
+
+    let gear = new Gear("someid", 0, "Annaki", "HeadGear", "Fresh Fish Head", "Run Speed Up", 0, 0);
+
+    let userIDs = await getUserIDsToBeNotified(client, gear);
+    console.log(userIDs);
 
     let notification = { title: "Test push notification", body: "Test body", image: "https://i.kym-cdn.com/photos/images/newsfeed/000/641/298/448.jpg"};
     webpush.setVapidDetails(
@@ -35,8 +39,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     let promises = [];
-    for (let subscription of userSubscriptions) {
-      promises.push(webpush.sendNotification(subscription, JSON.stringify(notification)));
+    for (let userID of userIDs) {
+      let userSubscriptions = await getUserSubscriptions(client, userID);
+      for (let subscription of userSubscriptions) {
+        promises.push(webpush.sendNotification(subscription, JSON.stringify(notification)));
+      }
     }
 
     await Promise.all(promises);

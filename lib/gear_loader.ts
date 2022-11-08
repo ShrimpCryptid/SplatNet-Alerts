@@ -1,5 +1,5 @@
 // Utilities for getting the current gear rotation.
-import json_data from './gear_example.js';
+import json_data from './gear_example';
 import fetch from 'node-fetch';
 
 const VERSION = '1.0.0'
@@ -9,16 +9,36 @@ var cachedGearJSON = json_data;
  * Data class for gear items
  */
 export class Gear {
-    id: string = "";
-    price: number = 0;
-    brand: string = "";
-    type: string = "";
-    name: string = "";
-    ability: string = "";
+    id: string;
+    price: number;
+    brand: string;
+    type: string;
+    name: string;
+    ability: string;
     /**The number of rarity stars, ranging from 0-2 (or the number sub ability slots - 1).*/
-    rarity: number = 0;
+    rarity: number;
     /**Expiration timestamp, as parsed by Date.parse()*/
-    expiration: number = 0;
+    expiration: number;
+
+    constructor(
+      id = "",
+      price = 0,
+      brand = "",
+      type = "",
+      name = "",
+      ability = "",
+      rarity = 0,
+      expiration = 0
+    ) {
+      this.id = id;
+      this.price = price;
+      this.brand = brand;
+      this.type = type;
+      this.name = name;
+      this.ability = ability;
+      this.rarity = rarity;
+      this.expiration = expiration;
+    }
 }
 
 /**

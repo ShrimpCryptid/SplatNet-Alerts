@@ -25,6 +25,7 @@ import {
   DB_AUTH_KEY,
   DB_P256DH_KEY,
   DB_SUBSCRIPTION_ID,
+  GEAR_NAMES,
 } from "../constants";
 import Filter from "./filter";
 import {
@@ -32,6 +33,7 @@ import {
 	NoSuchUserError,
 	NoSuchFilterError,
 	mapGetWithDefault,
+  IllegalArgumentError,
 } from "./utils";
 import Subscription from "./subscription";
 
@@ -592,30 +594,42 @@ export async function getUserFilters(
 }
 
 /**
- * Gets a list of all the users ID with filters that match the given gear item.
+ * Returns a set of all the user IDs with filters that match the gear item.
  * @param {*} gearData
  */
-async function getUserIDsToBeNotified(
-	client: PoolClient,
+export async function getUserIDsToBeNotified(
+	client: PoolClient | Pool,
 	gear: Gear
-): Promise<number[]> {
-	// TODO: Gear Name input must be sanitized
-  // Match filters by properties where they either match
+): Promise<Set<number>> {
+  // Prevent SQL injection attacks.
+  // Allow only alphanumeric characters, spaces, and -, +, (, and ) chars. 
+  const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()& ]*$/);
+  if (!allowedCharsPattern.test(gear.name)) {
+    throw new IllegalArgumentError("Gear name '" + gear.name + "' contains special characters.");
+  }
+  // Match filters by properties, either by specific brand/ability/type or by
+  // wildcard selectors. Then, select all users that match any of those filters.
 	let result = await client.query(
-		`SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
-        WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
-        AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
-        AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
-        AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
-        AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})`
+		`WITH matchingFilters(${DB_FILTER_ID}) AS 
+        (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
+          WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
+          AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = '${gear.name}')
+          AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
+          AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
+          AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)}))
+    SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}, matchingFilters
+      WHERE ${DB_TABLE_USERS_TO_FILTERS}.${DB_FILTER_ID} = matchingFilters.${DB_FILTER_ID};`
 	);
 
-	let filterList: number[] = [];
-	for (var i in result.rows) {
-		filterList.push(result.rows[i][DB_FILTER_ID]);
-	}
+  // Get all users, adding them to a set because there may be duplicates.
+	let userSet = new Set<number>();
+  if (result && result.rowCount > 0) {
+    for (let row of result.rows) {
+      userSet.add(row[DB_USER_ID]);
+    }
+  }
 
-	return filterList;
+	return userSet;
 }
 
 // #endregion

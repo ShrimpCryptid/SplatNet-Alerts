@@ -1,6 +1,6 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear_loader";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 , validate } from "uuid";
 import {
 	GEAR_BRANDS,
 	GEAR_TYPES,
@@ -486,6 +486,9 @@ export async function getUserIDFromCode(
 	client: PoolClient | Pool,
 	userCode: string
 ): Promise<number> {
+  if (!validate(userCode)) {
+    throw new IllegalArgumentError(userCode + " is not a valid uuid.");
+  }
 	let result = await client.query(
 		`SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS}
       WHERE ${DB_USER_CODE} = '${userCode}'`

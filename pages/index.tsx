@@ -35,7 +35,7 @@ export default function Home({
 	setUserCode,
 	setEditingFilter,
 }: DefaultPageProps) {
-  let [filterList, setFilterList] = useState<Filter[]>([]);
+  let [filterList, setFilterList] = useState<Filter[]|null>(null);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
 	// setEditingFilter(null);  // clear the filter we are editing.
@@ -47,7 +47,7 @@ export default function Home({
       setFilterList(filterList);
     }
   }
-  if (filterList.length == 0) {
+  if (filterList && filterList.length == 0) {
     updateFilterviews();  // run only once during initial page render
   }
 
@@ -70,17 +70,19 @@ export default function Home({
   // Click and remove a filter-- callback function
   const onClickDeleteFilter = (filterIndex: number) => {
     async function deleteFilter(filterIndex: number) {
-      let filter = filterList[filterIndex];
-      let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
-      url += `&${API_FILTER_JSON}=${filter.serialize()}`
-      let result = await fetch(url);
-      if (result.status == 200) {
-        // Remove filter from the list locally too
-        let newFilterList = [...filterList];  // shallow copy
-        newFilterList.splice(filterIndex, 1);
-        setFilterList(newFilterList);
-      } else {
-        // TODO: Error message
+      if (filterList) {
+        let filter = filterList[filterIndex];
+        let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
+        url += `&${API_FILTER_JSON}=${filter.serialize()}`
+        let result = await fetch(url);
+        if (result.status == 200) {
+          // Remove filter from the list locally too
+          let newFilterList = [...filterList];  // shallow copy
+          newFilterList.splice(filterIndex, 1);
+          setFilterList(newFilterList);
+        } else {
+          // TODO: Error message
+        }
       }
     }
     deleteFilter(filterIndex);
@@ -120,7 +122,7 @@ export default function Home({
 			</div>
 			<h2>Your Filters</h2>
 			<>
-        {filterList.map((filter, index) => {
+        {filterList ? filterList.map((filter, index) => {
           return (
             <FilterView
               onClickEdit={() => onClickFilter(filter)}
@@ -129,7 +131,7 @@ export default function Home({
               key={index}
             />
           );
-        })}
+        }) : <></>}
       </>
 			<Link href="filter">
 				<button>New Filter</button>

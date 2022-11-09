@@ -12,7 +12,7 @@ export type DefaultPageProps = {
 };
 
 export default function App({ Component, pageProps }: AppProps) {
-	const [usercode, setUserCode] = useState<null | string>("1234");
+	const [usercode, setUserCode] = useState<null | string>("37fb40c4-68e9-4475-a492-c2a9bce57737");
 	const [editingFilter, setEditingFilter] = useState<null | Filter>(null);
 
 	return (

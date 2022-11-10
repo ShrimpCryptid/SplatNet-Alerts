@@ -93,6 +93,7 @@ async function trySaveFilter(
 	userCode: string,
 	filter: Filter
 ): Promise<number> {
+  console.log(filter);
 	let url = `/api/add-filter`;
 	url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
 	let response = await fetch(url);
@@ -118,8 +119,6 @@ export default function FilterPage({
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
 	let initFilter = editingFilter || new Filter();
-
-	console.log(editingFilter);
 
 	// Load current filter properties
 	if (!editingFilter) {
@@ -223,6 +222,7 @@ export default function FilterPage({
 
 			if (!tempUserCode) {
 				// TODO: Display an error message
+        console.log("Could not make new user.");
 				return;
 			} else {
 				let responseCode = 0;

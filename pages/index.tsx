@@ -38,16 +38,20 @@ export default function Home({
   let [filterList, setFilterList] = useState<Filter[]|null>(null);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
-	// setEditingFilter(null);  // clear the filter we are editing.
 
 	// Retrieve the user's filters from the database.
   const updateFilterviews = async () => {
     if (usercode) {
-      let filterList = await getUserFilters(usercode);
-      setFilterList(filterList);
+      getUserFilters(usercode).then((filterList) =>
+        setFilterList(filterList)
+      );
+    } else {
+      setFilterList([]);  // store empty list so we do not query server again
     }
   }
-  if (filterList && filterList.length == 0) {
+  // On initial render only
+  if (!filterList) {
+    setEditingFilter(null);  // clear the filter we are editing.
     updateFilterviews();  // run only once during initial page render
   }
 
@@ -99,10 +103,10 @@ export default function Home({
       await registerServiceWorker();
 
       let subscription = await createNotificationSubscription();
-      console.log(subscription);
       let subscriptionString = JSON.stringify(subscription);
-      console.log(subscriptionString);
-      // Send to the server and save.
+      // TODO: Store locally?
+      
+      // Send the subscription data to the server and save.
       let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
       url += `&${API_USER_CODE}=${usercode}`;
       let result = await fetch(url);
@@ -158,14 +162,14 @@ export default function Home({
 			<p>
 				<b>Your unique identifier is:</b>
 			</p>
-			<textarea>{usercode}</textarea>
+			<textarea value={usercode ? usercode : ""} readOnly={true}/>
 			<button>📄</button>
 
 			<h3>Change User</h3>
 			<p>
 				Paste in your user ID to sync your notification settings across devices.
 			</p>
-			<textarea></textarea>
+			<textarea />
 			<button>Login</button>
 		</div>
 	);

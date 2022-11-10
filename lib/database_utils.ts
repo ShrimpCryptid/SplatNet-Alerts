@@ -5,28 +5,30 @@ import {
 	GEAR_BRANDS,
 	GEAR_TYPES,
 	GEAR_ABILITIES,
-	DB_GEAR_NAME,
-	DB_GEAR_RARITY,
-	DB_GEAR_TYPE_WILDCARD,
-	DB_GEAR_ABILITY_WILDCARD,
-	DB_GEAR_BRAND_WILDCARD,
-	DB_TABLE_FILTERS,
-	DB_FILTER_ID,
-	DB_LAST_NOTIFIED_EXPIRATION,
-	DB_PAIR_ID,
-	DB_TABLE_USERS,
-	DB_TABLE_USERS_TO_FILTERS,
-	DB_USER_ID,
-	DB_USER_CODE,
-	DB_LAST_MODIFIED,
+} from "../constants";
+import {
+  DB_GEAR_NAME,
+  DB_GEAR_RARITY,
+  DB_GEAR_TYPE_WILDCARD,
+  DB_GEAR_ABILITY_WILDCARD,
+  DB_GEAR_BRAND_WILDCARD,
+  DB_TABLE_FILTERS,
+  DB_FILTER_ID,
+  DB_LAST_NOTIFIED_EXPIRATION,
+  DB_PAIR_ID,
+  DB_TABLE_USERS,
+  DB_TABLE_USERS_TO_FILTERS,
+  DB_USER_ID,
+  DB_USER_CODE,
+  DB_LAST_MODIFIED,
   DB_TABLE_SUBSCRIPTIONS,
   DB_ENDPOINT,
   DB_EXPIRATION,
   DB_AUTH_KEY,
   DB_P256DH_KEY,
   DB_SUBSCRIPTION_ID,
-  GEAR_NAMES,
-} from "../constants";
+  DB_TABLE_GEAR_CACHE
+} from "../constants/db";
 import Filter from "./filter";
 import {
 	NotYetImplementedError,
@@ -168,6 +170,13 @@ function getTimestamp(): string {
  * @effects Initial setup the database and its tables.
  */
 export function setupDatabaseTables(client: Pool | PoolClient) {
+  // Create data cache table
+  client.query(
+    `CREATE TABLE IF NOT EXISTS ${DB_TABLE_GEAR_CACHE} (
+      
+    )`
+  )
+
   // Create users table
 	client.query(
 		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
@@ -196,7 +205,6 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
     );`
   )
 
-	// TODO: Add additional user data columns
   // Create pairing table, which pairs users with their selected filters.
 	client.query(`
     CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
@@ -486,6 +494,7 @@ export async function getUserIDFromCode(
 	client: PoolClient | Pool,
 	userCode: string
 ): Promise<number> {
+  // TODO: Add extra manual regex check here for other illegal characters
   if (!validate(userCode)) {
     throw new IllegalArgumentError(userCode + " is not a valid uuid.");
   }

@@ -27,7 +27,10 @@ import {
   DB_AUTH_KEY,
   DB_P256DH_KEY,
   DB_SUBSCRIPTION_ID,
-  DB_TABLE_GEAR_CACHE
+  DB_TABLE_SERVER_CACHE,
+  DB_CACHE_DATA,
+  DB_CACHE_EXPIRATION,
+  DB_CACHE_KEY
 } from "../constants/db";
 import Filter from "./filter";
 import {
@@ -61,6 +64,10 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
 	return false;
 }
 
+/**
+ * Queries the client and logs any errors to the console, along with the
+ * offending SQL query.
+ */
 async function queryAndLog(
 	client: Pool | PoolClient,
 	query: string
@@ -159,7 +166,7 @@ function getTimestamp(): string {
   return `'${new Date(Date.now()).toISOString()}'`;
 }
 
-//#endregion
+//#endregion HELPER METHODS
 
 // ==============
 // DATABASE SETUP
@@ -171,14 +178,17 @@ function getTimestamp(): string {
  */
 export function setupDatabaseTables(client: Pool | PoolClient) {
   // Create data cache table
-  client.query(
-    `CREATE TABLE IF NOT EXISTS ${DB_TABLE_GEAR_CACHE} (
-      
-    )`
+  // Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
+  queryAndLog(client,
+    `CREATE TABLE IF NOT EXISTS ${DB_TABLE_SERVER_CACHE} (
+      ${DB_CACHE_KEY} varchar(255),
+      ${DB_CACHE_DATA} jsonb,
+      ${DB_CACHE_EXPIRATION} bigint
+    );`
   )
 
   // Create users table
-	client.query(
+	queryAndLog(client,
 		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
             ${DB_USER_ID} SERIAL,
             ${DB_USER_CODE} varchar(255),
@@ -189,7 +199,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 	);
 
   // Create user subscriptions table.
-  client.query(
+  queryAndLog(client,
     `CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
           ${DB_SUBSCRIPTION_ID} SERIAL,
           ${DB_USER_ID} int4,
@@ -206,7 +216,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
   )
 
   // Create pairing table, which pairs users with their selected filters.
-	client.query(`
+	queryAndLog(client, `
     CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
         ${DB_PAIR_ID} SERIAL,
         ${DB_USER_ID} int4,
@@ -230,7 +240,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 	}
 	let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n\t") + " BOOL";
 
-	client.query(`CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
+	queryAndLog(client, `CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
         ${DB_FILTER_ID} SERIAL,
         ${DB_GEAR_NAME} varchar(255),
         ${DB_GEAR_RARITY} int2,
@@ -241,12 +251,27 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
     );`);
 }
 
-// #endregion
+// #endregion DATABASE SETUP
 
-// ==============
-// DATABASE ACCESS
-// ==============
+// ==========
+// DATA CACHE
+// ==========
+// # region
+async function getCachedGearData(client: Pool | PoolClient, gearData: {[key: string]: any}) {
+  throw new NotYetImplementedError("");
+}
+
+async function setCachedGearData(): Promise<{[key: string]: any}> {
+  throw new NotYetImplementedError("");
+}
+
+// # endregion DATA CACHE
+
+// =============
+// FILTER ACCESS
+// =============
 // #region
+
 /**
  * Searches and returns the ID of the first matching filter.
  * @param filter filter to search for
@@ -340,6 +365,13 @@ async function removeFilter(
 	return false;
 }
 
+// #endregion FILTER ACCESS
+
+// ===========
+// USER ACCESS
+// ===========
+// #region
+
 export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 	let newUserCode = await generateUserCode(client);
 	// TODO: add creation timestamp
@@ -411,57 +443,6 @@ export async function addUserPushSubscription(
   }
 }
 
-/** Removes the given push subscription for a user, if it exists. Ignores
- *  repeat subscriptions for the device associated with other users.
- */
-export async function removeUserPushSubscription(
-  client: PoolClient | Pool,
-	userID: number,
-  subscription: Subscription
-) {
-  throw new NotYetImplementedError("");
-}
-
-/** Deletes all subscriptions for the given device across all users. */
-export async function deletePushSubscription(
-  client: PoolClient | Pool,
-  subscription: Subscription
-) {
-  throw new NotYetImplementedError("");
-}
-
-/**
- * Returns an array of subscription data for the given user. Returns an empty
- * array if no subscription could be found.
- */
-export async function getUserSubscriptions(client: PoolClient | Pool,
-	  userID: number): Promise<Subscription[]> {
-  // Get all subscriptions that match this user
-  let result = await queryAndLog(client,
-    `SELECT * FROM ${DB_TABLE_SUBSCRIPTIONS}
-      WHERE ${DB_USER_ID} = ${userID}`);
-
-  if (result && result.rowCount > 0) {
-    // Parse each row into its own subscription object.
-    let subscriptions = [];
-    for (let row of result.rows) {
-      subscriptions.push(new Subscription(
-        row[DB_ENDPOINT],
-        row[DB_EXPIRATION],
-        {
-          "auth": row[DB_AUTH_KEY],
-          "p256dh": row[DB_P256DH_KEY]
-        }
-      ));
-    }
-    return subscriptions;
-  }
-  return [];
-}
-
-/**
- *
- */
 async function removeUser(client: PoolClient | Pool, userID: number) {
 	// Check if user exists
 	// Remove all filters user is subscribed to
@@ -508,6 +489,13 @@ export async function getUserIDFromCode(
 		return result.rows[0][DB_USER_ID];
 	}
 }
+
+// #endregion USER ACCESS
+
+// ===========================
+// USER AND FILTER INTERACTION
+// ===========================
+// #region
 
 async function doesUserHaveFilter(
 	client: PoolClient | Pool,
@@ -605,6 +593,61 @@ export async function getUserFilters(
 	return [];
 }
 
+// #endregion USER AND FILTER INTERACTION
+
+// ==================================
+// USER SUBSCRIPTION AND NOTIFICATION
+// ==================================
+// #region
+
+/** Removes the given push subscription for a user, if it exists. Ignores
+ *  repeat subscriptions for the device associated with other users.
+ */
+export async function removeUserPushSubscription(
+  client: PoolClient | Pool,
+	userID: number,
+  subscription: Subscription
+) {
+  throw new NotYetImplementedError("");
+}
+
+/** Deletes all subscriptions for the given device across all users. */
+export async function deletePushSubscription(
+  client: PoolClient | Pool,
+  subscription: Subscription
+) {
+  throw new NotYetImplementedError("");
+}
+
+/**
+ * Returns an array of subscription data for the given user. Returns an empty
+ * array if no subscription could be found.
+ */
+export async function getUserSubscriptions(client: PoolClient | Pool,
+	  userID: number): Promise<Subscription[]> {
+  // Get all subscriptions that match this user
+  let result = await queryAndLog(client,
+    `SELECT * FROM ${DB_TABLE_SUBSCRIPTIONS}
+      WHERE ${DB_USER_ID} = ${userID}`);
+
+  if (result && result.rowCount > 0) {
+    // Parse each row into its own subscription object.
+    let subscriptions = [];
+    for (let row of result.rows) {
+      subscriptions.push(new Subscription(
+        row[DB_ENDPOINT],
+        row[DB_EXPIRATION],
+        {
+          "auth": row[DB_AUTH_KEY],
+          "p256dh": row[DB_P256DH_KEY]
+        }
+      ));
+    }
+    return subscriptions;
+  }
+  return [];
+}
+
 /**
  * Returns a set of all the user IDs with filters that match the gear item.
  * @param {*} gearData
@@ -644,7 +687,8 @@ export async function getUserIDsToBeNotified(
 	return userSet;
 }
 
-// #endregion
+// #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
+
 
 export function getDBClient(): Pool {
 	// TODO: Retrieve values from an environment variable
@@ -657,9 +701,7 @@ export function getDBClient(): Pool {
 	});
 }
 
+// On load, set up the database if it's not already set up.
+// TODO: Move this to a Node server setup method?
 const pool = getDBClient();
-
 setupDatabaseTables(pool);
-
-let testAnyFilter = new Filter("", 2, [], ["Rockenberg"], ["Run Speed Up"]);
-//let testFindGear = new Filter("Fresh Fish Head", 0, [], [], []);

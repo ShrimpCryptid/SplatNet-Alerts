@@ -8,7 +8,6 @@ export const DB_TABLE_SERVER_CACHE = "ServerCache";
 /** Raw gear data JSON, as retrieved from Splatoon3.ink. */
 export const DB_CACHE_KEY = "cachekey";
 export const DB_CACHE_DATA = "cachedata";
-export const DB_CACHE_EXPIRATION = "cacheexpiration";
 
 // UsersToFilters table data
 export const DB_TABLE_USERS_TO_FILTERS = "UsersToFilters";

@@ -1,35 +1,31 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear_loader";
-import { v4 as uuidv4 , validate } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
+import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES } from "../constants";
 import {
-	GEAR_BRANDS,
-	GEAR_TYPES,
-	GEAR_ABILITIES,
-} from "../constants";
-import {
-  DB_GEAR_NAME,
-  DB_GEAR_RARITY,
-  DB_GEAR_TYPE_WILDCARD,
-  DB_GEAR_ABILITY_WILDCARD,
-  DB_GEAR_BRAND_WILDCARD,
-  DB_TABLE_FILTERS,
-  DB_FILTER_ID,
-  DB_LAST_NOTIFIED_EXPIRATION,
-  DB_PAIR_ID,
-  DB_TABLE_USERS,
-  DB_TABLE_USERS_TO_FILTERS,
-  DB_USER_ID,
-  DB_USER_CODE,
-  DB_LAST_MODIFIED,
-  DB_TABLE_SUBSCRIPTIONS,
-  DB_ENDPOINT,
-  DB_EXPIRATION,
-  DB_AUTH_KEY,
-  DB_P256DH_KEY,
-  DB_SUBSCRIPTION_ID,
-  DB_TABLE_SERVER_CACHE,
-  DB_CACHE_DATA,
-  DB_CACHE_KEY
+	DB_GEAR_NAME,
+	DB_GEAR_RARITY,
+	DB_GEAR_TYPE_WILDCARD,
+	DB_GEAR_ABILITY_WILDCARD,
+	DB_GEAR_BRAND_WILDCARD,
+	DB_TABLE_FILTERS,
+	DB_FILTER_ID,
+	DB_LAST_NOTIFIED_EXPIRATION,
+	DB_PAIR_ID,
+	DB_TABLE_USERS,
+	DB_TABLE_USERS_TO_FILTERS,
+	DB_USER_ID,
+	DB_USER_CODE,
+	DB_LAST_MODIFIED,
+	DB_TABLE_SUBSCRIPTIONS,
+	DB_ENDPOINT,
+	DB_EXPIRATION,
+	DB_AUTH_KEY,
+	DB_P256DH_KEY,
+	DB_SUBSCRIPTION_ID,
+	DB_TABLE_SERVER_CACHE,
+	DB_CACHE_DATA,
+	DB_CACHE_KEY,
 } from "../constants/db";
 import Filter from "./filter";
 import {
@@ -37,7 +33,7 @@ import {
 	NoSuchUserError,
 	NoSuchFilterError,
 	mapGetWithDefault,
-  IllegalArgumentError,
+	IllegalArgumentError,
 } from "./utils";
 import Subscription from "./subscription";
 
@@ -66,7 +62,7 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
 /**
  * Queries the client and logs any errors to the console, along with the
  * offending SQL query.
- * @param client 
+ * @param client
  * @param queryText The text string of the query. Queries can be parameterized
  * as described in the node-postgres documentation
  * (https://node-postgres.com/features/queries) to prevent SQL injection.
@@ -78,7 +74,7 @@ function arrayEqual(arr1: any[], arr2: any[]): boolean {
 async function queryAndLog(
 	client: Pool | PoolClient,
 	queryText: string,
-  values: any[]=[]
+	values: any[] = []
 ): Promise<QueryResult> {
 	try {
 		const result = await client.query(queryText, values);
@@ -86,8 +82,8 @@ async function queryAndLog(
 	} catch (err) {
 		console.log("ENCOUNTERED ERROR:");
 		console.log(queryText);
-    console.log(values);
-    throw err;
+		console.log(values);
+		throw err;
 	}
 }
 
@@ -171,7 +167,7 @@ function rowDataToFilter(rowData: { [key: string]: any }): Filter {
  * into an SQL query.
  */
 function getTimestamp(): string {
-  return `'${new Date(Date.now()).toISOString()}'`;
+	return `'${new Date(Date.now()).toISOString()}'`;
 }
 
 //#endregion HELPER METHODS
@@ -185,33 +181,41 @@ function getTimestamp(): string {
  * @effects Initial setup the database and its tables.
  */
 export function setupDatabaseTables(client: Pool | PoolClient) {
-  // Create data cache table
-  // Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
-  let promises = []
+	// Create data cache table
+	// Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
+	let promises = [];
 
-  promises.push(queryAndLog(client,
-    `CREATE TABLE IF NOT EXISTS ${DB_TABLE_SERVER_CACHE} (
+	promises.push(
+		queryAndLog(
+			client,
+			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_SERVER_CACHE} (
       ${DB_CACHE_KEY} varchar(255),
       ${DB_CACHE_DATA} jsonb,
       ${DB_LAST_MODIFIED} varchar(30),
       PRIMARY KEY (${DB_CACHE_KEY})
     );`
-  ));
+		)
+	);
 
-  // Create users table
-	promises.push(queryAndLog(client,
-		`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
+	// Create users table
+	promises.push(
+		queryAndLog(
+			client,
+			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
             ${DB_USER_ID} SERIAL,
             ${DB_USER_CODE} varchar(255),
             ${DB_LAST_NOTIFIED_EXPIRATION} varchar(30),
             ${DB_LAST_MODIFIED} varchar(30),
             PRIMARY KEY (${DB_USER_ID})
         );`
-	));
+		)
+	);
 
-  // Create user subscriptions table.
-  promises.push(queryAndLog(client,
-    `CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
+	// Create user subscriptions table.
+	promises.push(
+		queryAndLog(
+			client,
+			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
           ${DB_SUBSCRIPTION_ID} SERIAL,
           ${DB_USER_ID} int4,
           ${DB_ENDPOINT} varchar(400),
@@ -224,10 +228,14 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
             FOREIGN KEY (${DB_USER_ID})
               REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID})
     );`
-  ));
+		)
+	);
 
-  // Create pairing table, which pairs users with their selected filters.
-	promises.push(queryAndLog(client, `
+	// Create pairing table, which pairs users with their selected filters.
+	promises.push(
+		queryAndLog(
+			client,
+			`
     CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
         ${DB_PAIR_ID} SERIAL,
         ${DB_USER_ID} int4,
@@ -240,7 +248,9 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
         CONSTRAINT fk_filterid
           FOREIGN KEY (${DB_FILTER_ID})
             REFERENCES ${DB_TABLE_FILTERS}(${DB_FILTER_ID})
-    );`));
+    );`
+		)
+	);
 
 	// Auto-generate filter table.
 	// Auto-generates boolean columns for gear types, abilities, and brands.
@@ -251,7 +261,10 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 	}
 	let filterColumnQuery = joinedFilterColumnNames.join(" BOOL,\n\t") + " BOOL";
 
-	promises.push(queryAndLog(client, `CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
+	promises.push(
+		queryAndLog(
+			client,
+			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
         ${DB_FILTER_ID} SERIAL,
         ${DB_GEAR_NAME} varchar(255),
         ${DB_GEAR_RARITY} int2,
@@ -259,9 +272,11 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
         ${DB_GEAR_BRAND_WILDCARD} BOOL,
         ${DB_GEAR_ABILITY_WILDCARD} BOOL,
         ${filterColumnQuery}
-    );`));
-  
-  Promise.all(promises);  // wait for all queries to complete execution.
+    );`
+		)
+	);
+
+	Promise.all(promises); // wait for all queries to complete execution.
 }
 
 // #endregion DATABASE SETUP
@@ -269,51 +284,62 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 // ==========
 // DATA CACHE
 // ==========
-// # region
+// #region
 
 /**
  * Returns whether the database cache containts the given key.
  * NOTE: Does not check for null values!
  */
-export async function hasCachedData(client: Pool | PoolClient, key: string): Promise<boolean> {
-  let result = await queryAndLog(
-    client,
-    `SELECT FROM ${DB_TABLE_SERVER_CACHE} WHERE ${DB_CACHE_KEY} = $1`,
-    [key]  // passed as parameter to prevent SQL insertion attack
-  )
-  return result.rowCount > 0;
+export async function hasCachedData(
+	client: Pool | PoolClient,
+	key: string
+): Promise<boolean> {
+	let result = await queryAndLog(
+		client,
+		`SELECT FROM ${DB_TABLE_SERVER_CACHE} WHERE ${DB_CACHE_KEY} = $1`,
+		[key] // passed as parameter to prevent SQL insertion attack
+	);
+	return result.rowCount > 0;
 }
 
-export async function getCachedData(client: Pool | PoolClient, key: string, defaultValue: any=null): Promise<any> {
-  let result = await queryAndLog(
-    client,
-    `SELECT ${DB_CACHE_DATA} FROM ${DB_TABLE_SERVER_CACHE}
+export async function getCachedData(
+	client: Pool | PoolClient,
+	key: string,
+	defaultValue: any = null
+): Promise<any> {
+	let result = await queryAndLog(
+		client,
+		`SELECT ${DB_CACHE_DATA} FROM ${DB_TABLE_SERVER_CACHE}
       WHERE ${DB_CACHE_KEY} = $1`,
-    [key]
-  );
-  if (result.rowCount > 0) {
-    return result.rows[0][DB_CACHE_DATA];
-  } else {
-    return defaultValue;
-  }
+		[key]
+	);
+	if (result.rowCount > 0) {
+		return result.rows[0][DB_CACHE_DATA];
+	} else {
+		return defaultValue;
+	}
 }
 
-export async function setCachedData(client: Pool | PoolClient, key: string, value: any) {
-  // Insert into the table unless the key already exists, in which case the
-  // new values will be inserted instead.
-  await queryAndLog(
-    client,
-    `INSERT INTO ${DB_TABLE_SERVER_CACHE} (${DB_CACHE_KEY}, ${DB_CACHE_DATA}, ${DB_LAST_MODIFIED})
+export async function setCachedData(
+	client: Pool | PoolClient,
+	key: string,
+	value: any
+) {
+	// Insert into the table unless the key already exists, in which case the
+	// new values will be inserted instead.
+	await queryAndLog(
+		client,
+		`INSERT INTO ${DB_TABLE_SERVER_CACHE} (${DB_CACHE_KEY}, ${DB_CACHE_DATA}, ${DB_LAST_MODIFIED})
         VALUES ($1, $2, $3)
       ON CONFLICT (${DB_CACHE_KEY}) DO
           UPDATE SET
             ${DB_CACHE_DATA} = $2,
             ${DB_LAST_MODIFIED} = $3;`,
-    [key, value, getTimestamp()]
-  );
+		[key, value, getTimestamp()]
+	);
 }
 
-// # endregion DATA CACHE
+// #endregion DATA CACHE
 
 // =============
 // FILTER ACCESS
@@ -428,7 +454,7 @@ export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 		`INSERT INTO ${DB_TABLE_USERS}
       (${DB_USER_CODE}, ${DB_LAST_MODIFIED})
       VALUES ($1, ${getTimestamp()});`,
-    [newUserCode]
+		[newUserCode]
 	);
 	return newUserCode;
 }
@@ -447,41 +473,49 @@ async function generateUserCode(client: PoolClient | Pool): Promise<string> {
 export async function addUserPushSubscription(
 	client: PoolClient | Pool,
 	userID: number,
-  subscription: Subscription
+	subscription: Subscription
 ) {
-  // Note-- all `subscription` fields are vulnerable to SQL injection. Therefore
-  // all of these fields MUST be passed as parameters to client.query() or
-  // queryAndLog() (see optional value parameter).
-  if (!(await hasUser(client, userID))) {
-    throw new NoSuchUserError(userID);
-  }
-  // Check if user has already subscribed this device
-  // use text, value query style to prevent SQL injection attacks
-  let result = await queryAndLog(
-    client,
-    `SELECT ${DB_SUBSCRIPTION_ID} FROM ${DB_TABLE_SUBSCRIPTIONS}
+	// Note-- all `subscription` fields are vulnerable to SQL injection. Therefore
+	// all of these fields MUST be passed as parameters to client.query() or
+	// queryAndLog() (see optional value parameter).
+	if (!(await hasUser(client, userID))) {
+		throw new NoSuchUserError(userID);
+	}
+	// Check if user has already subscribed this device
+	// use text, value query style to prevent SQL injection attacks
+	let result = await queryAndLog(
+		client,
+		`SELECT ${DB_SUBSCRIPTION_ID} FROM ${DB_TABLE_SUBSCRIPTIONS}
       WHERE ${DB_USER_ID} = ${userID}
         AND ${DB_ENDPOINT} = $1;`,
-    [subscription.endpoint]
-  );
-  
-  // Check whether we need to update the entry or make a new one.
-  if (result.rowCount > 0) {
-    // Already has this entry, so we update it
-    let subscriptionID = result.rows[0][DB_SUBSCRIPTION_ID];
-    await queryAndLog(client,
-      `UPDATE ${DB_TABLE_SUBSCRIPTIONS}
+		[subscription.endpoint]
+	);
+
+	// Check whether we need to update the entry or make a new one.
+	if (result.rowCount > 0) {
+		// Already has this entry, so we update it
+		let subscriptionID = result.rows[0][DB_SUBSCRIPTION_ID];
+		await queryAndLog(
+			client,
+			`UPDATE ${DB_TABLE_SUBSCRIPTIONS}
         SET ${DB_ENDPOINT} = $1,
             ${DB_EXPIRATION} = $2,
             ${DB_AUTH_KEY} = $3,
             ${DB_P256DH_KEY} = $4,
             ${DB_LAST_MODIFIED} = ${getTimestamp()}
         WHERE ${DB_SUBSCRIPTION_ID} = ${subscriptionID};`,
-      [subscription.endpoint, subscription.expirationTime, subscription.keys.auth, subscription.keys.p256dh]);
-  } else {
-    // Create a new entry for new subscription
-    await queryAndLog(client,
-      `INSERT INTO ${DB_TABLE_SUBSCRIPTIONS}
+			[
+				subscription.endpoint,
+				subscription.expirationTime,
+				subscription.keys.auth,
+				subscription.keys.p256dh,
+			]
+		);
+	} else {
+		// Create a new entry for new subscription
+		await queryAndLog(
+			client,
+			`INSERT INTO ${DB_TABLE_SUBSCRIPTIONS}
         ( ${DB_USER_ID},
           ${DB_ENDPOINT},
           ${DB_EXPIRATION},
@@ -490,15 +524,20 @@ export async function addUserPushSubscription(
           ${DB_LAST_MODIFIED}
         )
         VALUES (${userID}, $1, $2, $3, $4, ${getTimestamp()});`,
-      [subscription.endpoint, subscription.expirationTime, subscription.keys.auth, subscription.keys.p256dh]
-    );
-  }
+			[
+				subscription.endpoint,
+				subscription.expirationTime,
+				subscription.keys.auth,
+				subscription.keys.p256dh,
+			]
+		);
+	}
 }
 
 async function removeUser(client: PoolClient | Pool, userID: number) {
 	// Check if user exists
 	// Remove all filters user is subscribed to
-  // Remove all subscriptions the user has
+	// Remove all subscriptions the user has
 	// Finally remove user
 	if (!(await hasUser(client, userID))) {
 		throw new NoSuchUserError(userID);
@@ -527,15 +566,15 @@ export async function getUserIDFromCode(
 	client: PoolClient | Pool,
 	userCode: string
 ): Promise<number> {
-  // TODO: Add extra manual regex check here for other illegal characters
-  if (!validate(userCode)) {
-    throw new IllegalArgumentError(userCode + " is not a valid uuid.");
-  }
+	// TODO: Add extra manual regex check here for other illegal characters
+	if (!validate(userCode)) {
+		throw new IllegalArgumentError(userCode + " is not a valid uuid.");
+	}
 	let result = await queryAndLog(
-    client,
+		client,
 		`SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS}
       WHERE ${DB_USER_CODE} = $1`,
-    [userCode]  // passed as parameter so postgres can handle attack prevention
+		[userCode] // passed as parameter so postgres can handle attack prevention
 	);
 	if (result.rowCount == 0) {
 		return -1;
@@ -586,7 +625,7 @@ export async function addFilterToUser(
 	}
 
 	if (!(await doesUserHaveFilter(client, userID, filterID))) {
-    // Make the new filter
+		// Make the new filter
 		await queryAndLog(
 			client,
 			`INSERT INTO ${DB_TABLE_USERS_TO_FILTERS}
@@ -658,48 +697,50 @@ export async function getUserFilters(
  *  repeat subscriptions for the device associated with other users.
  */
 export async function removeUserPushSubscription(
-  client: PoolClient | Pool,
+	client: PoolClient | Pool,
 	userID: number,
-  subscription: Subscription
+	subscription: Subscription
 ) {
-  throw new NotYetImplementedError("");
+	throw new NotYetImplementedError("");
 }
 
 /** Deletes all subscriptions for the given device across all users. */
 export async function deletePushSubscription(
-  client: PoolClient | Pool,
-  subscription: Subscription
+	client: PoolClient | Pool,
+	subscription: Subscription
 ) {
-  throw new NotYetImplementedError("");
+	throw new NotYetImplementedError("");
 }
 
 /**
  * Returns an array of subscription data for the given user. Returns an empty
  * array if no subscription could be found.
  */
-export async function getUserSubscriptions(client: PoolClient | Pool,
-	  userID: number): Promise<Subscription[]> {
-  // Get all subscriptions that match this user
-  let result = await queryAndLog(client,
-    `SELECT * FROM ${DB_TABLE_SUBSCRIPTIONS}
-      WHERE ${DB_USER_ID} = ${userID}`);
+export async function getUserSubscriptions(
+	client: PoolClient | Pool,
+	userID: number
+): Promise<Subscription[]> {
+	// Get all subscriptions that match this user
+	let result = await queryAndLog(
+		client,
+		`SELECT * FROM ${DB_TABLE_SUBSCRIPTIONS}
+      WHERE ${DB_USER_ID} = ${userID}`
+	);
 
-  if (result && result.rowCount > 0) {
-    // Parse each row into its own subscription object.
-    let subscriptions = [];
-    for (let row of result.rows) {
-      subscriptions.push(new Subscription(
-        row[DB_ENDPOINT],
-        row[DB_EXPIRATION],
-        {
-          "auth": row[DB_AUTH_KEY],
-          "p256dh": row[DB_P256DH_KEY]
-        }
-      ));
-    }
-    return subscriptions;
-  }
-  return [];
+	if (result && result.rowCount > 0) {
+		// Parse each row into its own subscription object.
+		let subscriptions = [];
+		for (let row of result.rows) {
+			subscriptions.push(
+				new Subscription(row[DB_ENDPOINT], row[DB_EXPIRATION], {
+					auth: row[DB_AUTH_KEY],
+					p256dh: row[DB_P256DH_KEY],
+				})
+			);
+		}
+		return subscriptions;
+	}
+	return [];
 }
 
 /**
@@ -710,14 +751,16 @@ export async function getUserIDsToBeNotified(
 	client: PoolClient | Pool,
 	gear: Gear
 ): Promise<Set<number>> {
-  // Prevent SQL injection attacks.
-  // Allow only alphanumeric characters, spaces, and -, +, (, and ) chars. 
-  const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()& ]*$/);
-  if (!allowedCharsPattern.test(gear.name)) {
-    throw new IllegalArgumentError("Gear name '" + gear.name + "' contains special characters.");
-  }
-  // Match filters by properties, either by specific brand/ability/type or by
-  // wildcard selectors. Then, select all users that match any of those filters.
+	// Prevent SQL injection attacks.
+	// Allow only alphanumeric characters, spaces, and -, +, (, and ) chars.
+	const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()& ]*$/);
+	if (!allowedCharsPattern.test(gear.name)) {
+		throw new IllegalArgumentError(
+			"Gear name '" + gear.name + "' contains special characters."
+		);
+	}
+	// Match filters by properties, either by specific brand/ability/type or by
+	// wildcard selectors. Then, select all users that match any of those filters.
 	let result = await client.query(
 		`WITH matchingFilters(${DB_FILTER_ID}) AS 
         (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
@@ -728,22 +771,21 @@ export async function getUserIDsToBeNotified(
           AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)}))
     SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}, matchingFilters
       WHERE ${DB_TABLE_USERS_TO_FILTERS}.${DB_FILTER_ID} = matchingFilters.${DB_FILTER_ID};`,
-    [gear.name]  // passed as a parameter for safety
+		[gear.name] // passed as a parameter for safety
 	);
 
-  // Get all users, adding them to a set because there may be duplicates.
+	// Get all users, adding them to a set because there may be duplicates.
 	let userSet = new Set<number>();
-  if (result && result.rowCount > 0) {
-    for (let row of result.rows) {
-      userSet.add(row[DB_USER_ID]);
-    }
-  }
+	if (result && result.rowCount > 0) {
+		for (let row of result.rows) {
+			userSet.add(row[DB_USER_ID]);
+		}
+	}
 
 	return userSet;
 }
 
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
-
 
 export function getDBClient(): Pool {
 	// TODO: Retrieve values from an environment variable

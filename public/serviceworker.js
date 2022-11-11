@@ -5,3 +5,6 @@ self.addEventListener('push', (event) => {
     image: data.image,
   });
 });
+
+// TODO: Add pushsubscriptionchange listener
+// See https://blog.pushpad.xyz/2021/01/web-push-error-410-the-push-subscription-has-expired-or-the-user-has-unsubscribed/

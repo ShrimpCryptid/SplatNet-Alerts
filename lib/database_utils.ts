@@ -704,12 +704,57 @@ export async function removeUserPushSubscription(
 	throw new NotYetImplementedError("");
 }
 
-/** Deletes all subscriptions for the given device across all users. */
+/** Deletes all subscriptions with a matching endpoint, regardless of user. */
 export async function deletePushSubscription(
 	client: PoolClient | Pool,
 	subscription: Subscription
 ) {
-	throw new NotYetImplementedError("");
+  await queryAndLog(
+    client,
+    `DELETE FROM ${DB_TABLE_SUBSCRIPTIONS}
+      WHERE ${DB_ENDPOINT} = $1;`,
+    [subscription.endpoint]
+  )
+}
+
+/**
+ * Updates a user's data with the expiration time of the last item the user was
+ * notified about. Used to prevent repeat notifications and to mark which
+ * users have already been notified.
+ */
+export async function updateLastNotifiedExpiration(
+  client: PoolClient | Pool,
+  userID: number,
+  latestExpiration: number
+) {
+  await queryAndLog(
+    client,
+    `UPDATE ${DB_TABLE_USERS} SET 
+      ${DB_LAST_NOTIFIED_EXPIRATION}  = $1
+      WHERE ${DB_USER_ID} = $2;`,
+    [latestExpiration, userID]
+  );
+}
+
+/**
+ * Returns the expiration timestamp of the last item the given user was notified
+ * about. If no such user exists, returns -1.
+ */
+export async function getLastNotifiedExpiration( 
+  client: PoolClient | Pool,
+  userID: number,
+): Promise<number> {
+  let result = await queryAndLog(
+    client,
+    `SELECT ${DB_LAST_NOTIFIED_EXPIRATION} FROM ${DB_TABLE_USERS}
+      WHERE ${DB_USER_ID} = $1;`,
+    [userID]
+  );
+  if (result.rowCount > 0 && result.rows[0][DB_LAST_NOTIFIED_EXPIRATION] !== null) {
+    return result.rows[0][DB_LAST_NOTIFIED_EXPIRATION];
+  } else {
+    return -1;
+  }
 }
 
 /**
@@ -781,7 +826,6 @@ export async function getUserIDsToBeNotified(
 			userSet.add(row[DB_USER_ID]);
 		}
 	}
-
 	return userSet;
 }
 

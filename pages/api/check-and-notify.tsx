@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
-import { getDBClient, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions } from '../../lib/database_utils';
+import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions, updateLastNotifiedExpiration } from '../../lib/database_utils';
 import Filter from "../../lib/filter";
 import webpush from 'web-push';
 import { fetchAPIRawGearData, fetchCachedRawGearData, Gear, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
@@ -65,7 +65,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       cachedGear = rawGearDataToGearList(cachedRawGearData)
     }
-    console.log(cachedGear);
 
     // Check if gear has expired (or if we have no stored gear data)
     // Note that gear is sorted in order of expiration, ascending
@@ -77,7 +76,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Retrieve the new gear data from the API.
     let fetchedRawGearData = await fetchAPIRawGearData();
     let fetchedGear = rawGearDataToGearList(fetchedRawGearData);
-    console.log(fetchedGear);
 
     // 2. Get list of new gear items.
     let newGear = getNewGearItems(cachedGear, fetchedGear);
@@ -100,38 +98,71 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     // 5. Send each user notifications to their subscribed devices.
+    let startTime = Date.now();
+    let numSkipped = 0;
+    let devicesNotified = 0;
+    let devicesFailed = 0;
+
     let promises = [];
     for (let userID of allUserIDs) {
       // Set up the notification *this* user should receive.
       let userGear = getUserGear(gearToUserIDs, userID);
       let notification = JSON.stringify(generateNotificationPayload(userGear));
+      let latestExpiration = userGear[userGear.length - 1].expiration;``
+
+      // Check that we haven't already notified this user
+      if (latestExpiration <= await getLastNotifiedExpiration(client, userID)) {
+        // We've already notified this user about these items, so we skip them.
+        numSkipped++;
+        continue;
+      }
       
       // Send notification to all of the user's subscribed devices
       let notificationPromises = [];
       let userSubscriptions = await getUserSubscriptions(client, userID);
+      if (userSubscriptions.length == 0) { // user has no subscribed devices
+        numSkipped++;
+        continue;
+      }
+
       for (let subscription of userSubscriptions) {
-        // TODO: Check that users haven't already been notified
+        devicesNotified++;
         notificationPromises.push(
           webpush.sendNotification(
               subscription,
               notification,
               // {timeout: 5}
-            ).then(({statusCode}) => {
-            // TODO: Handle push error codes (https://blog.pushpad.xyz/2022/04/web-push-errors-explained-with-http-status-codes/)
+            ).catch((err) => {
+              devicesFailed++;
+              if (err.statusCode === 404 || err.statusCode === 410) {
+                // 404: endpoint not found, 410: push subscription expired
+                // Remove this subscription from the database.
+                return deletePushSubscription(client, subscription);
+              } else {
+                throw err;
+              }
           })
         );
       }
       promises.push(Promise.all(notificationPromises).then(() => {
         // Update user entry once all devices have been notified.
+        updateLastNotifiedExpiration(client, userID, latestExpiration);
       }));
     }
 
-    // Wait for all notifications to finish.
+    // 6. Wait for all notifications to finish.
     await Promise.all(promises);
 
-    // Store the new cached gear data for the future.
-    // We only do this AFTER all users have been notified in case the 
+    // 7. Store the new cached gear data for the future.
+    // We only do this AFTER all users have been notified in case of server
+    // crashes-- if this happens, the server will pick up where it left off.
     await updateCachedRawGearData(client, fetchedRawGearData);
+
+    // 8. Logging
+    let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
+    console.log(`Notifications done. (Finished in ${timeElapsedSeconds.toFixed(2)} seconds)`);
+    console.log(`Users notified: ${allUserIDs.size} users (${numSkipped} skipped)`);
+    console.log(`Devices notified: ${devicesNotified - devicesFailed} devices (${devicesFailed} failures)`);
 
     return res.status(200).end();  // ok
   } catch (err) {

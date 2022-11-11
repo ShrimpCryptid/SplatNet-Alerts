@@ -1,7 +1,8 @@
 import { GEAR_ABILITIES, GEAR_BRANDS } from "../constants";
 
 /**
- * Helper function for auto-generating the ability, gear, and brand image imports. 
+ * Helper function for auto-generating the ability, gear, and brand image
+ * imports. 
  */
 export function printIconImportCode(items: string[]) {
 	let importStatements = "";

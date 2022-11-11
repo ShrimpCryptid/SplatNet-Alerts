@@ -279,7 +279,7 @@ export async function hasCachedData(client: Pool | PoolClient, key: string): Pro
   let result = await queryAndLog(
     client,
     `SELECT FROM ${DB_TABLE_SERVER_CACHE} WHERE ${DB_CACHE_KEY} = $1`,
-    [key]  // passed as parameter to prevent attack
+    [key]  // passed as parameter to prevent SQL insertion attack
   )
   return result.rowCount > 0;
 }
@@ -288,7 +288,7 @@ export async function getCachedData(client: Pool | PoolClient, key: string, defa
   let result = await queryAndLog(
     client,
     `SELECT ${DB_CACHE_DATA} FROM ${DB_TABLE_SERVER_CACHE}
-      WHERE ${DB_CACHE_DATA} = $1`,
+      WHERE ${DB_CACHE_KEY} = $1`,
     [key]
   );
   if (result.rowCount > 0) {
@@ -304,12 +304,11 @@ export async function setCachedData(client: Pool | PoolClient, key: string, valu
   await queryAndLog(
     client,
     `INSERT INTO ${DB_TABLE_SERVER_CACHE} (${DB_CACHE_KEY}, ${DB_CACHE_DATA}, ${DB_LAST_MODIFIED})
-        VALUES($1, $2, $3)
-      ON CONFLICT (${DB_CACHE_KEY})
-        DO
+        VALUES ($1, $2, $3)
+      ON CONFLICT (${DB_CACHE_KEY}) DO
           UPDATE SET
-            ${DB_CACHE_DATA} = $2, ${DB_LAST_MODIFIED} = $3
-          WHERE ${DB_CACHE_KEY} = $1`,
+            ${DB_CACHE_DATA} = $2,
+            ${DB_LAST_MODIFIED} = $3;`,
     [key, value, getTimestamp()]
   );
 }
@@ -462,7 +461,7 @@ export async function addUserPushSubscription(
     client,
     `SELECT ${DB_SUBSCRIPTION_ID} FROM ${DB_TABLE_SUBSCRIPTIONS}
       WHERE ${DB_USER_ID} = ${userID}
-        AND ${DB_ENDPOINT} = '$1';`,
+        AND ${DB_ENDPOINT} = $1;`,
     [subscription.endpoint]
   );
   

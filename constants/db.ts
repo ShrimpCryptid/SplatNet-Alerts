@@ -9,6 +9,8 @@ export const DB_TABLE_SERVER_CACHE = "ServerCache";
 export const DB_CACHE_KEY = "cachekey";
 export const DB_CACHE_DATA = "cachedata";
 
+export const DB_CACHE_KEY_GEAR_DATA = "geardata";
+
 // UsersToFilters table data
 export const DB_TABLE_USERS_TO_FILTERS = "UsersToFilters";
 /** Unique identifier for every pairing between a user and a filter. */

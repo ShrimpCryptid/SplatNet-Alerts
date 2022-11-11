@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
 import Router from "next/router";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
-import { SERVER } from "../config";
+import { SERVER, VAPID_PUBLIC_KEY } from "../config";
 
 /**
  * Retrieves a list of the user's current filters from the database.
@@ -102,7 +102,7 @@ export default function Home({
       await requestNotificationPermission();
       await registerServiceWorker();
 
-      let subscription = await createNotificationSubscription();
+      let subscription = await createNotificationSubscription(VAPID_PUBLIC_KEY);
       let subscriptionString = JSON.stringify(subscription);
       // TODO: Store locally?
       

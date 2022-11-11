@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
-import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions, updateLastNotifiedExpiration } from '../../lib/database_utils';
-import Filter from "../../lib/filter";
+import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDsToBeNotified, getUserSubscriptions, updateLastNotifiedExpiration } from '../../lib/database_utils';
 import webpush from 'web-push';
 import { fetchAPIRawGearData, fetchCachedRawGearData, Gear, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
+import { configureWebPush } from "../../lib/server_utils";
 
 function getUserGear(gearToUsers: Map<Gear, Set<number>>, userID: number): Gear[] {
   let gearList = [];
@@ -91,11 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("Notifying " + allUserIDs.size + " users.");
 
     // 4. Configure webpush
-    webpush.setVapidDetails(
-      'mailto:shrimpcryptid@gmail.com',
-      VAPID_PUBLIC_KEY,
-      VAPID_PRIVATE_KEY
-    );
+    configureWebPush();
 
     // 5. Send each user notifications to their subscribed devices.
     let startTime = Date.now();

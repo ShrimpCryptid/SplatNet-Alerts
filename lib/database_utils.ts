@@ -35,7 +35,7 @@ import {
 	mapGetWithDefault,
 	IllegalArgumentError,
 } from "./utils";
-import Subscription from "./subscription";
+import { Subscription } from "./notifications";
 
 // ==============
 // HELPER METHODS

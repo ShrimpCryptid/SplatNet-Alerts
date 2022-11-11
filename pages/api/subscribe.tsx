@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { API_SUBSCRIPTION, API_USER_CODE } from "../../constants";
 import { getDBClient, getUserIDFromCode, makeNewUser, addUserPushSubscription } from "../../lib/database_utils";
-import Subscription from "../../lib/subscription";
+import { Subscription } from "../../lib/notifications";
 
 /**
  * Updates the user's notification subscription.

@@ -12,7 +12,7 @@
   --cylinder-width: 40vmin;
   --face-count: 30;
   --face-deg: calc(360deg / var(--face-count));
-  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.09vw);
+  --face-width: calc(var(--cylinder-width) / var(--face-count));
   --face-shift: calc(var(--cylinder-width) / var(--pi) / 2);
   --pi: 3.14159265358979;
   --index: 0;

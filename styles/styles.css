@@ -79,3 +79,24 @@ button:active:enabled {
 button:disabled {
   filter: var(--button-disabled-filter);
 }
+
+div::-webkit-scrollbar       {
+  background-color:var(--background-alt);
+  width:12px;
+  margin-right: 2px;
+  border-radius: 12.5px;
+}
+div::-webkit-scrollbar-track {
+  background-color: var(--background-alt);
+}
+
+div::-webkit-scrollbar-thumb {
+  background-color:#babac0;
+  border-radius:16px;
+
+  border:3.5px solid var(--background-alt)
+}
+div::-webkit-scrollbar-thumb:hover {
+  border-radius:16px;
+  border:3px solid #babac0
+}

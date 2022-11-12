@@ -1,15 +1,13 @@
 .container {
-    width: 100%;
-    background-color: #252525;
+    width: auto;
+    background-color: var(--background-alt);
     border-radius: 20px;
     display: flex;
     flex-direction: row;
-    margin: 10px 0;
     padding: 10px;
 }
 
 .lcontainer {
-    margin-right: 10px;
     width: 30%;
     align-items: center;
     display: flex;

@@ -9,6 +9,9 @@ import { DefaultPageProps } from "./_app";
 import Router from "next/router";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
 import { SERVER, VAPID_PUBLIC_KEY } from "../config";
+import SuperJumpLoadAnimation from "../components/superjump/superjump";
+
+import testImage from '../public/images/superjump/superjumpmarker_tail.svg';
 
 /**
  * Retrieves a list of the user's current filters from the database.
@@ -40,7 +43,7 @@ export default function Home({
   let [notificationsToggle, setNotificationsToggle] = useState(false);
 
 	// Retrieve the user's filters from the database.
-  const updateFilterviews = async () => {
+  const updateFilterViews = async () => {
     if (usercode) {
       getUserFilters(usercode).then((filterList) =>
         setFilterList(filterList)
@@ -52,7 +55,7 @@ export default function Home({
   // On initial render only
   if (!filterList) {
     setEditingFilter(null);  // clear the filter we are editing.
-    updateFilterviews();  // run only once during initial page render
+    updateFilterViews();  // run only once during initial page render
   }
 
   // Click and edit a filter.
@@ -124,9 +127,14 @@ export default function Home({
 					<p>Get notified about gear from the SplatNet 3 app!</p>
 				</div>
 			</div>
+      <h2>Your Filters</h2>
+      <div className={styles.emptyFilterList}>
+        <SuperJumpLoadAnimation/>
+      </div>
 			<h2>Your Filters</h2>
-			<>
-        {filterList ? filterList.map((filter, index) => {
+      <button onClick={updateFilterViews}>Refresh</button>
+			<div className={styles.filterListContainer}>
+        {(filterList && filterList.length > 0) ? filterList.map((filter, index) => {
           return (
             <FilterView
               onClickEdit={() => onClickFilter(filter)}
@@ -136,7 +144,16 @@ export default function Home({
             />
           );
         }) : <></>}
-      </>
+
+        {(filterList && filterList.length == 0) ? 
+          <div className={styles.emptyFilterList}/> : <></>}
+
+        {(!filterList) ?
+          <div className={styles.emptyFilterList}>
+            <SuperJumpLoadAnimation/>
+          </div>
+          : <></>}
+      </div>
 			<Link href="filter">
 				<button>New Filter</button>
 			</Link>

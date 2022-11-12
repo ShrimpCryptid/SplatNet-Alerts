@@ -3,3 +3,31 @@
   justify-self: center;
   margin: 0 auto;
 }
+
+.filterListContainer {
+  width: 100%;
+  height: 100vmin;
+  max-height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 20px;
+}
+
+.emptyFilterList {
+  width: auto;
+  height: 100%;
+  margin: 10px;
+  outline-style: dashed;
+  outline-color: var(--background-alt);
+  outline-width: 3px;
+  border-radius: 20px;
+}
+
+.loadingFilterList {
+  width: auto;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}

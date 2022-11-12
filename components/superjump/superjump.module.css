@@ -1,0 +1,79 @@
+/** 
+ * Based on https://codepen.io/rebelchris/pen/vYRxZLP by Chris Bongers.
+ * Modified slightly as this project does not use Sass!
+ */
+
+.holder {
+  transform-style: preserve-3d;
+  transform: rotateX(-15deg);
+  transform-origin: center;
+  text-align: center;
+  position: relative;
+  --cylinder-width: 40vmin;
+  --face-count: 30;
+  --face-deg: calc(360deg / var(--face-count));
+  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.09vw);
+  --face-shift: calc(var(--cylinder-width) / var(--pi) / 2);
+  --pi: 3.14159265358979;
+  --index: 0;
+  align-items: center;
+}
+
+.cylinder {
+  position: relative;
+  height: 50vw;
+  width: 100%;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  animation: spin 5s infinite linear;
+  transform: translateZ(0);
+}
+
+.face {
+  position: absolute;
+  opacity: 0.7;
+  height: 90px;
+  width: var(--face-width);
+  top: 50%;
+  left: 50%;
+  margin: auto;
+  /* Translating 50% 50% means that position for top/left is center */
+  transform: translate(-50%, -50%) scaleX(-1) scaleY(1) rotateY(calc(var(--face-deg) * var(--index))) translateZ(calc(var(--face-shift))) translate3d(0, 0, 0);
+}
+
+@keyframes spin {
+  to {
+    transform: translateZ(0) rotateY(-360deg);
+  }
+}
+
+.bigIconHolder {
+  position: absolute;
+  opacity: 80%;
+  width: 100%;
+  height: 10vmin;
+  animation: bob 2.5s infinite ease-in-out;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: calc(50% - 100px);
+}
+
+@keyframes bob {
+  0% {
+    transform: translate(-50%, -30%);
+  }
+  50% {
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    transform: translate(-50%, -30%);
+  }
+}
+
+.label {
+  position: absolute;
+  text-align: center;
+  top: calc(50% + 60px);
+  left: 50%;
+  transform: translate(-50%, -50%)
+}

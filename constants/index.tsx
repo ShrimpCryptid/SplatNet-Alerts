@@ -77,3 +77,6 @@ export const GEAR_ABILITIES = [
 
 export const FE_WILDCARD = "Any";
 export const FE_LOCAL_USER_CODE = DB_USER_ID;
+
+export const FE_ERROR_404_MSG = "The server could not find your user ID. Please check your ID or make a new account.";
+export const FE_ERROR_500_MSG = "The server returned an error (500). Please report if you keep seeing this message.";

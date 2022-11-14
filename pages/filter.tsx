@@ -5,6 +5,7 @@ import Link from "next/link";
 import Router from "next/router";
 import React from "react";
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import FilterView from "../components/filter-view";
 import Selector from "../components/selector";
 import { SERVER } from "../config";
@@ -239,6 +240,7 @@ export default function FilterPage({
 				}
 				if (responseCode == 200) {
 					// Successfully saved; return to main page
+          toast.success("Filter saved.");
           setPageSwitchReady(true);
 				} else {
 					// TODO: Display an error message.

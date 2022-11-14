@@ -11,6 +11,7 @@
         "next": "^12.3.1",
         "node-fetch": "^3.2.10",
         "pg": "^8.8.0",
+        "react-toastify": "^9.1.1",
         "request-promise-native": "^1.0.9",
         "uuid": "^9.0.0",
         "web-push": "^3.5.0"

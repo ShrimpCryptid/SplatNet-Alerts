@@ -5,6 +5,9 @@ import type { AppProps } from "next/app";
 import Filter from "../lib/filter";
 import { FE_LOCAL_USER_CODE } from "../constants";
 
+import {toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export type DefaultPageProps = {
 	usercode: string | null;
 	setUserCode: CallableFunction;
@@ -13,15 +16,21 @@ export type DefaultPageProps = {
 };
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [usercode, setUserCode] = useState<null | string>(null);
+  // Initialize as undefined until we render, then get the local user data
+  // and transition it to either a string or null value.
+  const [usercode, setUserCode] = useState<null | string | undefined>(undefined);
 	const [editingFilter, setEditingFilter] = useState<null | Filter>(null);
 
   useEffect(() => {
     // Load locally-stored user code if it exists
-    if (window && window.localStorage.getItem(FE_LOCAL_USER_CODE) !== null && usercode === null) {
-      let storedUserCode = window.localStorage.getItem(FE_LOCAL_USER_CODE);
-      // Update internally stored usercode
-      setUserCode(storedUserCode);
+    if (usercode === undefined) {
+      if (window && window.localStorage.getItem(FE_LOCAL_USER_CODE) !== null) {
+        let storedUserCode = window.localStorage.getItem(FE_LOCAL_USER_CODE);
+        // Update internally stored usercode
+        setUserCode(storedUserCode);
+      } else {
+        setUserCode(null);
+      }
     }
   });
 
@@ -35,18 +44,20 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }
 
-
 	return (
 		<Layout>
-			<Component
-				{...pageProps}
-				usercode={usercode}
-				setUserCode={onSetUserCode}
-				editingFilter={editingFilter}
-				setEditingFilter={(filter: Filter) => {
-					setEditingFilter(filter);
-				}}
-			/>
+      <>
+      <button onClick={()=>toast("hi :)")}>test</button>
+      <Component
+        {...pageProps}
+        usercode={usercode}
+        setUserCode={onSetUserCode}
+        editingFilter={editingFilter}
+        setEditingFilter={(filter: Filter) => {
+          setEditingFilter(filter);
+        }}
+        />
+      </>
 		</Layout>
 	);
 }

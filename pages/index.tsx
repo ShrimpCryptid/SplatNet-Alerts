@@ -3,7 +3,7 @@ import Link from "next/link";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_FILTER_JSON, API_SUBSCRIPTION, API_USER_CODE } from "../constants";
+import { API_FILTER_JSON, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
 import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
 import Router from "next/router";
@@ -12,6 +12,7 @@ import { SERVER, VAPID_PUBLIC_KEY } from "../config";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 
 import testImage from '../public/images/superjump/superjumpmarker_tail.svg';
+import { toast } from "react-toastify";
 
 /**
  * Retrieves a list of the user's current filters from the database.
@@ -29,8 +30,12 @@ async function getUserFilters(userCode: string): Promise<Filter[]> {
 			filterList.push(Filter.deserializeObject(json));
 		}
 		return filterList;
-	}
-	return [];
+	} else if (response.status === 404) {
+    toast.error(FE_ERROR_404_MSG);
+  } else if (response.status === 500 || response.status === 400) {
+    toast.error(FE_ERROR_500_MSG);
+  }
+  return [];
 }
 
 
@@ -44,15 +49,18 @@ export default function Home({
   let [notificationsToggle, setNotificationsToggle] = useState(false);
   let [lastFetchedUserCode, setLastFetchedUserCode] = useState<string|null>(null);
   let [loginUserCode, setLoginUserCode] = useState("");
+  let [filterText, setFilterText] = useState("Loading...");
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
-    if (usercode) {
-      getUserFilters(usercode).then((filterList) =>
-        setFilterList(filterList)
+    if (usercode !== null && usercode !== undefined) {
+      getUserFilters(usercode).then((filterList) => {
+          setFilterList(filterList);
+        }
       );
-    } else {
+    } else if (usercode !== undefined) {
       setFilterList([]);  // store empty list
+      setFilterText("There's nothing here yet.");
     }
   }
   // On initial render only, or whenever our usercode has changed.
@@ -102,6 +110,8 @@ export default function Home({
   const toggleNotifications = async () => {
     if (notificationsToggle) {
       // Turn OFF notifications
+      // TODO: Remove subscription from server -> await then
+      toast("Notifications have been disabled for this device.");
       setNotificationsToggle(false);
     } else {
       // Turn ON notifications
@@ -117,7 +127,14 @@ export default function Home({
       let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
       url += `&${API_USER_CODE}=${usercode}`;
       let result = await fetch(url);
-      console.log(result.status);
+      if (result.status === 200) {
+        // TODO: Try sending a test notification to the device.
+        toast.success("Success! A test notification has been sent to your device.");
+      } else if (result.status === 404) {
+        toast.error(FE_ERROR_404_MSG);
+      } else if (result.status === 500) {
+        toast.error(FE_ERROR_500_MSG);
+      }
     }
   }
 
@@ -141,7 +158,7 @@ export default function Home({
 			</div>
       <h2>Your Filters</h2>
       <div className={styles.emptyFilterList}>
-        <SuperJumpLoadAnimation/>
+        <SuperJumpLoadAnimation filterText={filterText}/>
       </div>
 			<h2>Your Filters</h2>
       <button onClick={updateFilterViews}>Refresh</button>
@@ -162,7 +179,10 @@ export default function Home({
 
         {(!filterList) ?
           <div className={styles.emptyFilterList}>
-            <SuperJumpLoadAnimation/>
+            <SuperJumpLoadAnimation
+              filterText={filterText}
+              fillLevel={0.5}
+            />
           </div>
           : <></>}
       </div>

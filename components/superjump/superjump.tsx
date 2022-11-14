@@ -5,7 +5,12 @@ import { superjumpBody, superjumpHead, superjumpTail, superjumpMarker } from '..
 const totalFaces = 20;
 const gap = 1;
 
-const SuperJumpLoadAnimation = () => {
+export type SuperJumpLoadAnimationProps  = {
+  filterText: string;
+  fillLevel?: number;
+}
+
+const SuperJumpLoadAnimation = ({filterText, fillLevel=1.0}: SuperJumpLoadAnimationProps) => {
 
   let images: any[] = [];
   
@@ -48,7 +53,7 @@ const SuperJumpLoadAnimation = () => {
         })}
       </div>
       <div className={styles.label}>
-        <h3>Loading...</h3>
+        <h3>{filterText}</h3>
       </div>
     </div>
   )

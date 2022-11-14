@@ -1,5 +1,7 @@
 import { DB_FILTER_ID, DB_USER_ID } from "./db";
 
+export const VERSION = "1.0.0";
+
 export const API_USER_CODE = "usercode";
 export const API_FILTER_JSON = "filter";
 export const API_PREVIOUS_FILTER_JSON = "prev-filter";
@@ -24,7 +26,6 @@ export const GEAR_PRICE = "price";
 export const GEAR_NAMES = ["Fresh Fish Head", "Annaki Flannel Hoodie"];
 export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 
-// GrizzCo, Cuttlegear, and Amiibo brands removed.
 export const GEAR_BRANDS = [
 	"Annaki",
 	"Barazushi",
@@ -44,10 +45,14 @@ export const GEAR_BRANDS = [
 	"Zekko",
 	"Zink",
 ];
+export const IGNORED_GEAR_BRANDS = [
+  "GrizzCo",
+  "Cuttlegear",
+  "amiibo"
+]
 export const GEAR_RARITY_MAX = 2;
 export const GEAR_RARITY_MIN = 0;
 
-// Ability Doubler removed.
 export const GEAR_ABILITIES = [
 	"Ink Saver (Main)",
 	"Ink Saver (Sub)",
@@ -75,6 +80,7 @@ export const GEAR_ABILITIES = [
 	"Object Shredder",
 	"Drop Roller",
 ];
+export const IGNORED_GEAR_ABILITIES = ["Ability Doubler"]
 
 export const FE_WILDCARD = "Any";
 export const FE_LOCAL_USER_CODE = DB_USER_ID;

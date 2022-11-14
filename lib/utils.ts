@@ -1,4 +1,10 @@
-// Utility methods shared across backend and frontend.
+/**
+ * Utility methods shared across backend and frontend.
+*/ 
+
+import fetch from "node-fetch";
+import { VERSION } from "../constants";
+
 
 export class IllegalArgumentError extends Error {
 	constructor(message: string) {
@@ -43,4 +49,16 @@ export function mapGetWithDefault<T>(
 	} else {
 		return defaultValue;
 	}
+}
+
+/**
+ * Calls fetch on the given 
+ */
+export async function fetchWithBotHeader(url: string) {
+  return fetch(url, {
+		method: "GET",
+		headers: {
+			"User-Agent": `Splatnet Shop Alerts Prototype/${VERSION} https://twitter.com/ShrimpCryptid`,
+		}
+  });
 }

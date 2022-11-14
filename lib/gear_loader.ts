@@ -4,8 +4,8 @@ import fetch from "node-fetch";
 import { getCachedData, setCachedData } from "./database_utils";
 import { DB_CACHE_KEY_GEAR_DATA } from "../constants/db";
 import { Pool, PoolClient } from "pg";
-
-const VERSION = "1.0.0";
+import { VERSION } from "../constants";
+import { fetchWithBotHeader } from "./utils";
 
 interface GearJSON {
 	[key: string]: any;
@@ -99,12 +99,7 @@ function parseJSONToGear(gearJSON: GearJSON): Gear {
  * @returns JSON gear data. See `gear_example.json` for example structure.
  */
 export async function fetchAPIRawGearData(): Promise<any> {
-	const response = await fetch("https://splatoon3.ink/data/gear.json", {
-		method: "GET",
-		headers: {
-			"User-Agent": `Splatnet Shop Alerts Prototype/${VERSION} https://twitter.com/ShrimpCryptid`,
-		},
-	});
+	const response = await fetchWithBotHeader("https://splatoon3.ink/data/gear.json");
 	const data = await response.json();
 	return data;
 }

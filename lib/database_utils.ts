@@ -36,6 +36,7 @@ import {
 	IllegalArgumentError,
 } from "./utils";
 import { Subscription } from "./notifications";
+import webpush from 'web-push';
 
 // ==============
 // HELPER METHODS
@@ -827,6 +828,40 @@ export async function getUserIDsToBeNotified(
 		}
 	}
 	return userSet;
+}
+
+/**
+ * Attempts to send a notification to the given subscription endpoint, and
+ * handles cleanup if the message was unsuccessful. Returns the result (as
+ * returned from webpush.sendNotification) on completion.
+ * 
+ * Deletes the push subscription from the server if the request returned with
+ * status codes 404 (endpoint not found) or 410 (subscription expired).
+ * 
+ * Note: you must configure webpush BEFORE attempting to send notifications.
+ */
+export async function trySendNotification(client: Pool | PoolClient, subscription: Subscription, notification: string): Promise<webpush.SendResult|undefined> {
+  try {
+    let result = await webpush.sendNotification(
+      subscription,
+      notification,
+      // {timeout: 5}
+    );
+    return result;
+  } catch (error) {
+    if (error instanceof webpush.WebPushError) {
+      if (error.statusCode === 404 || error.statusCode === 410) {
+        // 404: endpoint not found, 410: push subscription expired
+        // Remove this subscription from the database.
+        await deletePushSubscription(client, subscription);
+        return;
+      } else {
+        console.log(error.statusCode);
+        throw(error);
+      }
+    }
+    throw(error);
+  }
 }
 
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS

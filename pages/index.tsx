@@ -3,7 +3,7 @@ import Link from "next/link";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_FILTER_JSON, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
+import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
 import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
 import Router from "next/router";
@@ -126,6 +126,7 @@ export default function Home({
       // Send the subscription data to the server and save.
       let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
       url += `&${API_USER_CODE}=${usercode}`;
+      url += `&${API_SEND_TEST_NOTIFICATION}`;  // flag: send test notif.
       let result = await fetch(url);
       if (result.status === 200) {
         // TODO: Try sending a test notification to the device.

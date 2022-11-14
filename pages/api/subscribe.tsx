@@ -1,14 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { API_SUBSCRIPTION, API_USER_CODE } from "../../constants";
-import { getDBClient, getUserIDFromCode, makeNewUser, addUserPushSubscription } from "../../lib/database_utils";
+import { API_SUBSCRIPTION, API_USER_CODE, API_SEND_TEST_NOTIFICATION } from "../../constants";
+import { getDBClient, getUserIDFromCode, makeNewUser, addUserPushSubscription, trySendNotification } from "../../lib/database_utils";
 import { Subscription } from "../../lib/notifications";
+import { configureWebPush } from "../../lib/server_utils";
 
 /**
  * Updates the user's notification subscription.
  *
  * @param req http request.
- *  - `API_USER_CODE`
- *  - `API_SUBSCRIPTION ` A PushSubscription object.
+ *  - {@link API_USER_CODE}
+ *  - {@link API_SUBSCRIPTION} A PushSubscription object.
+ *  - {@link API_SEND_TEST_NOTIFICATION} Flag, indicates whether the server
+ *    should send a test notification to the given device on subscribe.
  *
  * @return A response with one of the following response codes:
  *  - 200 if the subscription was updated successfully.
@@ -51,6 +54,16 @@ export default async function handler(
 
     // Update user subscriptions
     addUserPushSubscription(client, userID, subscription);
+
+    // Send user a notification.
+    if (req.query[API_SEND_TEST_NOTIFICATION] !== undefined) {
+      let notification = {
+        title: "Hello!",
+        body: "Welcome to the Splatnet Shop Alerts service!"
+      };
+      configureWebPush();  // TODO: Move into centralized configuration?
+      trySendNotification(client, subscription, JSON.stringify(notification));
+    }
 
 		res.status(200);
 		return res.end();

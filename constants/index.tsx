@@ -5,6 +5,7 @@ export const API_FILTER_JSON = "filter";
 export const API_PREVIOUS_FILTER_JSON = "prev-filter";
 export const API_FILTER_ID = DB_FILTER_ID;
 export const API_SUBSCRIPTION = "subscription";
+export const API_SEND_TEST_NOTIFICATION = "sendtestnotif";
 
 export const API_RESPONSE_FILTER_LIST = "filters";
 /** The maximum number of subscribed devices/browsers a user can have. */

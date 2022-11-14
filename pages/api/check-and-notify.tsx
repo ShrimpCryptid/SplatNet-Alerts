@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDsToBeNotified, getUserSubscriptions, updateLastNotifiedExpiration } from '../../lib/database_utils';
-import webpush from 'web-push';
+import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDsToBeNotified, getUserSubscriptions, trySendNotification, updateLastNotifiedExpiration } from '../../lib/database_utils';
 import { fetchAPIRawGearData, fetchCachedRawGearData, Gear, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
 import { configureWebPush } from "../../lib/server_utils";
 
@@ -39,15 +38,8 @@ function generateNotificationPayload(gearList: Gear[]): any {
  * local cache. If changes are found, notifies all users that have filters for
  * those new items.
  * 
- * @param req http request. Requires the following parameters, as defined in
- *  `/constants`:
- *  - `API_USER_CODE` string
- *  - `API_FILTER_JSON` string: serialized JSON data for new filter.
- * 
  * @return A response with one of the following response codes:
- *  - 200 if filter was successfully updated.
- *  - 400 if one or more arguments was missing.
- *  - 404 if no matching user was found.
+ *  - 200 once all operations have completed.
  *  - 500 if any other errors encountered.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -123,20 +115,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       for (let subscription of userSubscriptions) {
         devicesNotified++;
         notificationPromises.push(
-          webpush.sendNotification(
-              subscription,
-              notification,
-              // {timeout: 5}
-            ).catch((err) => {
-              devicesFailed++;
-              if (err.statusCode === 404 || err.statusCode === 410) {
-                // 404: endpoint not found, 410: push subscription expired
-                // Remove this subscription from the database.
-                return deletePushSubscription(client, subscription);
-              } else {
-                throw err;
-              }
-          })
+          trySendNotification(client, subscription, notification).then(
+            (result) => {
+              if (!result) { devicesFailed++ }
+            }
+          )
         );
       }
       promises.push(Promise.all(notificationPromises).then(() => {

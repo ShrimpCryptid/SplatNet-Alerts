@@ -12,7 +12,7 @@
   --cylinder-width: 40vmin;
   --face-count: 30;
   --face-deg: calc(360deg / var(--face-count));
-  --face-width: calc(var(--cylinder-width) / var(--face-count));
+  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.025vmin);
   --face-shift: calc(var(--cylinder-width) / var(--pi) / 2);
   --pi: 3.14159265358979;
   --index: 0;
@@ -49,7 +49,7 @@
 
 .bigIconHolder {
   position: absolute;
-  opacity: 80%;
+  opacity: 70%;
   width: 100%;
   height: 10vmin;
   animation: bob 2.5s infinite ease-in-out;

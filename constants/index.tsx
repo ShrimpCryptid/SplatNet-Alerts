@@ -76,4 +76,4 @@ export const GEAR_ABILITIES = [
 ];
 
 export const FE_WILDCARD = "Any";
-export const FE_COOKIE_USER_ID = DB_USER_ID;
+export const FE_LOCAL_USER_CODE = DB_USER_ID;

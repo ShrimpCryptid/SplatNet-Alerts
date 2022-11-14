@@ -33,6 +33,7 @@ async function getUserFilters(userCode: string): Promise<Filter[]> {
 	return [];
 }
 
+
 export default function Home({
 	usercode,
 	setUserCode,
@@ -41,6 +42,8 @@ export default function Home({
   let [filterList, setFilterList] = useState<Filter[]|null>(null);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
+  let [lastFetchedUserCode, setLastFetchedUserCode] = useState<string|null>(null);
+  let [loginUserCode, setLoginUserCode] = useState("");
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
@@ -49,13 +52,14 @@ export default function Home({
         setFilterList(filterList)
       );
     } else {
-      setFilterList([]);  // store empty list so we do not query server again
+      setFilterList([]);  // store empty list
     }
   }
-  // On initial render only
-  if (!filterList) {
+  // On initial render only, or whenever our usercode has changed.
+  if (usercode !== lastFetchedUserCode || (usercode === null && filterList === null)) {
     setEditingFilter(null);  // clear the filter we are editing.
     updateFilterViews();  // run only once during initial page render
+    setLastFetchedUserCode(usercode);  // Store this usercode
   }
 
   // Click and edit a filter.
@@ -117,6 +121,14 @@ export default function Home({
     }
   }
 
+  const handleLoginChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLoginUserCode(event.currentTarget.value);
+  }
+
+  const onClickLogin = () => {
+    // TODO: Validae usercode, show some sort of error message if it's invalid
+    setUserCode(loginUserCode);
+  }
 
 	return (
 		<div className={styles.main}>
@@ -186,8 +198,8 @@ export default function Home({
 			<p>
 				Paste in your user ID to sync your notification settings across devices.
 			</p>
-			<textarea />
-			<button>Login</button>
+			<textarea value={loginUserCode} onChange={handleLoginChange} />
+			<button onClick={onClickLogin}>Login</button>
 		</div>
 	);
 }

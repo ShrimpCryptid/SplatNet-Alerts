@@ -1,6 +1,8 @@
 # SplatNet Shop Alerts 📣
 Set notifications for the SplatNet 3 Shop!
 
+![image](https://user-images.githubusercontent.com/30200665/201589511-bc220ada-caa7-4ad8-9154-0967867b4e6c.png)
+
 ## What's this?
 This is an unofficial web app for the game Splatoon 3 that alerts you about relevant SplatNet gear. It's currently work-in-progress, but you can view updates on my [Twitter (@ShrimpCryptid)](https://twitter.com/shrimpcryptid) and via the roadmap below, which I'll update as I make progress.
 
@@ -45,3 +47,6 @@ I'm currently targeting December 2022 for launch. 🤞
 
 ## License
 This project is not associated with Nintendo, and is an unofficial, fan-made website. Licensed under MIT.
+
+![loading2](https://user-images.githubusercontent.com/30200665/201589377-e51c9cda-f713-402d-8a3c-5759536da264.gif)
+

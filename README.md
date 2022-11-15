@@ -27,7 +27,7 @@ I'm currently targeting December 2022 for launch. 🤞
 - [x] Collect current gear from [Splatoon3.ink](https://splatoon3.ink)
 - [x] Detect changes to gear from local backup and send updates to relevant users
 - [ ] Custom images + text for push notifications
-- [ ] Scrape data from the Splatoon 3 wiki for gear items
+- [x] Scrape data from the Splatoon 3 wiki for gear items
 - [ ] Gear item selection screen on filter page
 - [ ] UI polish pass
   - [ ] Show favored/unfavored abilities for brands
@@ -44,6 +44,7 @@ I'm currently targeting December 2022 for launch. 🤞
 - [ ] **WEBSITE GOES LIVE** 🎉
 - [ ] User testing
 - [ ] Contributor tutorial + documentation (💖)
+- [ ] Translation support
 
 ## License
 This project is not associated with Nintendo, and is an unofficial, fan-made website. Licensed under MIT.

@@ -6,6 +6,7 @@ import {
 	getUserFilters,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
+import { IllegalArgumentError } from "../../lib/utils";
 
 /**
  * Retrieves the list of filters that the user is subscribed to.
@@ -36,14 +37,12 @@ export default async function handler(
 		const client = getDBClient();
 
 		// Validate user
-		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
-		if (userID == -1) {
-			// no matching user
-			return res
-				.status(404)
-				.json({
+    let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
+		if (userID == -1) {  // no matching user
+			res.status(404).json({
 					err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
 				});
+      return res.end();
 		}
 
 		// Get list of filters owned by user
@@ -52,7 +51,11 @@ export default async function handler(
 		res.status(200).json(filters);
 		return res.end();
 	} catch (err) {
-		console.log(err);
-		return res.status(500).end(); // internal server error
+    if (err instanceof IllegalArgumentError) {
+      return res.status(404).end();
+    } else {
+      console.log(err);
+      return res.status(500).end(); // internal server error
+    }
 	}
 }

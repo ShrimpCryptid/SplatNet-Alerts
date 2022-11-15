@@ -1,10 +1,7 @@
 // Utilities for getting the current gear rotation.
-import json_data from "./gear_example";
-import fetch from "node-fetch";
 import { getCachedData, setCachedData } from "./database_utils";
 import { DB_CACHE_KEY_GEAR_DATA } from "../constants/db";
 import { Pool, PoolClient } from "pg";
-import { VERSION } from "../constants";
 import { fetchWithBotHeader } from "./utils";
 
 interface GearJSON {

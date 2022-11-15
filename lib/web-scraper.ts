@@ -1,10 +1,10 @@
 import * as cheerio from "cheerio";
+import fs from 'fs';
 import { Gear } from "./gear_loader";
-import fetch from "node-fetch";
 import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
 import { fetchWithBotHeader } from "./utils";
-import * as cliProgress from "cli-progress";
-import * as colors from "ansi-colors";
+import cliProgress from "cli-progress";
+import colors from "ansi-colors";
 
 const SPLATOON_WIKI_URL_PREFIX = "https://splatoonwiki.org";
 const RARITY_FULL_STAR_ALT = "Star-full.png";
@@ -23,7 +23,7 @@ function sleep(ms: number) {
  * brands or abilities that are set to be ignored (see
  * {@link IGNORED_GEAR_ABILITIES} and {@link IGNORED_GEAR_BRANDS} for a full
  * list).
- * 
+ *
  * Note: this method may perform one additional fetch request to get the image
  * data URL. Please be respectful to the wiki's bandwidth resources when running
  * it by adding some sort of throttling or delay between requests.
@@ -122,14 +122,17 @@ async function scrapeGearDataFromWikiPage(
 		// Generate progress bar
 		const progressBar = new cliProgress.SingleBar({
 			format:
-				gearType.padEnd(12, " ") + "|" +
+				gearType.padEnd(12, " ") +
+				"|" +
 				colors.grey("{bar}") +
-				"| {percentage}% || {value}/{total} Items || Skipped Items: {skipped}",
+				"| {percentage}% || {value}/{total} || Skipped: {skipped}",
 			barCompleteChar: "\u2588",
 			barIncompleteChar: "\u2591",
 			hideCursor: true,
+      stopOnComplete: true,
+      clearOnComplete: false,
 		});
-    progressBar.start(gearCount, 0, {speed: "N/A"});
+		progressBar.start(gearCount, 0, { speed: "N/A" });
 
 		// Traverse each gear item as a row in the table.
 		$("div table tbody tr").each((_idx, rowElement) => {
@@ -148,42 +151,64 @@ async function scrapeGearDataFromWikiPage(
 							// mark that we skipped gear
 							gearSkippedCount++;
 						}
-            progressBar.update({"skipped": gearSkippedCount});
-            progressBar.increment();
+						progressBar.update({ skipped: gearSkippedCount });
+						progressBar.increment();
 					});
 				})
 			);
 		});
 		await Promise.all(promises);
-    progressBar.setTotal(gearCount);
+		progressBar.update(gearCount);
     progressBar.stop();
-    console.log(`Fetched ${gearCount - gearSkippedCount} items (skipped ${gearSkippedCount}).`);
 		return gear;
 	} catch (error) {
 		throw error;
 	}
 }
 
-/** 
+/**
  * Returns a list of all gear items that are currently eligible for
  * order on SplatNet by crawling the Splatoon wiki.
  */
 async function getAllGearData() {
+  console.log("Working... This may take a few minutes.");
 	let headGearList = await scrapeGearDataFromWikiPage(
 		"https://splatoonwiki.org/wiki/List_of_headgear_in_Splatoon_3",
 		"HeadGear"
 	);
-  let clothingGearList = await scrapeGearDataFromWikiPage(
-    "https://splatoonwiki.org/wiki/List_of_clothing_in_Splatoon_3",
-    "ClothingGear"
-  );
-  let shoesGearList = await scrapeGearDataFromWikiPage(
-    "https://splatoonwiki.org/wiki/List_of_shoes_in_Splatoon_3",
-    "ShoesGear"
-  );
+	let clothingGearList = await scrapeGearDataFromWikiPage(
+		"https://splatoonwiki.org/wiki/List_of_clothing_in_Splatoon_3",
+		"ClothingGear"
+	);
+	let shoesGearList = await scrapeGearDataFromWikiPage(
+		"https://splatoonwiki.org/wiki/List_of_shoes_in_Splatoon_3",
+		"ShoesGear"
+	);
 
-  return [...headGearList, ...clothingGearList, ...shoesGearList];
+	return [...headGearList, ...clothingGearList, ...shoesGearList];
 }
 
-console.log("Working... This may take a few minutes.");
-getAllGearData();
+/**
+ * Formats the gear data as a dictionary mapping from gear names to gear
+ * objects and saves the resulting JSON object locally.
+ */
+async function updateLocalGearJSON(filepath: string) {
+  let startTime = Date.now();
+  let gearData = await getAllGearData();
+  // format gear data as a dictionary
+  let gearDict: {[key: string]: Gear} = {};
+  for (let gear of gearData) {
+    gearDict[gear.name] = gear;
+  }
+  let jsonString = JSON.stringify(gearDict);
+
+  try {
+    fs.writeFileSync(filepath, jsonString);
+    let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
+    console.log("Wrote file successfully. Time elapsed: " + timeElapsedSeconds.toFixed(2) + "s");
+  } catch (err) {
+    throw err;
+  }
+}
+
+updateLocalGearJSON('./constants/geardata.json');

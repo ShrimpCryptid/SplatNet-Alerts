@@ -3,52 +3,10 @@ import { getCachedData, setCachedData } from "./database_utils";
 import { DB_CACHE_KEY_GEAR_DATA } from "../constants/db";
 import { Pool, PoolClient } from "pg";
 import { fetchWithBotHeader } from "./utils";
+import { Gear } from "./Gear";
 
 interface GearJSON {
 	[key: string]: any;
-}
-
-/**
- * Data class for gear items
- */
-export class Gear {
-	id: string;
-	price: number;
-	brand: string;
-	type: string;
-	name: string;
-	ability: string;
-	/**The number of rarity stars, ranging from 0-2 (or the number sub ability slots - 1).*/
-	rarity: number;
-	/**Expiration timestamp, as parsed by Date.parse()*/
-	expiration: number;
-  image: string;
-
-	constructor(
-		id = "",
-		price = 0,
-		brand = "",
-		type = "",
-		name = "",
-		ability = "",
-		rarity = 0,
-		expiration = 0,
-    image = "",
-	) {
-		this.id = id;
-		this.price = price;
-		this.brand = brand;
-		this.type = type;
-		this.name = name;
-		this.ability = ability;
-		this.rarity = rarity;
-		this.expiration = expiration;
-    this.image = image;
-	}
-}
-
-const sortGearByExpiration = (a: Gear, b: Gear) => {
-  return a.expiration - b.expiration;
 }
 
 /**
@@ -117,8 +75,8 @@ export function getNewGearItems(oldGear: Gear[], newGear: Gear[]): Gear[] {
   // Make copies of the original arrays and sort by expiration
   oldGear = [...oldGear];
   newGear = [...newGear];
-  oldGear.sort(sortGearByExpiration);
-  newGear.sort(sortGearByExpiration);
+  oldGear.sort(Gear.expirationComparator);
+  newGear.sort(Gear.expirationComparator);
 
   let newGearItems = [];
   // Find the expiration date of the last item in the old gear list.

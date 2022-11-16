@@ -1,5 +1,5 @@
 import { Pool, PoolClient, QueryResult } from "pg";
-import { Gear } from "./gear_loader";
+import { Gear } from "./Gear";
 import { v4 as uuidv4, validate } from "uuid";
 import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES } from "../constants";
 import {

@@ -1,18 +1,18 @@
 import Head from "next/head";
 import Link from "next/link";
+import Router from "next/router";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
 import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
-import { useEffect, useState } from "react";
 import { DefaultPageProps } from "./_app";
-import Router from "next/router";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
-import { SERVER, VAPID_PUBLIC_KEY } from "../config";
+import { VAPID_PUBLIC_KEY } from "../config";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 
-import testImage from '../public/images/superjump/superjumpmarker_tail.svg';
-import { toast } from "react-toastify";
 
 /**
  * Retrieves a list of the user's current filters from the database.
@@ -144,7 +144,7 @@ export default function Home({
   }
 
   const onClickLogin = () => {
-    // TODO: Validae usercode, show some sort of error message if it's invalid
+    // TODO: Validate usercode, show some sort of error message if it's invalid
     setUserCode(loginUserCode);
   }
 
@@ -157,10 +157,6 @@ export default function Home({
 					<p>Get notified about gear from the SplatNet 3 app!</p>
 				</div>
 			</div>
-      <h2>Your Filters</h2>
-      <div className={styles.emptyFilterList}>
-        <SuperJumpLoadAnimation filterText={filterText}/>
-      </div>
 			<h2>Your Filters</h2>
       <button onClick={updateFilterViews}>Refresh</button>
 			<div className={styles.filterListContainer}>
@@ -173,19 +169,13 @@ export default function Home({
               key={index}
             />
           );
-        }) : <></>}
-
-        {(filterList && filterList.length == 0) ? 
-          <div className={styles.emptyFilterList}/> : <></>}
-
-        {(!filterList) ?
-          <div className={styles.emptyFilterList}>
-            <SuperJumpLoadAnimation
-              filterText={filterText}
-              fillLevel={0.5}
-            />
-          </div>
-          : <></>}
+        }) :
+        (<div className={styles.emptyFilterList}>
+          <SuperJumpLoadAnimation
+            filterText={filterText}
+            fillLevel={0.5}
+          />
+        </div>)}
       </div>
 			<Link href="filter">
 				<button>New Filter</button>

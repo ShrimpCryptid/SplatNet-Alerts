@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import fs from 'fs';
-import { Gear } from "./gear_loader";
+import { Gear } from "./Gear";
 import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
 import { fetchWithBotHeader } from "./utils";
 import cliProgress from "cli-progress";

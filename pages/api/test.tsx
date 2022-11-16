@@ -3,7 +3,7 @@ import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
 import { getDBClient, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions } from '../../lib/database_utils';
 import Filter from "../../lib/filter";
 import webpush from 'web-push';
-import { Gear } from "../../lib/gear_loader";
+import { Gear } from "../../lib/Gear";
 
 
 /**

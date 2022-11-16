@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDsToBeNotified, getUserSubscriptions, trySendNotification, updateLastNotifiedExpiration } from '../../lib/database_utils';
-import { fetchAPIRawGearData, fetchCachedRawGearData, Gear, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
+import { fetchAPIRawGearData, fetchCachedRawGearData, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
+import { Gear } from "../../lib/Gear";
 import { configureWebPush } from "../../lib/server_utils";
 
 function getUserGear(gearToUsers: Map<Gear, Set<number>>, userID: number): Gear[] {
@@ -86,7 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 5. Send each user notifications to their subscribed devices.
     let startTime = Date.now();
-    let numSkipped = 0;
+    let numAlreadyNotified = 0;
+    let numNoSubscriber = 0;
     let devicesNotified = 0;
     let devicesFailed = 0;
 
@@ -100,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Check that we haven't already notified this user
       if (latestExpiration <= await getLastNotifiedExpiration(client, userID)) {
         // We've already notified this user about these items, so we skip them.
-        numSkipped++;
+        numAlreadyNotified++;
         continue;
       }
       
@@ -108,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       let notificationPromises = [];
       let userSubscriptions = await getUserSubscriptions(client, userID);
       if (userSubscriptions.length == 0) { // user has no subscribed devices
-        numSkipped++;
+        numNoSubscriber++;
         continue;
       }
 
@@ -139,7 +141,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 8. Logging
     let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
     console.log(`Notifications done. (Finished in ${timeElapsedSeconds.toFixed(2)} seconds)`);
-    console.log(`Users notified: ${allUserIDs.size} users (${numSkipped} skipped)`);
+    let usersNotified = allUserIDs.size - numAlreadyNotified - numNoSubscriber;
+    console.log(`Users notified: ${usersNotified} users (${numAlreadyNotified} already notified, ${numNoSubscriber} with no devices)`);
     console.log(`Devices notified: ${devicesNotified - devicesFailed} devices (${devicesFailed} failures)`);
 
     return res.status(200).end();  // ok

@@ -62,7 +62,7 @@ type SelectorProps = {
 	category: GEAR_PROPERTY;
 	items: string[];
 	selected: Map<string, boolean>;
-	itemImages?: Map<string, StaticImageData>;
+	itemImages?: Map<string, StaticImageData|string|undefined>;
 	wildcard?: boolean;
 	search?: boolean;
 	onChanged?: CallableFunction;
@@ -147,10 +147,16 @@ const Selector: FunctionComponent<SelectorProps> = ({
 						isSelected = false;
 						disabled = true;
 					}
+
 					let image = null;
 					if (itemImages) {
 						image = itemImages.get(item);
 					}
+          if (image === undefined || image === null) {
+              // Show default image
+              itemCategory = GEAR_PROPERTY.ABILITY;  // formatting style
+              image = unknownIcon;
+          }
 
 					return (
 						<SelectorItem

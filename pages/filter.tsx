@@ -19,6 +19,7 @@ import {
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
 } from "../constants";
+import { gearNameToImageURL, validGearNames } from "../constants/geardata";
 import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
@@ -111,6 +112,9 @@ async function tryUpdateFilter(
 	return response.status;
 }
 
+// ============
+// Page Content
+// ============
 export default function FilterPage({
 	usercode,
 	setUserCode,
@@ -292,6 +296,13 @@ export default function FilterPage({
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
 			<p>Select the gear properties you want to be alerted for.</p>
+      <Selector
+        title="Gear Items"
+        category={GEAR_PROPERTY.NAME}
+        items={[...validGearNames]}
+        selected={makeSelectedMap([...validGearNames])}
+        itemImages={gearNameToImageURL}
+      />
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
 					<Selector

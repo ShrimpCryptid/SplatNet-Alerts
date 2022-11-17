@@ -10,7 +10,7 @@ import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
 import GearSelector from "../components/gear_selector";
 import Selector from "../components/selector";
-import { SERVER } from "../config";
+import { API_HOST } from "../config";
 import {
 	FE_WILDCARD,
 	GEAR_ABILITIES,
@@ -222,7 +222,7 @@ export default function FilterPage({
 			if (!usercode) {
 				// Try making a new user. If it doesn't work, display an error message.
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
-					let response = await fetch(`${SERVER}/api/new-user`);
+					let response = await fetch(`${API_HOST}/api/new-user`);
 					if (response.status == 200) {
 						let tempUserCode = await response.json();
             setUserCode(tempUserCode);  // store new code

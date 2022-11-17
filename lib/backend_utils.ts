@@ -1,14 +1,14 @@
 import webpush from 'web-push';
-import { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, DEV_EMAIL } from '../config';
 import fetch from "node-fetch";
 import { VERSION } from "../constants";
+import { ENV_KEY_DEV_EMAIL, ENV_KEY_VAPID_PRIVATE, ENV_KEY_VAPID_PUBLIC } from '../constants/env';
+import { getEnvWithDefault } from './shared_utils';
 
 export function configureWebPush() {
   webpush.setVapidDetails(
-    `mailto:${DEV_EMAIL}`,
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY
-  );
+    `mailto:${getEnvWithDefault(ENV_KEY_DEV_EMAIL, "")}`,
+    getEnvWithDefault(ENV_KEY_VAPID_PUBLIC, ""),
+    getEnvWithDefault(ENV_KEY_VAPID_PRIVATE, ""));
 }
 
 /**
@@ -18,7 +18,8 @@ export function configureWebPush() {
   return fetch(url, {
 		method: "GET",
 		headers: {
-			"User-Agent": `Splatnet Shop Alerts Prototype/${VERSION} ${DEV_EMAIL}`,
+			"User-Agent": `Splatnet Shop Alerts Prototype/${VERSION} ${
+        getEnvWithDefault(ENV_KEY_DEV_EMAIL, "")}`,
 		}
   });
 }

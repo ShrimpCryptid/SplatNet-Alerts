@@ -62,7 +62,6 @@ export async function createNotificationSubscription(vapidPublicKey: string) {
   // wait for service worker installation to be ready
   const serviceWorker = await navigator.serviceWorker.ready;
   // subscribe and return the subscription
-  console.log(vapidPublicKey);
   return await serviceWorker.pushManager.subscribe({
     userVisibleOnly: true,  // required
     applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),

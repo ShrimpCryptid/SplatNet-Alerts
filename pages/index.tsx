@@ -10,7 +10,6 @@ import styles from "../styles/index.module.css";
 import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
 import { DefaultPageProps } from "./_app";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
-import { VAPID_PUBLIC_KEY } from "../config";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 
 
@@ -123,7 +122,12 @@ export default function Home({
       await requestNotificationPermission();
       await registerServiceWorker();
 
-      let subscription = await createNotificationSubscription(VAPID_PUBLIC_KEY);
+      const publicVAPIDKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!publicVAPIDKey) {
+        console.error("Cannot find public VAPID key environment variable.");
+        return;
+      }
+      let subscription = await createNotificationSubscription(publicVAPIDKey);
       let subscriptionString = JSON.stringify(subscription);
       // TODO: Store locally?
       

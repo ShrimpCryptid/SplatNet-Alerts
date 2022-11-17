@@ -46,3 +46,12 @@ export function mapGetWithDefault<T>(
 		return defaultValue;
 	}
 }
+
+export function getEnvWithDefault<T>(key: string, defaultValue: T): string|T {
+  let value = process.env[key];
+  if (value) {
+    return value;
+  } else {
+    return defaultValue;
+  }
+}

@@ -34,10 +34,18 @@ import {
 	NoSuchFilterError,
 	mapGetWithDefault,
 	IllegalArgumentError,
+	getEnvWithDefault,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
-import webpush from 'web-push';
-import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGSTRING, PGUSER } from "../config";
+import webpush from "web-push";
+import {
+  ENV_KEY_PGDATABASE,
+	ENV_KEY_PGHOST,
+	ENV_KEY_PGPASSWORD,
+	ENV_KEY_PGPORT,
+	ENV_KEY_PGSTRING,
+	ENV_KEY_PGUSER,
+} from "../constants/env";
 
 // ==============
 // HELPER METHODS
@@ -186,7 +194,7 @@ export function setupDatabaseTables() {
 	// Create data cache table
 	// Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
 	let promises = [];
-  let client = getDBClient();
+	let client = getDBClient();
 
 	promises.push(
 		queryAndLog(
@@ -258,7 +266,7 @@ export function setupDatabaseTables() {
 		)
 	);
 
-  // Create pairing table, which pairs users with their selected filters.
+	// Create pairing table, which pairs users with their selected filters.
 	promises.push(
 		queryAndLog(
 			client,
@@ -712,12 +720,12 @@ export async function deletePushSubscription(
 	client: PoolClient | Pool,
 	subscription: Subscription
 ) {
-  await queryAndLog(
-    client,
-    `DELETE FROM ${DB_TABLE_SUBSCRIPTIONS}
+	await queryAndLog(
+		client,
+		`DELETE FROM ${DB_TABLE_SUBSCRIPTIONS}
       WHERE ${DB_ENDPOINT} = $1;`,
-    [subscription.endpoint]
-  )
+		[subscription.endpoint]
+	);
 }
 
 /**
@@ -726,38 +734,41 @@ export async function deletePushSubscription(
  * users have already been notified.
  */
 export async function updateLastNotifiedExpiration(
-  client: PoolClient | Pool,
-  userID: number,
-  latestExpiration: number
+	client: PoolClient | Pool,
+	userID: number,
+	latestExpiration: number
 ) {
-  await queryAndLog(
-    client,
-    `UPDATE ${DB_TABLE_USERS} SET 
+	await queryAndLog(
+		client,
+		`UPDATE ${DB_TABLE_USERS} SET 
       ${DB_LAST_NOTIFIED_EXPIRATION}  = $1
       WHERE ${DB_USER_ID} = $2;`,
-    [latestExpiration, userID]
-  );
+		[latestExpiration, userID]
+	);
 }
 
 /**
  * Returns the expiration timestamp of the last item the given user was notified
  * about. If no such user exists, returns -1.
  */
-export async function getLastNotifiedExpiration( 
-  client: PoolClient | Pool,
-  userID: number,
+export async function getLastNotifiedExpiration(
+	client: PoolClient | Pool,
+	userID: number
 ): Promise<number> {
-  let result = await queryAndLog(
-    client,
-    `SELECT ${DB_LAST_NOTIFIED_EXPIRATION} FROM ${DB_TABLE_USERS}
+	let result = await queryAndLog(
+		client,
+		`SELECT ${DB_LAST_NOTIFIED_EXPIRATION} FROM ${DB_TABLE_USERS}
       WHERE ${DB_USER_ID} = $1;`,
-    [userID]
-  );
-  if (result.rowCount > 0 && result.rows[0][DB_LAST_NOTIFIED_EXPIRATION] !== null) {
-    return result.rows[0][DB_LAST_NOTIFIED_EXPIRATION];
-  } else {
-    return -1;
-  }
+		[userID]
+	);
+	if (
+		result.rowCount > 0 &&
+		result.rows[0][DB_LAST_NOTIFIED_EXPIRATION] !== null
+	) {
+		return result.rows[0][DB_LAST_NOTIFIED_EXPIRATION];
+	} else {
+		return -1;
+	}
 }
 
 /**
@@ -836,49 +847,54 @@ export async function getUserIDsToBeNotified(
  * Attempts to send a notification to the given subscription endpoint, and
  * handles cleanup if the message was unsuccessful. Returns the result (as
  * returned from webpush.sendNotification) on completion.
- * 
+ *
  * Deletes the push subscription from the server if the request returned with
  * status codes 404 (endpoint not found) or 410 (subscription expired).
- * 
+ *
  * Note: you must configure webpush BEFORE attempting to send notifications.
  */
-export async function trySendNotification(client: Pool | PoolClient, subscription: Subscription, notification: string): Promise<webpush.SendResult|undefined> {
-  try {
-    let result = await webpush.sendNotification(
-      subscription,
-      notification,
-      // {timeout: 5}
-    );
-    return result;
-  } catch (error) {
-    if (error instanceof webpush.WebPushError) {
-      if (error.statusCode === 404 || error.statusCode === 410) {
-        // 404: endpoint not found, 410: push subscription expired
-        // Remove this subscription from the database.
-        await deletePushSubscription(client, subscription);
-        return;
-      } else {
-        console.log(error.statusCode);
-        throw(error);
-      }
-    }
-    throw(error);
-  }
+export async function trySendNotification(
+	client: Pool | PoolClient,
+	subscription: Subscription,
+	notification: string
+): Promise<webpush.SendResult | undefined> {
+	try {
+		let result = await webpush.sendNotification(
+			subscription,
+			notification
+			// {timeout: 5}
+		);
+		return result;
+	} catch (error) {
+		if (error instanceof webpush.WebPushError) {
+			if (error.statusCode === 404 || error.statusCode === 410) {
+				// 404: endpoint not found, 410: push subscription expired
+				// Remove this subscription from the database.
+				await deletePushSubscription(client, subscription);
+				return;
+			} else {
+				console.log(error.statusCode);
+				throw error;
+			}
+		}
+		throw error;
+	}
 }
 
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
 
 export function getDBClient(): Pool {
-  if (PGSTRING) {
-    // Use PG string instead of variables
-    return new Pool({connectionString: PGSTRING});
-  } else {
-    return new Pool({
-      host: PGHOST,
-      user: PGUSER,
-      port: PGPORT,
-      password: PGPASSWORD,
-      database: PGDATABASE,
-    });
-  }
+	const pgString = getEnvWithDefault(ENV_KEY_PGSTRING, null);
+	if (pgString) {
+		// Use PG string instead of variables
+		return new Pool({ connectionString: pgString });
+	} else {
+		return new Pool({
+			host: getEnvWithDefault(ENV_KEY_PGHOST, ""),
+			user: getEnvWithDefault(ENV_KEY_PGUSER, ""),
+			port: Number.parseInt(getEnvWithDefault(ENV_KEY_PGPORT, "")),
+			password: getEnvWithDefault(ENV_KEY_PGPASSWORD, ""),
+			database: getEnvWithDefault(ENV_KEY_PGDATABASE, ""),
+		});
+	}
 }

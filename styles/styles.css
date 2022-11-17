@@ -1,6 +1,7 @@
 @import url('./fonts.css');
 
 :root {
+  --background: black;
   --ability-background: black;
   --selected-color: rgb(220, 255, 65);
   
@@ -99,4 +100,31 @@ div::-webkit-scrollbar-thumb {
 div::-webkit-scrollbar-thumb:hover {
   border-radius:16px;
   border:3px solid #babac0
+}
+
+.inputContainer {
+  border-radius: 1000000px;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+}
+
+.inputContainer:active {
+  border-color: var(--selected-color);
+}
+
+input {
+  resize: none;
+  border: none;
+  font-family: var(--font-family-ui);
+  text-align: left;
+  display: inline-block;
+  overflow: hidden;
+  background-color: #00000000;
+  width: 100%;
+}
+
+input:active {
+  border: none;
 }

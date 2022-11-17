@@ -3,7 +3,7 @@ import { getCachedData, setCachedData } from "./database_utils";
 import { DB_CACHE_KEY_GEAR_DATA } from "../constants/db";
 import { Pool, PoolClient } from "pg";
 import { fetchWithBotHeader } from "./utils";
-import { Gear } from "./Gear";
+import { Gear } from "./gear";
 
 interface GearJSON {
 	[key: string]: any;
@@ -26,7 +26,7 @@ interface GearJSON {
 	}
 
 	// Sort by expiration date/time, ascending.
-	parsedGearList.sort(sortGearByExpiration);
+	parsedGearList.sort(Gear.expirationComparator);
 	return parsedGearList;
 }
 

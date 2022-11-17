@@ -1,0 +1,69 @@
+.container {
+}
+
+.searchIcon {
+  
+}
+
+.searchbar {
+
+}
+
+.listContainer {
+  height: 60vh;
+  width: 100%;
+}
+
+.list {
+  width: 100%;
+  max-height: 100%;
+  height: fit-content;
+  overflow-y: scroll;
+  flex-direction: row;
+  flex-wrap: wrap;
+  display: flex;
+  margin: 0 auto;
+  justify-content: left;
+  gap: 5px;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  width: 14vmin;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.listItem:hover {
+  background-color: var(--item-hover);
+}
+
+.listItemImageContainer {
+  position: relative;
+}
+
+
+.listItemGearIcon {
+  height: 10vmin;
+  width: 10vmin;
+  margin: auto auto;
+  position: relative;
+}
+
+.listItemLabel {
+  font-family: var(--font-family-ui);
+  text-align: center;
+}
+
+.listItemBrandIcon {
+  position: absolute;
+  width: 4vmin;
+  height: 4vmin;
+  background-color: white;
+  border-radius: 5px;
+  bottom: 0%;
+  right: 10%;
+  border-color: var(--selected-color);
+  border-width: 2px;
+}

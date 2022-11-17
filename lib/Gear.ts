@@ -47,6 +47,7 @@ export class Gear {
     newGear.rarity = obj.rarity;
     newGear.expiration = obj.expiration;
     newGear.image = obj.image;
+    newGear.name = obj.name;
     return newGear;
   }
   

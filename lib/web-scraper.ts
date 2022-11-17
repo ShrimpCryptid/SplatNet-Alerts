@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import fs from 'fs';
-import { Gear } from "./Gear";
+import { Gear } from "./gear";
 import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
 import { fetchWithBotHeader } from "./utils";
 import cliProgress from "cli-progress";
@@ -211,4 +211,4 @@ async function updateLocalGearJSON(filepath: string) {
   }
 }
 
-updateLocalGearJSON('./constants/geardata.json');
+updateLocalGearJSON('./public/data/geardata.json');

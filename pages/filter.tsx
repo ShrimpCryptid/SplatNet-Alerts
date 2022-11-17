@@ -6,7 +6,9 @@ import Router from "next/router";
 import React from "react";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
+import GearSelector from "../components/gear_selector";
 import Selector from "../components/selector";
 import { SERVER } from "../config";
 import {
@@ -18,8 +20,10 @@ import {
 	API_USER_CODE,
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
+  GEAR_NAME_TO_IMAGE,
+  GEAR_NAMES,
+  GEAR_NAME_TO_DATA
 } from "../constants";
-import { gearNameToImageURL, validGearNames } from "../constants/geardata";
 import Filter from "../lib/filter";
 
 import { abilityIcons } from "../public/icons/abilities";
@@ -296,12 +300,18 @@ export default function FilterPage({
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
 			<p>Select the gear properties you want to be alerted for.</p>
+      <LabeledAlertbox header="Select Gear">
+        <GearSelector
+          gearData={GEAR_NAME_TO_DATA}
+          onSelection={(selectedGear) => {updateFilter(GEAR_PROPERTY.NAME, selectedGear.name)}}
+        />
+      </LabeledAlertbox>
       <Selector
         title="Gear Items"
         category={GEAR_PROPERTY.NAME}
-        items={[...validGearNames]}
-        selected={makeSelectedMap([...validGearNames])}
-        itemImages={gearNameToImageURL}
+        items={GEAR_NAMES}
+        selected={makeSelectedMap(GEAR_NAMES)}
+        itemImages={GEAR_NAME_TO_IMAGE}
       />
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>

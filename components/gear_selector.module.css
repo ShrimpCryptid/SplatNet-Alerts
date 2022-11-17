@@ -6,7 +6,8 @@
 }
 
 .searchbar {
-
+  margin: 5px;
+  color: black;
 }
 
 .listContainer {
@@ -32,11 +33,17 @@
   flex-direction: column;
   width: 14vmin;
   padding: 5px;
+  background-color: var(--background-alt);
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .listItem:hover {
   background-color: var(--item-hover);
+}
+
+.listItem:active {
+  background: var(--item-active);
 }
 
 .listItemImageContainer {
@@ -58,12 +65,25 @@
 
 .listItemBrandIcon {
   position: absolute;
-  width: 4vmin;
-  height: 4vmin;
+  width: 3.5vmin;
+  height: 3.5vmin;
   background-color: white;
   border-radius: 5px;
   bottom: 0%;
   right: 10%;
   border-color: var(--selected-color);
   border-width: 2px;
+}
+
+.clearSearchButton {
+  padding: 0;
+  margin: 0;
+  height: fit-content;
+  width: fit-content;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.hidden {
+  visibility: hidden;
 }

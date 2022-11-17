@@ -43,11 +43,12 @@ export default class Filter {
       if (!GEAR_NAMES.includes(gearName)) {
 			  throw new IllegalArgumentError(`No known gear '${gearName}'.`);
       } else {
-        // Override rarity and brand parameters.
+        // Override rarity, type, and brand parameters.
         let gear = GEAR_NAME_TO_DATA.get(gearName);
         if (gear) {
           minimumRarity = gear.rarity;
           gearBrands = [gear.brand];
+          gearTypes = [gear.type];
         }
       }
 		}

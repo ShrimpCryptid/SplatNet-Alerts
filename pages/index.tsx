@@ -158,7 +158,9 @@ export default function Home({
 				</div>
 			</div>
 			<h2>Your Filters</h2>
-      <button onClick={updateFilterViews}>Refresh</button>
+      <button onClick={updateFilterViews}>
+        <span className="material-symbols-outlined">sync</span>
+      </button>
 			<div className={styles.filterListContainer}>
         {(filterList && filterList.length > 0) ? filterList.map((filter, index) => {
           return (

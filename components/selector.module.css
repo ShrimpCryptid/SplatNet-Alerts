@@ -26,6 +26,7 @@
     border-width: 2px;
     border-color: transparent;
     border-style: solid;
+    cursor: pointer;
 }
 
 .itemContainer:hover {

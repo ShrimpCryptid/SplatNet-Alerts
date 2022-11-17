@@ -11,6 +11,7 @@ import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 
 import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
+import { GEAR_NAME_TO_IMAGE } from "../constants";
 
 const ABILITY_ICON_WIDTH = 49;
 const BRAND_ICON_LIST_WIDTH = 49;
@@ -46,9 +47,7 @@ const FilterView: FunctionComponent<Props> = ({
 	// GEAR TYPE, IMAGE, AND BRANDS
 	if (isItem) {
 		// Gear has a specific image, so show it here
-		// TODO: Gear images
-		iconURL =
-			"https://cdn.wikimg.net/en/splatoonwiki/images/1/1c/S3_Gear_Clothing_Annaki_Flannel_Hoodie.png";
+		iconURL = mapGetWithDefault(GEAR_NAME_TO_IMAGE, filter.gearName, unknownIcon);
 
 		// Gear item has a specific name, so we show it
 		gearNameElements = (
@@ -162,8 +161,16 @@ const FilterView: FunctionComponent<Props> = ({
 	return (
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
-				{onClickEdit ? <button onClick={onClickEdit}>Edit</button> : <></>}
-        {onClickDelete ? <button onClick={onClickDelete}>Delete</button> : <></>}
+				{onClickEdit ? <button onClick={onClickEdit}>
+            <span className="material-symbols-rounded">
+              edit_square
+            </span>
+          </button> : <></>}
+        {onClickDelete ? <button onClick={onClickDelete}>
+            <span className="material-symbols-rounded">
+              delete
+            </span>
+          </button> : <></>}
 				<Image
 					className={styles.gearIcon}
 					src={iconURL}

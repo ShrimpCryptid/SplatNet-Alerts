@@ -75,6 +75,7 @@ async function parseRowToGear(
 	if (children[1].firstChild) {
 		let childAElement = children[1].firstChild; // <a> tag
 		// Links are relative (ex: '/wiki/18K_Aviators') so must add URL prefix
+    // TODO: Retrieve highest-quality version (256x256) that the wiki has
 		pageLink = SPLATOON_WIKI_URL_PREFIX + $(childAElement).attr("href");
 	}
 

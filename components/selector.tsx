@@ -66,6 +66,8 @@ type SelectorProps = {
 	wildcard?: boolean;
 	search?: boolean;
 	onChanged?: CallableFunction;
+  /** Locks the input to one of the items, disabling all options until cleared.*/
+  lockTo?: string | null;
 };
 
 function countSelected(selections: Map<string, boolean>): number {
@@ -94,6 +96,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	wildcard,
 	search,
 	onChanged,
+  lockTo,
 }) => {
 	// check if items includes wildcard. if not, insert into our list of items and map of what
 	// items are selected.
@@ -142,8 +145,13 @@ const Selector: FunctionComponent<SelectorProps> = ({
 
 					let isSelected = selected.get(item);
 					let disabled = false;
-					// Disable every other item if wildcard is active and selected.
-					if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
+
+          if (lockTo) {
+            // Show the locked item as selected and disable all selections.
+            disabled = true;
+            isSelected = item === lockTo;
+          } else if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
+            // Disable every other item if wildcard is active and selected.
 						isSelected = false;
 						disabled = true;
 					}

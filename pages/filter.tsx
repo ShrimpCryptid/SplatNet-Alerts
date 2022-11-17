@@ -150,49 +150,45 @@ export default function FilterPage({
 
 	// Initialize page states, using existing filter values if present.
 	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(
-		initFilter.minimumRarity
-	);
+	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
 	const [currFilter, setCurrFilter] = useState(initFilter);
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
   const [pageSwitchReady, setPageSwitchReady] = useState(false);
+  const [showGearSelection, setShowGearSelection] = useState(false);
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.
 	const updateFilter = (
 		category: GEAR_PROPERTY,
-		updatedMap?: Map<string, boolean>,
-		updatedName?: string,
-		updatedRarity?: number
+		newValue: any,
 	) => {
-		let newGearName = "";
-		let newRarity = 0;
+		let newGearName = selectedGearName;
+		let newRarity = selectedRarity;
 		let newAbilities = selectedAbilities;
 		let newBrands = selectedBrands;
 		let newTypes = selectedTypes;
 
-		if (updatedMap) {
-			// either ability, brand, or gear types.
-			if (category == GEAR_PROPERTY.ABILITY) {
-				setSelectedAbilities(updatedMap);
-				newAbilities = updatedMap;
-			} else if (category == GEAR_PROPERTY.BRAND) {
-				setSelectedBrands(updatedMap);
-				newBrands = updatedMap;
-			} else if (category == GEAR_PROPERTY.TYPE) {
-				setSelectedTypes(updatedMap);
-				newTypes = updatedMap;
-			}
-		} else if (updatedName && category == GEAR_PROPERTY.NAME) {
-			newGearName = updatedName;
-			setSelectedGearName(updatedName);
-		} else if (updatedRarity && category == GEAR_PROPERTY.RARITY) {
-			newRarity = updatedRarity;
-			setSelectedRarity(updatedRarity);
+    // either ability, brand, or gear types.
+    if (category == GEAR_PROPERTY.ABILITY) {
+      setSelectedAbilities(newValue);
+      newAbilities = newValue;
+    } else if (category == GEAR_PROPERTY.BRAND) {
+      setSelectedBrands(newValue);
+      newBrands = newValue;
+    } else if (category == GEAR_PROPERTY.TYPE) {
+      setSelectedTypes(newValue);
+      newTypes = newValue;
+    } else if (category == GEAR_PROPERTY.NAME) {
+			setSelectedGearName(newValue);
+			newGearName = newValue;
+		} else if (category == GEAR_PROPERTY.RARITY) {
+			setSelectedRarity(newValue);
+			newRarity = newValue;
 		}
+
 		let newFilter = new Filter(
 			newGearName,
 			newRarity,
@@ -203,11 +199,17 @@ export default function FilterPage({
 		setCurrFilter(newFilter);
 
 		// Update whether filter can be saved
-		setCanSaveFilter(
-			hasSelection(newTypes) &&
-				hasSelection(newBrands) &&
-				hasSelection(newAbilities)
-		);
+    if (newGearName !== "") {
+      // If gear item selected, ignore brands and type (set by default)
+      setCanSaveFilter(hasSelection(newAbilities));
+    } else {
+      // Otherwise, types, brands, and abilities must all be set.
+      setCanSaveFilter(
+        hasSelection(newTypes) &&
+        hasSelection(newBrands) &&
+        hasSelection(newAbilities)
+      );
+    }
 	}; // updateFilter
 
 	const onClickSave = () => {
@@ -300,19 +302,19 @@ export default function FilterPage({
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
 			<p>Select the gear properties you want to be alerted for.</p>
-      <LabeledAlertbox header="Select Gear">
-        <GearSelector
-          gearData={GEAR_NAME_TO_DATA}
-          onSelection={(selectedGear) => {updateFilter(GEAR_PROPERTY.NAME, selectedGear.name)}}
-        />
-      </LabeledAlertbox>
-      <Selector
-        title="Gear Items"
-        category={GEAR_PROPERTY.NAME}
-        items={GEAR_NAMES}
-        selected={makeSelectedMap(GEAR_NAMES)}
-        itemImages={GEAR_NAME_TO_IMAGE}
-      />
+      <button onClick={() => {setShowGearSelection(true)}}>Select Gear (optional)</button>
+      {showGearSelection ?
+        <LabeledAlertbox header="Select Gear">
+          <GearSelector
+            gearData={GEAR_NAME_TO_DATA}
+            onSelection={(selectedGear) => {
+              updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
+              setShowGearSelection(false)
+            }}
+            />
+        </LabeledAlertbox>
+        : <></>
+      }
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
 					<Selector
@@ -325,6 +327,7 @@ export default function FilterPage({
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.TYPE, newSelected);
 						}}
+            lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>
@@ -338,6 +341,7 @@ export default function FilterPage({
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.BRAND, newSelected);
 						}}
+            lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.brand}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>

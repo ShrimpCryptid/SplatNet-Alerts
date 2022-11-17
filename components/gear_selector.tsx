@@ -18,37 +18,42 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearDa
   const [filteredGear, setFilteredGear] = useState([...gearData.values()]);
 
   // Set up fuzzy search
+  // TODO: Combine both name and brand in searches? https://stackoverflow.com/questions/47436817/search-in-two-properties-using-one-search-query
   const searchOptions = {
     shouldSort: true,  // sort by result accuracy
     keys: ["name", "brand"],
-    threshold: 0.5
+    threshold: 0.4
   }
   const fuzzySearcher = new Fuse([...gearData.values()], searchOptions);
 
-  const searchGear = async (newSearchText: string) => {
-
-  }
-
-  const handleSearchChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let newSearchText = event.currentTarget.value;
+  const handleSearchChanged = (newSearchText: string) => {
     setSearchText(newSearchText);
-    searchGear(newSearchText);
     // Filter the gear so only certain items are included.
-    if (newSearchText === "") {
+    if (newSearchText.replaceAll(" ", "") === "") {
       setFilteredGear([...gearData.values()]);
     } else {
-      let searchResults = fuzzySearcher.search(newSearchText);
+      // Modify search text so it doesn't include spaces-- this can cause
+      // unexpected behavior because the fuse searcher will try to match with it
+      let searchTextNoSpace = newSearchText.replaceAll(" ", "");
+      let searchResults = fuzzySearcher.search(searchTextNoSpace);
       setFilteredGear(searchResults.map((result) => {return result.item}));
     }
   }
 
   return (
     <div className={styles.container}>
-      <div className={"inputContainer"}>
+      <div className={`inputContainer ${styles.searchbar}`}>
+        <span className="material-symbols-rounded">search</span>
         <input
           value={searchText}
-          onChange={handleSearchChanged}
+          onChange={(event) => {handleSearchChanged(event.currentTarget.value)}}
         />
+        <div
+          className={`${styles.clearSearchButton} ${searchText === "" ? styles.hidden : ""}`}
+          role={"button"}
+        >
+          <span className="material-symbols-rounded" onClick={() => {handleSearchChanged("")}}>close</span>
+        </div>
       </div>
       <div className={styles.listContainer}>
         <div className={styles.list}>
@@ -83,6 +88,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearDa
           })}
         </div>
       </div>
+      <button>Cancel</button>
     </div>
   );
 }

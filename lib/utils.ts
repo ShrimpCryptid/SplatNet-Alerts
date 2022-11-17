@@ -41,7 +41,7 @@ export class NoSuchFilterError extends Error {
 export function mapGetWithDefault<T>(
 	map: Map<string, T>,
 	key: string,
-	defaultValue: T
+	defaultValue: any
 ): T {
 	let value = map.get(key);
 	if (value) {

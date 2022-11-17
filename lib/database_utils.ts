@@ -37,7 +37,7 @@ import {
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from 'web-push';
-import { DB_HOST, DB_PASSWORD, DB_USERNAME } from "../config";
+import { DB_DATABASE_NAME, DB_HOST, DB_PASSWORD, DB_USERNAME } from "../config";
 
 // ==============
 // HELPER METHODS
@@ -872,6 +872,7 @@ export function getDBClient(): Pool {
 		host: DB_HOST,
 		user: DB_USERNAME,
 		password: DB_PASSWORD,
+    database: DB_DATABASE_NAME,
 	});
 }
 

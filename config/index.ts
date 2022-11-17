@@ -25,7 +25,9 @@ function getEnvWithDefault(key: string, defaultValue: string): string {
 /** URL prefix for all API requests. */
 export const API_HOST = getEnvWithDefault("API_HOST", "http://localhost:3000");
 /** The database URL. */
-export const DB_HOST = getEnvWithDefault("DB_HOST", "http://localhost:5433");
+export const DB_HOST = getEnvWithDefault("DB_HOST", "localhost:5433");
+/** The name of the database. */
+export const DB_DATABASE_NAME = getEnvWithDefault("DB_DATABASE_NAME", "");
 /**The username for the database. The user should have read/write access and
  * the ability to create new tables. */
 export const DB_USERNAME = getEnvWithDefault("DB_USERNAME", "");

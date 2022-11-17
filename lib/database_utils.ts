@@ -182,10 +182,11 @@ function getTimestamp(): string {
 /**
  * @effects Initial setup the database and its tables.
  */
-export function setupDatabaseTables(client: Pool | PoolClient) {
+export function setupDatabaseTables() {
 	// Create data cache table
 	// Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
 	let promises = [];
+  let client = getDBClient();
 
 	promises.push(
 		queryAndLog(
@@ -204,7 +205,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 		queryAndLog(
 			client,
 			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
-            ${DB_USER_ID} SERIAL,
+            ${DB_USER_ID} SERIAL UNIQUE,
             ${DB_USER_CODE} varchar(255),
             ${DB_LAST_NOTIFIED_EXPIRATION} varchar(30),
             ${DB_LAST_MODIFIED} varchar(30),
@@ -218,7 +219,7 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 		queryAndLog(
 			client,
 			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
-          ${DB_SUBSCRIPTION_ID} SERIAL,
+          ${DB_SUBSCRIPTION_ID} SERIAL UNIQUE,
           ${DB_USER_ID} int4,
           ${DB_ENDPOINT} varchar(400),
           ${DB_EXPIRATION} varchar(255),
@@ -229,27 +230,6 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
           CONSTRAINT fk_userid
             FOREIGN KEY (${DB_USER_ID})
               REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID})
-    );`
-		)
-	);
-
-	// Create pairing table, which pairs users with their selected filters.
-	promises.push(
-		queryAndLog(
-			client,
-			`
-    CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
-        ${DB_PAIR_ID} SERIAL,
-        ${DB_USER_ID} int4,
-        ${DB_FILTER_ID} int4,
-        ${DB_LAST_MODIFIED} varchar(30),
-        PRIMARY KEY (${DB_PAIR_ID}),
-        CONSTRAINT fk_userid
-          FOREIGN KEY (${DB_USER_ID})
-            REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID}),
-        CONSTRAINT fk_filterid
-          FOREIGN KEY (${DB_FILTER_ID})
-            REFERENCES ${DB_TABLE_FILTERS}(${DB_FILTER_ID})
     );`
 		)
 	);
@@ -267,13 +247,34 @@ export function setupDatabaseTables(client: Pool | PoolClient) {
 		queryAndLog(
 			client,
 			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_FILTERS} (
-        ${DB_FILTER_ID} SERIAL,
+        ${DB_FILTER_ID} SERIAL UNIQUE,
         ${DB_GEAR_NAME} varchar(255),
         ${DB_GEAR_RARITY} int2,
         ${DB_GEAR_TYPE_WILDCARD} BOOL,
         ${DB_GEAR_BRAND_WILDCARD} BOOL,
         ${DB_GEAR_ABILITY_WILDCARD} BOOL,
         ${filterColumnQuery}
+    );`
+		)
+	);
+
+  // Create pairing table, which pairs users with their selected filters.
+	promises.push(
+		queryAndLog(
+			client,
+			`
+    CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS_TO_FILTERS} (
+        ${DB_PAIR_ID} SERIAL UNIQUE,
+        ${DB_USER_ID} int4,
+        ${DB_FILTER_ID} int4,
+        ${DB_LAST_MODIFIED} varchar(30),
+        PRIMARY KEY (${DB_PAIR_ID}),
+        CONSTRAINT fk_userid
+          FOREIGN KEY (${DB_USER_ID})
+            REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID}),
+        CONSTRAINT fk_filterid
+          FOREIGN KEY (${DB_FILTER_ID})
+            REFERENCES ${DB_TABLE_FILTERS}(${DB_FILTER_ID})
     );`
 		)
 	);
@@ -881,8 +882,3 @@ export function getDBClient(): Pool {
     });
   }
 }
-
-// On load, set up the database if it's not already set up.
-// TODO: Move this to a Node server setup method?
-const pool = getDBClient();
-setupDatabaseTables(pool);

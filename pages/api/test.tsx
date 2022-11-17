@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../constants";
+import { VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY } from "../../config";
 import { getDBClient, getUserIDFromCode, getUserIDsToBeNotified, getUserSubscriptions } from '../../lib/database_utils';
 import Filter from "../../lib/filter";
 import webpush from 'web-push';

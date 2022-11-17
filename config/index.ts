@@ -68,16 +68,7 @@ export const ACTION_SECRET = getEnvWithDefault("ACTION_SECRET", "");
 // to encrypt data before it reaches user devices. To generate your own pair,
 // run `npx web-push generate-vapid-keys --json` in the command line.
 
-// These values are provided **ONLY** as an example for development, and are not
-// used in production for the web app.
-
 /** VAPID public key for authenticating push notifications. */
-export const VAPID_PUBLIC_KEY = getEnvWithDefault(
-	"VAPID_PUBLIC_KEY",
-	"BP0f7Rhdh5eQg3mWuu7SyUptJ-MGm6f9Ci4ldL1yp4BWK_651XEiBJrDrOmTGqme8ndpETkkdqAbu-_zxCiNoyk"
-);
+export const VAPID_PUBLIC_KEY = getEnvWithDefault("VAPID_PUBLIC_KEY", "");
 /** VAPID private key for authenticating push notifications. */
-export const VAPID_PRIVATE_KEY = getEnvWithDefault(
-	"VAPID_PRIVATE_KEY",
-	"kKRbyxQeGeeoEtRCij10GRZUa4DoF8FXEMK1Sxf5ChM"
-);
+export const VAPID_PRIVATE_KEY = getEnvWithDefault("VAPID_PRIVATE_KEY", "");

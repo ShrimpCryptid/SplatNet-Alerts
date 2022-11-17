@@ -37,7 +37,7 @@ import {
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from 'web-push';
-import { DB_DATABASE_NAME, DB_HOST, DB_PASSWORD, DB_USERNAME } from "../config";
+import { PGDATABASE, PGHOST, PGPASSWORD, PGPORT, PGSTRING, PGUSER } from "../config";
 
 // ==============
 // HELPER METHODS
@@ -868,12 +868,18 @@ export async function trySendNotification(client: Pool | PoolClient, subscriptio
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
 
 export function getDBClient(): Pool {
-	return new Pool({
-		host: DB_HOST,
-		user: DB_USERNAME,
-		password: DB_PASSWORD,
-    database: DB_DATABASE_NAME,
-	});
+  if (PGSTRING) {
+    // Use PG string instead of variables
+    return new Pool({connectionString: PGSTRING});
+  } else {
+    return new Pool({
+      host: PGHOST,
+      user: PGUSER,
+      port: PGPORT,
+      password: PGPASSWORD,
+      database: PGDATABASE,
+    });
+  }
 }
 
 // On load, set up the database if it's not already set up.

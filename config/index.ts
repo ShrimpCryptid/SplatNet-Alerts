@@ -7,12 +7,14 @@
  * when making a PR.
  */
 
-function getEnvWithDefault(key: string, defaultValue: string): string {
+function getEnvWithDefault(key: string, defaultValue: string, printWarning: boolean = true): string {
   let value = process.env[key];
   if (value !== undefined) {
     return value;
   } else {
-    console.log(`Using default value for environment variable '${key}' (${defaultValue}).`);
+    if (printWarning) {
+      console.log(`Using default value for environment variable '${key}' (${defaultValue}).`);
+    }
     return defaultValue;
   }
 }
@@ -20,19 +22,30 @@ function getEnvWithDefault(key: string, defaultValue: string): string {
 // -----------------------------------------------------------------------------
 // Configuration for the database.
 // If using a local database for testing (e.g., PostGres), use localhost and a
-// defined port.
+// defined port, which can be defined below.
 
-/** URL prefix for all API requests. */
-export const API_HOST = getEnvWithDefault("API_HOST", "http://localhost:3000");
+/**
+ * Postgres connection string. If defined, overrides all other connection
+ * parameters ({@link PGHOST}, {@link PGPORT}, {@link PGDATABASE},
+ * {@link PGUSER}, {@link PGPASSWORD}).
+ */
+export const PGSTRING = process.env["PGSTRING"];
+let willUsePGString = PGSTRING !== undefined;  // silence warnings if used
+if (willUsePGString) {
+  console.log("Found PGSTRING, will use for database connection.");
+}
+
+// Manual connection parameters
 /** The database URL. */
-export const DB_HOST = getEnvWithDefault("DB_HOST", "localhost:5433");
+export const PGHOST = getEnvWithDefault("PGHOST", "localhost", !willUsePGString);
+export const PGPORT = Number.parseInt(getEnvWithDefault("PGPORT", "5433", !willUsePGString));
 /** The name of the database. */
-export const DB_DATABASE_NAME = getEnvWithDefault("DB_DATABASE_NAME", "");
+export const PGDATABASE = getEnvWithDefault("PGDATABASE", "", !willUsePGString);
 /**The username for the database. The user should have read/write access and
  * the ability to create new tables. */
-export const DB_USERNAME = getEnvWithDefault("DB_USERNAME", "");
-/** The password for the database user (given by {@link DB_USERNAME}). */
-export const DB_PASSWORD = getEnvWithDefault("DB_PASSWORD", "");
+export const PGUSER = getEnvWithDefault("PGUSER", "", !willUsePGString);
+/** The password for the database user (given by {@link PGUSER}). */
+export const PGPASSWORD = getEnvWithDefault("PGPASSWORD", "", !willUsePGString);
 
 // -----------------------------------------------------------------------------
 //  Included in headers for requests made by this app. This is used to contact

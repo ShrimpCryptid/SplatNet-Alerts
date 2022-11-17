@@ -20,6 +20,8 @@ import SuperJumpLoadAnimation from "../components/superjump/superjump";
  */
 async function getUserFilters(userCode: string): Promise<Filter[]> {
 	// TODO: Use SWR fetcher?
+  // TODO: URL-ify usercode.
+  // TODO: Validate user code before sending.
 	let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
 	let response = await fetch(url);
 	if (response.status == 200) {
@@ -53,6 +55,8 @@ export default function Home({
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
+    // TODO: Fix incorrect text when all filters have been deleted for an existing
+    // user.
     if (usercode !== null && usercode !== undefined) {
       getUserFilters(usercode).then((filterList) => {
           setFilterList(filterList);

@@ -2,7 +2,7 @@ import { FunctionComponent, MouseEventHandler } from "react";
 import Image from "next/image";
 
 import Filter from "../lib/filter";
-import { mapGetWithDefault } from "../lib/utils";
+import { mapGetWithDefault } from "../lib/shared_utils";
 
 import { unknownIcon, noneIcon } from "../public/icons/utils";
 import { abilityIcons } from "../public/icons/abilities";

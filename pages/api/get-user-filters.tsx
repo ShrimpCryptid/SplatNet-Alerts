@@ -6,7 +6,7 @@ import {
 	getUserFilters,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
-import { IllegalArgumentError } from "../../lib/utils";
+import { IllegalArgumentError } from "../../lib/shared_utils";
 
 /**
  * Retrieves the list of filters that the user is subscribed to.

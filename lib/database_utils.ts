@@ -34,9 +34,10 @@ import {
 	NoSuchFilterError,
 	mapGetWithDefault,
 	IllegalArgumentError,
-} from "./utils";
+} from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from 'web-push';
+import { DB_HOST, DB_PASSWORD, DB_USERNAME } from "../config";
 
 // ==============
 // HELPER METHODS
@@ -867,13 +868,10 @@ export async function trySendNotification(client: Pool | PoolClient, subscriptio
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
 
 export function getDBClient(): Pool {
-	// TODO: Retrieve values from an environment variable
-	// I love storing passwords in plaintext in my public github repo :]
 	return new Pool({
-		host: "localhost",
-		user: "postgres",
-		password: "2Nu^4nRW7H7$",
-		port: 5433,
+		host: DB_HOST,
+		user: DB_USERNAME,
+		password: DB_PASSWORD,
 	});
 }
 

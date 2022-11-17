@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUserIDsToBeNotified, getUserSubscriptions, trySendNotification, updateLastNotifiedExpiration } from '../../lib/database_utils';
 import { fetchAPIRawGearData, fetchCachedRawGearData, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
 import { Gear } from "../../lib/gear";
-import { configureWebPush } from "../../lib/server_utils";
+import { configureWebPush } from "../../lib/backend_utils";
 
 function getUserGear(gearToUsers: Map<Gear, Set<number>>, userID: number): Gear[] {
   let gearList = [];

@@ -2,7 +2,7 @@ import styles from "./selector.module.css";
 import { FunctionComponent } from "react";
 import Image, { StaticImageData } from "next/image";
 import { FE_WILDCARD, GEAR_PROPERTY } from "../constants";
-import { mapGetWithDefault } from "../lib/utils";
+import { mapGetWithDefault } from "../lib/shared_utils";
 import { unknownIcon } from "../public/icons/utils";
 
 type SelectorItemProps = {

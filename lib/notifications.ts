@@ -1,4 +1,4 @@
-import { IllegalArgumentError } from "./utils";
+import { IllegalArgumentError } from "./shared_utils";
 import { PushSubscription } from 'web-push';
 
 /** Data class for Push Subscriptions. */

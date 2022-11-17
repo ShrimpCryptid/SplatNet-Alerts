@@ -7,7 +7,7 @@ import {
 	GEAR_ABILITIES,
   GEAR_NAME_TO_DATA,
 } from "../constants";
-import { IllegalArgumentError } from "./utils";
+import { IllegalArgumentError } from "./shared_utils";
 
 /**
  * Data class representing a single filter for gear properties.

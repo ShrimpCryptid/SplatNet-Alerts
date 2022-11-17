@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { API_SUBSCRIPTION, API_USER_CODE, API_SEND_TEST_NOTIFICATION } from "../../constants";
 import { getDBClient, getUserIDFromCode, makeNewUser, addUserPushSubscription, trySendNotification } from "../../lib/database_utils";
 import { Subscription } from "../../lib/notifications";
-import { configureWebPush } from "../../lib/server_utils";
+import { configureWebPush } from "../../lib/backend_utils";
 
 /**
  * Updates the user's notification subscription.

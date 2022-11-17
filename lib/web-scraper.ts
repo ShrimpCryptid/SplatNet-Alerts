@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import fs from 'fs';
 import { Gear } from "./gear";
 import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
-import { fetchWithBotHeader } from "./utils";
+import { fetchWithBotHeader } from "./backend_utils";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
 

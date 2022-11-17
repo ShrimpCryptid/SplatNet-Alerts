@@ -2,7 +2,7 @@
 import { getCachedData, setCachedData } from "./database_utils";
 import { DB_CACHE_KEY_GEAR_DATA } from "../constants/db";
 import { Pool, PoolClient } from "pg";
-import { fetchWithBotHeader } from "./utils";
+import { fetchWithBotHeader } from "./backend_utils";
 import { Gear } from "./gear";
 
 interface GearJSON {

@@ -5,7 +5,7 @@ import Fuse from 'fuse.js';
 import Image from "next/image";
 import { unknownIcon } from "../public/icons/utils";
 import { brandIcons } from "../public/icons/brands";
-import { mapGetWithDefault } from "../lib/utils";
+import { mapGetWithDefault } from "../lib/shared_utils";
 
 type GearSelectorProps = {
   onSelection: (selectedGear: Gear) => void,

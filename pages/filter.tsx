@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
 import GearSelector from "../components/gear_selector";
+import LoadingButton from "../components/loading-button";
 import Selector from "../components/selector";
 import {
 	FE_WILDCARD,
@@ -155,6 +156,7 @@ export default function FilterPage({
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
   const [pageSwitchReady, setPageSwitchReady] = useState(false);
   const [showGearSelection, setShowGearSelection] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.
@@ -231,6 +233,7 @@ export default function FilterPage({
 			if (!tempUserCode) {
 				// TODO: Display an error message
         console.log("Could not make new user.");
+        setIsSaving(false);
 				return;
 			} else {
 				let responseCode = 0;
@@ -253,10 +256,12 @@ export default function FilterPage({
 					// TODO: Display an error message.
 					console.log("Response code: " + responseCode);
 					console.error("Could not complete request.");
+          setIsSaving(false);
 					return;
 				}
 			}
 		}
+    setIsSaving(true);
 		saveFilter();
 	};
 
@@ -356,6 +361,7 @@ export default function FilterPage({
 					/>
 				</div>
 			</div>
+      <br/>
 			<div className={styles.filterViewContainer}>
 				<FilterView
 					filter={currFilter}
@@ -364,9 +370,11 @@ export default function FilterPage({
 					typesSelected={hasSelection(selectedTypes)}
 				/>
 			</div>
-			<button onClick={onClickSave} disabled={!canSaveFilter}>
+      <br/>
+			<LoadingButton onClick={onClickSave} disabled={!canSaveFilter} loading={isSaving}>
 				Save
-			</button>
+			</LoadingButton>
+      <br/>
 			<Link href="/">
 				<button>Cancel</button>
 			</Link>

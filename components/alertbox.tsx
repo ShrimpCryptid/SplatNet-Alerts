@@ -1,7 +1,6 @@
 import React, { MouseEventHandler } from "react";
 import styles from "./alertbox.module.css";
 
-// TODO: Add close button to Alertbox, if applicable.
 export function Alertbox(props: React.PropsWithChildren) {
   return (
     <div className={styles.background}>

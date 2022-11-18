@@ -5,7 +5,6 @@ import {
 	getUserIDFromCode,
 	getUserFilters,
 } from "../../lib/database_utils";
-import Filter from "../../lib/filter";
 import { IllegalArgumentError } from "../../lib/shared_utils";
 
 /**
@@ -25,6 +24,9 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
+  // Set up cache
+  res.setHeader('Cache-Control', 'max-age=10');
+
 	// Validate input
 	if (
 		!(req.query[API_USER_CODE] && typeof req.query[API_USER_CODE] === "string")

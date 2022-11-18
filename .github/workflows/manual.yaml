@@ -9,4 +9,4 @@ jobs:
         run: |
           curl --request POST \
           --url 'https://splatnet-alerts.netlify.app/api/check-and-notify' \
-          --header 'Authorization: Bearer ${{secrets.ACTION_KEY}}'
+          --header 'Authorization: ${{secrets.ACTION_KEY}}'

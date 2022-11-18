@@ -55,7 +55,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Note: providing an empty string for the secret key will skip checks.
     let secretKey = getEnvWithDefault(ENV_KEY_ACTION_SECRET, null);
     let providedKey = req.headers.authorization;
-    console.log(providedKey);
 
     if (!secretKey) {
       // Secret key is undefined-- assume that this is an error.

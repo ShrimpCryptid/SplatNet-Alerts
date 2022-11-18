@@ -15,7 +15,7 @@ export default async function handler(
 	res: NextApiResponse
 ) {
 	try {
-		const client = getDBClient();
+		let client = getDBClient();
 		let usercode = await makeNewUser(client);
 
 		res.status(200).json(usercode);

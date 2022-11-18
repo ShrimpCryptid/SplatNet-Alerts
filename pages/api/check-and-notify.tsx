@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Validate input
 
   try {
-    const client = getDBClient();
+    let client = getDBClient();
 
     // 0. Check authentication on the request-- must match stored API key.
     // Note: providing an empty string for the secret key will skip checks.

@@ -42,7 +42,7 @@ export default async function handler(
 	}
 
 	try {
-		const client = getDBClient();
+		let client = getDBClient();
 
 		// Validate user
 		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);

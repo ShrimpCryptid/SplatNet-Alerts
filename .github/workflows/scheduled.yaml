@@ -1,9 +1,10 @@
 name: Fetch gear
 on:
   schedule:
-    - cron: '0,5,10,15,20,25,30,35,40,45,50,55 * * * *' # run every hour at 0 and 5 minute mark
+    - cron: '0,10,20,30,40,50 * * * *'
+    # run every 10 minutes
 jobs:
-  cron:
+  fetch_gear:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch gear

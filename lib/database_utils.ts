@@ -867,8 +867,9 @@ export async function trySendNotification(
 		return result;
 	} catch (error) {
 		if (error instanceof webpush.WebPushError) {
-			if (error.statusCode === 404 || error.statusCode === 410) {
+			if (error.statusCode === 404 || error.statusCode === 410 || error.statusCode === 403) {
 				// 404: endpoint not found, 410: push subscription expired
+        // 403: incorrect/changed keys
 				// Remove this subscription from the database.
 				await deletePushSubscription(client, subscription);
 				return;

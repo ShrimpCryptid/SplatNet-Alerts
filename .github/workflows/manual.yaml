@@ -1,0 +1,12 @@
+name: Test manually fetch gear
+on: workflow_dispatch
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manual gear fetch
+        # Send a request to the server with a secret key for authentication
+        run: |
+          curl --request POST \
+          --url 'https://splatnet-alerts.netlify.app/api/check-and-notify' \
+          --header 'Authorization: Bearer ${{secrets.ACTION_KEY}}'

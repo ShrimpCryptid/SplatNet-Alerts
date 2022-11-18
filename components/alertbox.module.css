@@ -18,4 +18,13 @@
   min-height: 10vmin;
   background-color: var(--background-alt);
   padding: 15px;
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  cursor: pointer;
+  font-size: 10px;
 }

@@ -19,8 +19,6 @@ import {
 	API_USER_CODE,
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
-  GEAR_NAME_TO_IMAGE,
-  GEAR_NAMES,
   GEAR_NAME_TO_DATA
 } from "../constants";
 import Filter from "../lib/filter";
@@ -303,13 +301,14 @@ export default function FilterPage({
 			<p>Select the gear properties you want to be alerted for.</p>
       <button onClick={() => {setShowGearSelection(true)}}>Select Gear (optional)</button>
       {showGearSelection ?
-        <LabeledAlertbox header="Select Gear">
+        <LabeledAlertbox header="Select Gear" onClickClose={() => setShowGearSelection(false)}>
           <GearSelector
             gearData={GEAR_NAME_TO_DATA}
             onSelection={(selectedGear) => {
               updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
               setShowGearSelection(false)
             }}
+            onClickClose={() => {setShowGearSelection(false)}}
             />
         </LabeledAlertbox>
         : <></>

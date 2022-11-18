@@ -9,10 +9,11 @@ import { mapGetWithDefault } from "../lib/shared_utils";
 
 type GearSelectorProps = {
   onSelection: (selectedGear: Gear) => void,
+  onClickClose: any,
   gearData: Map<string, Gear>
 }
 
-const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearData}) => {
+const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, onClickClose, gearData}) => {
   const gearArray = [...gearData.values()];
   const [searchText, setSearchText] = useState("");
   const [filteredGear, setFilteredGear] = useState([...gearData.values()]);
@@ -43,7 +44,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearDa
   return (
     <div className={styles.container}>
       <div className={`inputContainer ${styles.searchbar}`}>
-        <span className="material-symbols-rounded">search</span>
+        <span className="material-symbols-rounded md-dark">search</span>
         <input
           value={searchText}
           onChange={(event) => {handleSearchChanged(event.currentTarget.value)}}
@@ -52,7 +53,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearDa
           className={`${styles.clearSearchButton} ${searchText === "" ? styles.hidden : ""}`}
           role={"button"}
         >
-          <span className="material-symbols-rounded" onClick={() => {handleSearchChanged("")}}>close</span>
+          <span className="material-symbols-rounded md-dark" onClick={() => {handleSearchChanged("")}}>close</span>
         </div>
       </div>
       <div className={styles.listContainer}>
@@ -88,7 +89,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, gearDa
           })}
         </div>
       </div>
-      <button>Cancel</button>
+      <button onClick={onClickClose}>Cancel</button>
     </div>
   );
 }

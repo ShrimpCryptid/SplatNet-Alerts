@@ -39,8 +39,8 @@ I'm currently targeting December 2022 for launch. 🤞
   - [ ] Notification on/off slider, options for stopping all notifications
   - [ ] User flow alerts (prompt for notifications, etc.)
 - [ ] Set up metrics collection and server logging
-- [ ] Configure server/database options, key security
-- [ ] Web hosting setup
+- [x] Configure server/database options, key security
+- [x] Web hosting setup
 - [ ] **WEBSITE GOES LIVE** 🎉
 - [ ] User testing
 - [ ] Contributor tutorial + documentation (💖)

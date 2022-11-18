@@ -3,6 +3,8 @@ import { deletePushSubscription, getDBClient, getLastNotifiedExpiration, getUser
 import { fetchAPIRawGearData, fetchCachedRawGearData, getNewGearItems, rawGearDataToGearList, updateCachedRawGearData } from "../../lib/gear_loader";
 import { Gear } from "../../lib/gear";
 import { configureWebPush } from "../../lib/backend_utils";
+import { getEnvWithDefault } from "../../lib/shared_utils";
+import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
 
 function getUserGear(gearToUsers: Map<Gear, Set<number>>, userID: number): Gear[] {
   let gearList = [];
@@ -48,6 +50,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const client = getDBClient();
+
+    // 0. Check authentication on the request-- must match stored API key.
+    // Note: providing an empty string for the secret key will skip checks.
+    let secretKey = getEnvWithDefault(ENV_KEY_ACTION_SECRET, null);
+    let providedKey = req.headers.authorization;
+    console.log(providedKey);
+
+    if (!secretKey) {
+      // Secret key is undefined-- assume that this is an error.
+      console.error("Secret key 'ACTION_SECRET' is not defined.");
+      return res.status(500).end();
+    } else if (secretKey === "") {
+      console.log("Secret key is empty-- no checks will be run.");
+    } else if (secretKey === providedKey) {
+      console.log("Secret key matches. Request authenticated.");
+    } else {
+      console.error("Unauthorized request: keys do not match.");
+      return res.status(401).end();
+    }
 
     // 1. Check for new/expired gear items.
     let cachedRawGearData = await fetchCachedRawGearData(client);

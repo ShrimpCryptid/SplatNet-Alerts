@@ -1,0 +1,14 @@
+name: Fetch gear
+on:
+  schedule:
+    - cron: '0,5,10,15,20,25,30,35,40,45,50,55 * * * *' # run every hour at 0 and 5 minute mark
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch gear
+        # Send a request to the server with a secret key for authentication
+        run: |
+          curl --request POST \
+          --url 'https://splatnet-alerts.netlify.app/api/check-and-notify' \
+          --header 'Authorization: Bearer ${{secrets.ACTION_KEY}}'

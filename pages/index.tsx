@@ -127,6 +127,8 @@ export default function Home({
         console.error("Cannot find public VAPID key environment variable.");
         return;
       }
+      // TODO: Handle 'DOMException: Registration failed' when VAPID keys have changed.
+      // TODO: Determine why notifications don't work correctly the first time they're registered?
       let subscription = await createNotificationSubscription(publicVAPIDKey);
       let subscriptionString = JSON.stringify(subscription);
       // TODO: Store locally?

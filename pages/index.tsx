@@ -7,20 +7,22 @@ import { toast } from "react-toastify";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG } from "../constants";
+import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG, FE_ERROR_INVALID_USERCODE } from "../constants";
 import { DefaultPageProps } from "./_app";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
+import { isValidUserCode } from "../lib/shared_utils";
 
 
 /**
  * Retrieves a list of the user's current filters from the database.
  * @param userCode the unique string identifier for this user.
  */
-async function getUserFilters(userCode: string): Promise<Filter[]> {
+async function getUserFilters(userCode: string): Promise<Filter[]|null> {
 	// TODO: Use SWR fetcher?
   // TODO: URL-ify usercode.
-  // TODO: Validate user code before sending.
+  // TODO: Make multiple attempts to get a 200 response in case the server is
+  // misbehaving.  
 	let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
 	let response = await fetch(url);
 	if (response.status == 200) {
@@ -31,12 +33,12 @@ async function getUserFilters(userCode: string): Promise<Filter[]> {
 			filterList.push(Filter.deserializeObject(json));
 		}
 		return filterList;
-	} else if (response.status === 404) {
+	} else if (response.status === 404 && isValidUserCode(userCode)) {
     toast.error(FE_ERROR_404_MSG);
   } else if (response.status === 500 || response.status === 400) {
     toast.error(FE_ERROR_500_MSG);
   }
-  return [];
+  return null;
 }
 
 
@@ -48,29 +50,33 @@ export default function Home({
   let [filterList, setFilterList] = useState<Filter[]|null>(null);
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
-  let [lastFetchedUserCode, setLastFetchedUserCode] = useState<string|null>(null);
+  let [shouldFetchFilters, setShouldFetchFilters] = useState<boolean>(true);
   let [loginUserCode, setLoginUserCode] = useState("");
   let [filterText, setFilterText] = useState("Loading...");
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
-    // TODO: Fix incorrect text when all filters have been deleted for an existing
-    // user.
-    if (usercode !== null && usercode !== undefined) {
+    setFilterText("Loading...");  // Reset filter text while loading in text
+    if (usercode !== null) {
       getUserFilters(usercode).then((filterList) => {
-          setFilterList(filterList);
+          if (filterList && filterList.length > 0) {
+            setFilterList(filterList);
+          } else {
+            setFilterList([]);
+            setFilterText("There's nothing here yet.");
+          }
         }
       );
-    } else if (usercode !== undefined) {
-      setFilterList([]);  // store empty list
-      setFilterText("There's nothing here yet.");
+    } else {
+      setFilterList(null);  // store empty list
+      setFilterText("There's nothing here yet. Make a new filter to get started.");
     }
   }
   // On initial render only, or whenever our usercode has changed.
-  if (usercode !== lastFetchedUserCode || (usercode === null && filterList === null)) {
+  if (shouldFetchFilters) {
     setEditingFilter(null);  // clear the filter we are editing.
-    updateFilterViews();  // run only once during initial page render
-    setLastFetchedUserCode(usercode);  // Store this usercode
+    updateFilterViews();
+    setShouldFetchFilters(false);
   }
 
   // Click and edit a filter.
@@ -89,7 +95,7 @@ export default function Home({
 		}
 	});
 
-  // Click and remove a filter-- callback function
+  /** Attempts to delete the filter given by the index from the server. */
   const onClickDeleteFilter = (filterIndex: number) => {
     async function deleteFilter(filterIndex: number) {
       if (filterList) {
@@ -102,6 +108,10 @@ export default function Home({
           let newFilterList = [...filterList];  // shallow copy
           newFilterList.splice(filterIndex, 1);
           setFilterList(newFilterList);
+          if (newFilterList.length === 0) {
+            // Reset filter text
+            setFilterText("There's nothing here yet.");
+          }
         } else {
           // TODO: Error message
         }
@@ -139,7 +149,6 @@ export default function Home({
       url += `&${API_SEND_TEST_NOTIFICATION}`;  // flag: send test notif.
       let result = await fetch(url);
       if (result.status === 200) {
-        // TODO: Try sending a test notification to the device.
         toast.success("Success! A test notification has been sent to your device.");
       } else if (result.status === 404) {
         toast.error(FE_ERROR_404_MSG);
@@ -149,13 +158,20 @@ export default function Home({
     }
   }
 
+  /** Updates the login field as the user types. */
   const handleLoginChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLoginUserCode(event.currentTarget.value);
   }
 
   const onClickLogin = () => {
-    // TODO: Validate usercode, show some sort of error message if it's invalid
+    if (!isValidUserCode(loginUserCode)) {
+      toast.error(FE_ERROR_INVALID_USERCODE);
+      return;
+    }
+    // TODO: Attempt to log user in, and only allow switch if the server has
+    // a valid entry for the user.
     setUserCode(loginUserCode);
+    setShouldFetchFilters(true);
   }
 
 	return (

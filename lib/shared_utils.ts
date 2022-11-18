@@ -1,6 +1,8 @@
 /**
  * Utility methods shared across backend and frontend.
-*/ 
+*/
+import { validate, v4 as uuidv4 } from "uuid";
+
 
 export class IllegalArgumentError extends Error {
 	constructor(message: string) {
@@ -54,4 +56,15 @@ export function getEnvWithDefault<T>(key: string, defaultValue: T): string|T {
   } else {
     return defaultValue;
   }
+}
+
+/** Checks whether the given user code is valid. */
+export function isValidUserCode(userCode: string): boolean {
+	const allowedCharsPattern = new RegExp(/^[a-z0-9-]*$/);
+  return allowedCharsPattern.test(userCode) && validate(userCode);
+}
+
+/** Generates a random user code. */
+export function generateRandomUserCode(): string {
+  return uuidv4();
 }

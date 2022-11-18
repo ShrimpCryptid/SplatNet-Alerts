@@ -1,6 +1,5 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear";
-import { v4 as uuidv4, validate } from "uuid";
 import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES } from "../constants";
 import {
 	DB_GEAR_NAME,
@@ -35,6 +34,8 @@ import {
 	mapGetWithDefault,
 	IllegalArgumentError,
 	getEnvWithDefault,
+  isValidUserCode,
+  generateRandomUserCode,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from "web-push";
@@ -458,7 +459,7 @@ async function removeFilter(
 // #region
 
 export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
-	let newUserCode = await generateUserCode(client);
+	let newUserCode = await generateUnusedUserCode(client);
 	// TODO: add creation timestamp
 	let result = await queryAndLog(
 		client,
@@ -470,12 +471,12 @@ export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 	return newUserCode;
 }
 
-async function generateUserCode(client: PoolClient | Pool): Promise<string> {
+async function generateUnusedUserCode(client: PoolClient | Pool): Promise<string> {
 	// generate number
 	let userCode = "";
 	// repeat until there is no user with this existing user code.
 	do {
-		userCode = uuidv4();
+		userCode = generateRandomUserCode();
 	} while ((await getUserIDFromCode(client, userCode)) !== -1);
 	return userCode;
 }
@@ -578,7 +579,7 @@ export async function getUserIDFromCode(
 	userCode: string
 ): Promise<number> {
 	// TODO: Add extra manual regex check here for other illegal characters
-	if (!validate(userCode)) {
+	if (!isValidUserCode(userCode)) {
 		throw new IllegalArgumentError(userCode + " is not a valid uuid.");
 	}
 	let result = await queryAndLog(

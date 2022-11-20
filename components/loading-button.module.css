@@ -1,13 +1,23 @@
 .button {
+  height: fit-content;
+  position: relative;
+}
+
+.buttonIcon {
   padding: 5px;
   height: fit-content;
   font-size: 24px;
   position: relative;
   line-height: 0;
   border-radius: 10px;
-  border-color: white;
   border-style: solid;
   background-color: var(--background-alt);
+}
+
+.buttonFill {
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .loadingIcon {

@@ -39,13 +39,15 @@ const SuperJumpLoadAnimation = ({filterText, fillLevel=1.0}: SuperJumpLoadAnimat
         {images.map((value, index) => {
           if (value != null) {
             return (
-              //@ts-ignore Needed because --index is a custom property
-              <div className={`${styles.face}`} style={{'--index': index}}>
+              <div
+                className={`${styles.face}`}
+                //@ts-ignore Needed because --index is a custom property
+                style={{'--index': index}}
+                key={index}
+              >
                 <Image
                 src={value}
                 layout={"fill"}
-                width={40}
-                height={40}
               />
               </div>
             )
@@ -53,7 +55,7 @@ const SuperJumpLoadAnimation = ({filterText, fillLevel=1.0}: SuperJumpLoadAnimat
         })}
       </div>
       <div className={styles.label}>
-        <h3>{filterText}</h3>
+        <h2>{filterText}</h2>
       </div>
     </div>
   )

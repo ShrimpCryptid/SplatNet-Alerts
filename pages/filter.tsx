@@ -362,22 +362,31 @@ export default function FilterPage({
 				</div>
 			</div>
       <br/>
-			<div className={styles.filterViewContainer}>
-				<FilterView
-					filter={currFilter}
-					brandsSelected={hasSelection(selectedBrands)}
-					abilitiesSelected={hasSelection(selectedAbilities)}
-					typesSelected={hasSelection(selectedTypes)}
-				/>
-			</div>
-      <br/>
-			<LoadingButton onClick={onClickSave} disabled={!canSaveFilter} loading={isSaving}>
-				Save
-			</LoadingButton>
-      <br/>
-			<Link href="/">
-				<button>Cancel</button>
-			</Link>
+      <div style={{minWidth: "fit-content", width: "80vmin", margin: "0 auto"}}>
+        <div className={styles.filterViewContainer}>
+          <FilterView
+            filter={currFilter}
+            brandsSelected={hasSelection(selectedBrands)}
+            abilitiesSelected={hasSelection(selectedAbilities)}
+            typesSelected={hasSelection(selectedTypes)}
+          />
+        </div>
+        <br/>
+        <div style={{display: "flex", flexDirection: "row", gap: "20px", flexWrap: "wrap", width: "100%", justifyContent: "space-between"}}>
+          <Link href="/">
+            <button style={{width: "fit-content"}}>
+              <div style={{padding: "10px", width: "25vmin"}}>
+                Cancel
+              </div>
+            </button>
+          </Link>
+          <LoadingButton onClick={onClickSave} disabled={!canSaveFilter} loading={isSaving}>
+            <div style={{padding: "10px", width: "25vmin"}}>
+              Save
+            </div>
+          </LoadingButton>
+        </div>
+      </div>
 		</div>
 	);
 }

@@ -49,7 +49,6 @@ export default function App({ Component, pageProps }: AppProps) {
 	return (
 		<Layout>
       <>
-      <button onClick={()=>toast("hi :)")}>test</button>
       <Component
         {...pageProps}
         usercode={usercode}

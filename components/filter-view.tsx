@@ -12,7 +12,7 @@ import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 import { GEAR_NAME_TO_IMAGE } from "../constants";
-import LoadingButton from "./loading-button";
+import LoadingButton, { ButtonStyle } from "./loading-button";
 
 const ABILITY_ICON_WIDTH = 49;
 const BRAND_ICON_LIST_WIDTH = 49;
@@ -61,7 +61,7 @@ const FilterView: FunctionComponent<Props> = ({
 		// Gear item has a specific name, so we show it
 		gearNameElements = (
 			<div className={styles.gearNameContainer}>
-				<h2 className={styles.gearNameLabel}>{filter.gearName}</h2>
+				<h3 className={styles.gearNameLabel}>{filter.gearName}</h3>
 			</div>
 		);
 	} else {
@@ -191,14 +191,14 @@ const FilterView: FunctionComponent<Props> = ({
 			<div className={styles.rcontainer}>
 				<div className={styles.buttonGroup}>
 					{onClickEdit ? (
-						<LoadingButton onClick={onClickEdit} loading={awaitingEdit}>
+						<LoadingButton onClick={onClickEdit} loading={awaitingEdit} buttonStyle={ButtonStyle.ICON}>
 							<span className="material-symbols-rounded">edit_square</span>
 						</LoadingButton>
 					) : (
 						<></>
 					)}
 					{onClickDelete ? (
-						<LoadingButton onClick={onClickDelete} loading={awaitingDelete}>
+						<LoadingButton onClick={onClickDelete} loading={awaitingDelete} buttonStyle={ButtonStyle.ICON}>
 							<span className="material-symbols-rounded">delete</span>
 						</LoadingButton>
 					) : (

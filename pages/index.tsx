@@ -7,11 +7,12 @@ import { toast } from "react-toastify";
 import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
-import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG, FE_ERROR_INVALID_USERCODE } from "../constants";
+import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER_CODE, FE_ERROR_404_MSG, FE_ERROR_500_MSG, FE_ERROR_INVALID_USERCODE, FE_UNKNOWN_MSG } from "../constants";
 import { DefaultPageProps } from "./_app";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { isValidUserCode } from "../lib/shared_utils";
+import LoadingButton from "../components/loading-button";
 
 /**
  * Retrieves a list of the user's current filters from the database. Returns
@@ -22,21 +23,25 @@ async function getUserFilters(userCode: string): Promise<Filter[]|null> {
 	// TODO: Use SWR fetcher?
   // TODO: URL-ify usercode.
   // TODO: Make multiple attempts to get a 200 response in case the server is
-  // misbehaving.  
+  // misbehaving.
 	let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
-	let response = await fetch(url);
-	if (response.status == 200) {
-		// ok
-		let jsonList = await response.json();
-		let filterList = [];
-		for (let json of jsonList) {
-			filterList.push(Filter.deserializeObject(json));
-		}
-		return filterList;
-	} else if (response.status === 404 && isValidUserCode(userCode)) {
-    toast.error(FE_ERROR_404_MSG);
-  } else if (response.status === 500 || response.status === 400) {
-    toast.error(FE_ERROR_500_MSG);
+  try {
+    let response = await fetch(url);
+    if (response.status == 200) {
+      // ok
+      let jsonList = await response.json();
+      let filterList = [];
+      for (let json of jsonList) {
+        filterList.push(Filter.deserializeObject(json));
+      }
+      return filterList;
+    } else if (response.status === 404 && isValidUserCode(userCode)) {
+      toast.error(FE_ERROR_404_MSG);
+    } else if (response.status === 500 || response.status === 400) {
+      toast.error(FE_ERROR_500_MSG);
+    }
+  } catch (e) {
+    toast.error(FE_UNKNOWN_MSG);
   }
   return null;
 }
@@ -55,6 +60,7 @@ export default function Home({
   let [awaitingEdit, setAwaitingEdit] = useState(-1);
   /** The index of any filters we are waiting to delete. -1 by default. */
   let [awaitingDelete, setAwaitingDelete] = useState(-1);
+  let [awaitingRefresh, setAwaitingRefresh] = useState(false);
 
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
@@ -64,6 +70,7 @@ export default function Home({
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
+    setAwaitingRefresh(true);
     setFilterText("Loading...");  // Reset filter text while loading in text
     if (usercode !== null && usercode !== undefined) {
       getUserFilters(usercode).then((filterList) => {
@@ -74,11 +81,13 @@ export default function Home({
             setFilterList([]);
             setFilterText("There's nothing here yet.");
           }
+          setAwaitingRefresh(false);
         }
       );
     } else {
       setFilterList(null);  // store empty list
       setFilterText("There's nothing here yet. Make a new filter to get started.");
+      setAwaitingRefresh(false);
     }
   }
   // Check for changes to the user code and fetch filter views again if changed
@@ -117,21 +126,26 @@ export default function Home({
   const onClickDeleteFilter = (filterIndex: number) => {
     async function deleteFilter(filterIndex: number) {
       if (filterList) {
-        let filter = filterList[filterIndex];
-        let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
-        url += `&${API_FILTER_JSON}=${filter.serialize()}`
-        let result = await fetch(url);
-        if (result.status == 200) {
-          // Remove filter from the list locally too
-          let newFilterList = [...filterList];  // shallow copy
-          newFilterList.splice(filterIndex, 1);
-          setFilterList(newFilterList);
-          if (newFilterList.length === 0) {
-            // Reset filter text
-            setFilterText("There's nothing here yet.");
+        try {
+
+          let filter = filterList[filterIndex];
+          let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
+          url += `&${API_FILTER_JSON}=${filter.serialize()}`
+          let result = await fetch(url);
+          if (result.status == 200) {
+            // Remove filter from the list locally too
+            let newFilterList = [...filterList];  // shallow copy
+            newFilterList.splice(filterIndex, 1);
+            setFilterList(newFilterList);
+            if (newFilterList.length === 0) {
+              // Reset filter text
+              setFilterText("There's nothing here yet.");
+            }
+          } else {
+            // TODO: Error message
           }
-        } else {
-          // TODO: Error message
+        } catch (e) {
+          toast.error(FE_UNKNOWN_MSG);
         }
       }
       setAwaitingDelete(-1);
@@ -203,10 +217,10 @@ export default function Home({
 					<p>Get notified about gear from the SplatNet 3 app!</p>
 				</div>
 			</div>
-			<h2>Your Filters</h2>
-      <button onClick={updateFilterViews}>
-        <span className="material-symbols-outlined">sync</span>
-      </button>
+      <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+        <h2>Your Filters</h2>
+        <LoadingButton onClick={updateFilterViews} loading={awaitingRefresh}>Refresh</LoadingButton>
+      </div>
 			<div className={styles.filterListContainer}>
         {(filterList && filterList.length > 0) ? filterList.map((filter, index) => {
           return (

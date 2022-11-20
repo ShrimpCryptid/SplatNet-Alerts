@@ -13,9 +13,9 @@ import { requestNotificationPermission, registerServiceWorker, createNotificatio
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { isValidUserCode } from "../lib/shared_utils";
 
-
 /**
- * Retrieves a list of the user's current filters from the database.
+ * Retrieves a list of the user's current filters from the database. Returns
+ * null if filters could not be retrieved (due to a 404 or 500 error).
  * @param userCode the unique string identifier for this user.
  */
 async function getUserFilters(userCode: string): Promise<Filter[]|null> {
@@ -48,6 +48,14 @@ export default function Home({
 	setEditingFilter,
 }: DefaultPageProps) {
   let [filterList, setFilterList] = useState<Filter[]|null>(null);
+  let [lastUserCode, setLastUserCode] = useState<string|null>(usercode);
+
+  // Flags for UI loading buttons
+  /** The index of any filter we are waiting to edit. -1 by default. */
+  let [awaitingEdit, setAwaitingEdit] = useState(-1);
+  /** The index of any filters we are waiting to delete. -1 by default. */
+  let [awaitingDelete, setAwaitingDelete] = useState(-1);
+
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
   let [shouldFetchFilters, setShouldFetchFilters] = useState<boolean>(true);
@@ -57,11 +65,12 @@ export default function Home({
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
     setFilterText("Loading...");  // Reset filter text while loading in text
-    if (usercode !== null) {
+    if (usercode !== null && usercode !== undefined) {
       getUserFilters(usercode).then((filterList) => {
           if (filterList && filterList.length > 0) {
             setFilterList(filterList);
           } else {
+            // TODO: Check for an error state here (filter list === null)
             setFilterList([]);
             setFilterText("There's nothing here yet.");
           }
@@ -72,19 +81,28 @@ export default function Home({
       setFilterText("There's nothing here yet. Make a new filter to get started.");
     }
   }
-  // On initial render only, or whenever our usercode has changed.
+  // Check for changes to the user code and fetch filter views again if changed
+  // this is necessary because retrieval of the user code happens AFTER initial
+  // render)
+  if (lastUserCode !== usercode) {
+    setShouldFetchFilters(true);
+    setLastUserCode(usercode);
+  }
+  // Reload filters
   if (shouldFetchFilters) {
-    setEditingFilter(null);  // clear the filter we are editing.
+    setEditingFilter(null);  // clear any filters that we may have been editing
     updateFilterViews();
     setShouldFetchFilters(false);
   }
 
-  // Click and edit a filter.
-	const onClickFilter = (filter: Filter) => {
+  /** Edit an existing filter */
+	const onClickEditFilter = (filterIndex: number) => {
 		// Switch page contexts, save the editing filter to the state.
-		console.log(filter);
-		setEditingFilter(filter);
-		setPageSwitchReady(true);
+    if (filterList) {
+      setEditingFilter(filterList[filterIndex]);
+      setAwaitingEdit(filterIndex);
+      setPageSwitchReady(true);
+    }
 	};
 
   // Switches page to the filter edit/creation, but only when state has finished
@@ -116,7 +134,9 @@ export default function Home({
           // TODO: Error message
         }
       }
+      setAwaitingDelete(-1);
     }
+    setAwaitingDelete(filterIndex);
     deleteFilter(filterIndex);
   }
 
@@ -191,8 +211,10 @@ export default function Home({
         {(filterList && filterList.length > 0) ? filterList.map((filter, index) => {
           return (
             <FilterView
-              onClickEdit={() => onClickFilter(filter)}
+              onClickEdit={() => onClickEditFilter(index)}
               onClickDelete={() => onClickDeleteFilter(index)}
+              awaitingEdit={index === awaitingEdit}
+              awaitingDelete={index === awaitingDelete}
               filter={filter}
               key={index}
             />

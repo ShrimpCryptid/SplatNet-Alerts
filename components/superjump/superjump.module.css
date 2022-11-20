@@ -9,7 +9,7 @@
   transform-origin: center;
   text-align: center;
   position: relative;
-  --cylinder-width: 40vmin;
+  --cylinder-width: calc(55vmin);
   --face-count: 30;
   --face-deg: calc(360deg / var(--face-count));
   --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.025vmin);
@@ -17,16 +17,20 @@
   --pi: 3.14159265358979;
   --index: 0;
   align-items: center;
+  width: 100%;
+  height: 100%;
+  user-select: none;
 }
 
 .cylinder {
   position: relative;
   height: 50vw;
   width: 100%;
+  top: 50%;
   transform-style: preserve-3d;
   transform-origin: center;
   animation: spin 5s infinite linear;
-  transform: translateZ(0);
+  transform: translateY(-50%) rotateY(0deg);
 }
 
 .face {
@@ -43,7 +47,7 @@
 
 @keyframes spin {
   to {
-    transform: translateZ(0) rotateY(-360deg);
+    transform: translateY(-50%) rotateY(-360deg);
   }
 }
 
@@ -51,29 +55,22 @@
   position: absolute;
   opacity: 70%;
   width: 100%;
-  height: 10vmin;
-  animation: bob 2.5s infinite ease-in-out;
-  transform: translate(-50%, -50%);
+  height: 13vmin;
+  animation: bob 1.25s infinite ease-in-out alternate-reverse;
+  transform: translate(-50%, 0);
   left: 50%;
-  top: calc(50% - 100px);
+  bottom: calc(50% + 8vmin);
 }
 
 @keyframes bob {
-  0% {
-    transform: translate(-50%, -30%);
-  }
-  50% {
-    transform: translate(-50%, -50%);
-  }
-  100% {
-    transform: translate(-50%, -30%);
+  to {
+    transform: translate(-50%, 3vmin);
   }
 }
 
 .label {
   position: absolute;
   text-align: center;
-  top: calc(50% + 60px);
-  left: 50%;
-  transform: translate(-50%, -50%)
+  top: calc(50% + 5vmin);
+  width: 100%;
 }

@@ -12,11 +12,11 @@
 
 .listContainer {
   height: 60vh;
-  width: 100%;
+  width: fit-content;
 }
 
 .list {
-  width: 100%;
+  width: fit-content;
   max-height: 100%;
   height: fit-content;
   overflow-y: scroll;
@@ -31,7 +31,7 @@
 .listItem {
   display: flex;
   flex-direction: column;
-  width: 14vmin;
+  width: calc(8vmin + 45px);
   padding: 5px;
   background-color: var(--background-alt);
   border-radius: 10px;
@@ -52,8 +52,8 @@
 
 
 .listItemGearIcon {
-  height: 10vmin;
-  width: 10vmin;
+  height: calc(8vmin + 40px);
+  width: calc(8vmin + 40px);
   margin: auto auto;
   position: relative;
 }
@@ -65,12 +65,13 @@
 
 .listItemBrandIcon {
   position: absolute;
-  width: 3.5vmin;
-  height: 3.5vmin;
+  width: calc(2vmin + 15px);
+  height: calc(2vmin + 15px);
+
   background-color: white;
   border-radius: 5px;
   bottom: 0%;
-  right: 10%;
+  right: 0%;
   border-color: var(--selected-color);
   border-width: 2px;
 }

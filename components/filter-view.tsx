@@ -12,6 +12,7 @@ import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 import { GEAR_NAME_TO_IMAGE } from "../constants";
+import LoadingButton from "./loading-button";
 
 const ABILITY_ICON_WIDTH = 49;
 const BRAND_ICON_LIST_WIDTH = 49;
@@ -21,8 +22,11 @@ const GEAR_TYPE_WIDTH = 150;
 type Props = {
 	filter: Filter;
 	filterID?: number;
+
 	onClickEdit?: MouseEventHandler;
-  onClickDelete?: MouseEventHandler;
+	onClickDelete?: MouseEventHandler;
+	awaitingDelete?: boolean;
+	awaitingEdit?: boolean;
 
 	// Whether to show an alternative X symbol for brands, abilities, and types
 	// when they are unselected. All true by default.
@@ -33,9 +37,10 @@ type Props = {
 
 const FilterView: FunctionComponent<Props> = ({
 	filter,
-	filterID,
+	awaitingDelete = false,
+	awaitingEdit = false,
 	onClickEdit,
-  onClickDelete,
+	onClickDelete,
 	brandsSelected = true,
 	abilitiesSelected = true,
 	typesSelected = true,
@@ -47,18 +52,15 @@ const FilterView: FunctionComponent<Props> = ({
 	// GEAR TYPE, IMAGE, AND BRANDS
 	if (isItem) {
 		// Gear has a specific image, so show it here
-		iconURL = mapGetWithDefault(GEAR_NAME_TO_IMAGE, filter.gearName, unknownIcon);
+		iconURL = mapGetWithDefault(
+			GEAR_NAME_TO_IMAGE,
+			filter.gearName,
+			unknownIcon
+		);
 
 		// Gear item has a specific name, so we show it
 		gearNameElements = (
 			<div className={styles.gearNameContainer}>
-				<Image
-					className={styles.brandIcon}
-					src={mapGetWithDefault(brandIcons, filter.gearBrands[0], unknownIcon)}
-					width={BRAND_ICON_WIDTH}
-					height={BRAND_ICON_WIDTH}
-					layout={"fixed"}
-				/>
 				<h2 className={styles.gearNameLabel}>{filter.gearName}</h2>
 			</div>
 		);
@@ -99,7 +101,7 @@ const FilterView: FunctionComponent<Props> = ({
 							src={brandsSelected ? unknownIcon : noneIcon}
 							width={BRAND_ICON_LIST_WIDTH}
 							height={BRAND_ICON_LIST_WIDTH}
-							layout={"fixed"}
+							layout={"fill"}
 						/>
 					</div>
 				</>
@@ -112,12 +114,12 @@ const FilterView: FunctionComponent<Props> = ({
 						{filter.gearBrands.map((value, index) => {
 							return (
 								<Image
-                  key={index}
+									key={index}
 									className={styles.brandIconList}
 									src={mapGetWithDefault(brandIcons, value, unknownIcon)}
 									width={BRAND_ICON_LIST_WIDTH}
 									height={BRAND_ICON_LIST_WIDTH}
-									layout={"fixed"}
+									layout={"fill"}
 								/>
 							);
 						})}
@@ -133,12 +135,12 @@ const FilterView: FunctionComponent<Props> = ({
 		abilityElements = (
 			<>
 				<Image
-          key={0}
+					key={0}
 					className={styles.abilityIcon}
 					src={abilitiesSelected ? unknownIcon : noneIcon}
 					width={ABILITY_ICON_WIDTH}
 					height={ABILITY_ICON_WIDTH}
-					layout={"fixed"}
+					layout={"fill"}
 				/>
 			</>
 		);
@@ -151,7 +153,7 @@ const FilterView: FunctionComponent<Props> = ({
 					src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
 					width={ABILITY_ICON_WIDTH}
 					height={ABILITY_ICON_WIDTH}
-					layout={"fixed"}
+					layout={"fill"}
 					quality={100}
 				/>
 			);
@@ -161,22 +163,24 @@ const FilterView: FunctionComponent<Props> = ({
 	return (
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
-				{onClickEdit ? <button onClick={onClickEdit}>
-            <span className="material-symbols-rounded">
-              edit_square
-            </span>
-          </button> : <></>}
-        {onClickDelete ? <button onClick={onClickDelete}>
-            <span className="material-symbols-rounded">
-              delete
-            </span>
-          </button> : <></>}
-				<Image
-					className={styles.gearIcon}
-					src={iconURL}
-					width={GEAR_TYPE_WIDTH}
-					height={GEAR_TYPE_WIDTH}
-				/>
+        <div className={styles.gearIcon}>
+          <Image
+            src={iconURL}
+            width={GEAR_TYPE_WIDTH}
+            height={GEAR_TYPE_WIDTH}
+            layout={"responsive"}
+          />
+          <div className={styles.gearIconBrand}
+               style={{visibility: isItem ? "visible" : "hidden"}}
+          >
+            <Image
+              src={mapGetWithDefault(brandIcons, filter.gearBrands[0], unknownIcon)}
+              width={BRAND_ICON_WIDTH}
+              height={BRAND_ICON_WIDTH}
+              layout={"fill"}
+            />
+          </div>
+        </div>
 				<div className={styles.rarityMeter}>
 					<RarityMeter
 						minRarity={filter.minimumRarity}
@@ -185,6 +189,23 @@ const FilterView: FunctionComponent<Props> = ({
 				</div>
 			</div>
 			<div className={styles.rcontainer}>
+				<div className={styles.buttonGroup}>
+					{onClickEdit ? (
+						<LoadingButton onClick={onClickEdit} loading={awaitingEdit}>
+							<span className="material-symbols-rounded">edit_square</span>
+						</LoadingButton>
+					) : (
+						<></>
+					)}
+					{onClickDelete ? (
+						<LoadingButton onClick={onClickDelete} loading={awaitingDelete}>
+							<span className="material-symbols-rounded">delete</span>
+						</LoadingButton>
+					) : (
+						<></>
+					)}
+				</div>
+
 				{gearNameElements}
 				{brandElements}
 

@@ -21,6 +21,8 @@ export default function App({ Component, pageProps }: AppProps) {
   const [usercode, setUserCode] = useState<null | string | undefined>(undefined);
 	const [editingFilter, setEditingFilter] = useState<null | Filter>(null);
 
+  // Wrapped in useEffect because this needs to run on the client side
+  // (not during server-side rendering)
   useEffect(() => {
     // Load locally-stored user code if it exists
     if (usercode === undefined) {

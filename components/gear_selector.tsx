@@ -44,7 +44,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({onSelection, onClic
   return (
     <div className={styles.container}>
       <div className={`inputContainer ${styles.searchbar}`}>
-        <span className="material-symbols-rounded md-dark">search</span>
+        <span className="material-symbols-rounded">search</span>
         <input
           value={searchText}
           onChange={(event) => {handleSearchChanged(event.currentTarget.value)}}

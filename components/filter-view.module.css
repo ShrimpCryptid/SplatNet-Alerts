@@ -1,28 +1,28 @@
 .container {
-    width: auto;
-    background-color: var(--background-alt);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: row;
-    padding: 10px;
+  width: auto;
+  background-color: var(--background-alt);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
 }
 
 .lcontainer {
-    width: 30%;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    padding-right: 10px;
+  width: 30vmin;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-right: 10px;
 }
 
 .gearIcon {
-    position: relative;
-    margin-left: auto;
-    margin-right: auto;
-    align-self: center;
-    width: calc(12vmin + 25px);
-    height: calc(12vmin + 25px);
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  align-self: center;
+  width: calc(12vmin + 25px);
+  height: calc(12vmin + 25px);
 }
 
 .gearIconBrand {
@@ -35,63 +35,69 @@
   border-radius: 10%;
 }
 
-.gearNameContainer {
-    display: inline;
-    width: 100%;
-    height: fit-content;
-    gap: 10px;
-}
-
-.gearNameLabel {
-    margin: 0 0;
-    align-self: center;
-    height: fit-content;
-    width: fit-content;
-    display: inline;
-}
-
 .rcontainer {
     width: 70%;
     height: fit-content;
     position: relative;
 }
 
+.gearNameContainer {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: fit-content;
+  gap: 10px;
+}
+
+.gearNameLabel {
+  margin: 0 0;
+  align-self: center;
+  height: fit-content;
+  width: fit-content;
+  display: inline;
+  font-size: calc(18px + .4vw);
+}
+
+
 .buttonGroup {
-  position: absolute;
   top: 0%;
   right: 0%;
   display: flex;
   flex-direction: row;
   width: fit-content;
   margin-left: auto;
+  height: fit-content;
   gap: 10px;
 }
 
 .categoryLabel {
     margin-bottom: 0;
     margin-top: 0;
+    font-size: calc(16px + .2vw);
 }
 
-.brandIconList {
+.brandIcon {
     background-color: white;
     border-radius: 10%;
+    height: calc(4vmin + 15px);
+    width: calc(4vmin + 15px);
+    position: relative;
 }
 
 .brandIconContainer {
-    position: relative;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 5px;
-    height: calc(4vmin + 15px);
-    width: calc(4vmin + 15px);
 }
 
 
 .abilityIcon {
     background-color: black;
     border-radius: 100%;
-    margin: 10px;
+    height: calc(4vmin + 15px);
+    width: calc(4vmin + 15px);
+    position: relative;
 }
 
 .abilityIconContainer {
@@ -102,8 +108,6 @@
     justify-items: left;
     gap: 5px;
     align-items: center;
-    height: calc(4vmin + 15px);
-    width: calc(4vmin + 15px);
 }
 
 .rarityMeter {

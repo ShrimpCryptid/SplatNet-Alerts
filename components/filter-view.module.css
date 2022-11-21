@@ -8,7 +8,7 @@
 }
 
 .lcontainer {
-  width: 30vmin;
+  width: 30%;
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -56,6 +56,9 @@
   width: fit-content;
   display: inline;
   font-size: calc(18px + .4vw);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 

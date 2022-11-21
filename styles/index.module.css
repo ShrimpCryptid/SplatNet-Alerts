@@ -1,5 +1,5 @@
 .main {
-  width: 80vmin;
+  width: calc(100vmin - 30px);
   justify-self: center;
   margin: 0 auto;
 }

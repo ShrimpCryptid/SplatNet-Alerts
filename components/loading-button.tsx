@@ -41,11 +41,13 @@ export default function LoadingButton({
         style={style}
 			>
 				<div className={loading ? styles.hidden : ""}>{children}</div>
-				<div
-					className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
-				>
-					<Image src={loadingIcon} width={50} height={50} layout="fill" />
-				</div>
+        {loading ? <div
+          className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
+          >
+            <div className={styles.loadingFiller}></div>
+            <Image src={loadingIcon} layout="fill" />
+          </div>
+        : <>  </>}
 			</button>
 		</div>
 	);

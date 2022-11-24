@@ -213,8 +213,18 @@ export default function Home({
 			<Head>Splatnet Shop Alerts</Head>
 			<div>
 				<div>
-					<h1>Splatnet Shop Alerts (SSA)</h1>
-					<p>Get notified about gear from the SplatNet 3 app!</p>
+					<h1>Splatnet Alerts</h1>
+					<h3>Get notified about gear from the SplatNet 3 app!</h3>
+          <p>Splatnet Alerts lets you sign up for notifications about new gear
+            items. You can set <b>filters</b> to search for certain brand,
+            ability, or gear combinations, and sync notifications across
+            devices. You'll be notified within 30 minutes of new items arriving
+            in the shop!
+            <br/>
+            <br/>
+            Splatnet Alerts is maintained by @ShrimpCryptid. You can contribute directly to the
+            project on GitHub!
+          </p>
 				</div>
 			</div>
       <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>

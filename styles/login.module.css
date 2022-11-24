@@ -1,0 +1,39 @@
+.mainContent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.codeContainer {
+  height: fit-content;
+  flex-direction: column;
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.usercodeText {
+  width: fit-content;
+  margin-right: 20px;
+}
+
+.buttonDiv {
+  margin: auto 0;
+}
+
+.loadingSpinner {
+  width: calc(10vmin + 40px);
+  height: calc(10vmin + 40px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 1.5s infinite linear;
+  opacity: 50%;
+}
+
+@keyframes spin {
+  100% {
+    transform: translate(-50%, -50%) rotateZ(360deg);
+  }
+}

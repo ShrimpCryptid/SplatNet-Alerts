@@ -26,7 +26,7 @@ export default function LabeledAlertbox(props: LabeledAlertboxProps) {
         <span className="material-symbols-rounded md-36 md-light">close</span>
       </div>
       : <></>}
-      <h1>{props.header}</h1>
+      <h1 style={{marginTop: "0"}}>{props.header}</h1>
       {props.children}
     </Alertbox>
   )

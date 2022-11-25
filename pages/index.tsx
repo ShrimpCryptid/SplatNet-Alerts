@@ -12,7 +12,8 @@ import { DefaultPageProps } from "./_app";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { isValidUserCode } from "../lib/shared_utils";
-import LoadingButton from "../components/loading-button";
+import LoadingButton, { ButtonStyle } from "../components/loading-button";
+import LabeledAlertbox, { Alertbox, WelcomeAlertbox } from "../components/alertbox";
 
 /**
  * Retrieves a list of the user's current filters from the database. Returns
@@ -211,21 +212,16 @@ export default function Home({
 	return (
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
+
+      {/** 
+      <WelcomeAlertbox
+        onClickClose={() => {}}
+        usercode={usercode ? usercode : ""}
+        onClickSubmitNickname={() => {}}
+      />*/}
+
 			<div>
-				<div>
 					<h1>Splatnet Alerts</h1>
-					<h3>Get notified about gear from the SplatNet 3 app!</h3>
-          <p>Splatnet Alerts lets you sign up for notifications about new gear
-            items. You can set <b>filters</b> to search for certain brand,
-            ability, or gear combinations, and sync notifications across
-            devices. You'll be notified within 30 minutes of new items arriving
-            in the shop!
-            <br/>
-            <br/>
-            Splatnet Alerts is maintained by @ShrimpCryptid. You can contribute directly to the
-            project on GitHub!
-          </p>
-				</div>
 			</div>
       <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
         <h2>Your Filters</h2>
@@ -255,6 +251,19 @@ export default function Home({
 				<button>New Filter</button>
 			</Link>
 
+      <h3>Get notified about gear from the SplatNet 3 app!</h3>
+        <p>
+          Splatnet Alerts lets you sign up for notifications about new gear
+          items. You can set <b>filters</b> to search for certain brand,
+          ability, or gear combinations, and sync notifications across
+          devices. You'll be notified within 30 minutes of new items arriving
+          in the shop!
+          <br/>
+          <br/>
+          Splatnet Alerts is maintained by @ShrimpCryptid. You can contribute directly to the
+          project on GitHub!
+      </p>
+
 			<h2>Settings</h2>
 			<h3>Notifications</h3>
 			<p>
@@ -277,7 +286,9 @@ export default function Home({
 				<b>Your unique identifier is:</b>
 			</p>
 			<textarea value={usercode ? usercode : ""} readOnly={true}/>
-			<button>📄</button>
+      <LoadingButton buttonStyle={ButtonStyle.ICON}>
+        <span className="material-symbols-rounded">content_copy</span>
+      </LoadingButton>
 
 			<h3>Change User</h3>
 			<p>

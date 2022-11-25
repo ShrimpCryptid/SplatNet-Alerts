@@ -1,5 +1,6 @@
 import React, { MouseEventHandler, useState } from "react";
 import { toast } from "react-toastify";
+import { getRandomTitle } from "../lib/shared_utils";
 import styles from "./alertbox.module.css";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 
@@ -56,7 +57,7 @@ type WelcomeAlertboxProps = {
   onClickSubmitNickname: MouseEventHandler<HTMLElement>
 }
 export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(getRandomTitle());
 
   // TODO: Register nickname to server on submit
   const onChangedNickname = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -97,7 +98,10 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
         value={nickname}
         onChange={onChangedNickname}
       />
-      <LoadingButton buttonStyle={ButtonStyle.ICON}>
+      <LoadingButton
+        buttonStyle={ButtonStyle.ICON}
+        onClick={() => setNickname(getRandomTitle())}
+      >
         <span className="material-symbols-rounded">refresh</span>
       </LoadingButton>
     </div>

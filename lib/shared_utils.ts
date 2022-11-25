@@ -2,6 +2,7 @@
  * Utility methods shared across backend and frontend.
 */
 import { validate, v4 as uuidv4 } from "uuid";
+import { ADJECTIVES, SUBJECTS } from "../constants/titledata";
 
 
 export class IllegalArgumentError extends Error {
@@ -67,4 +68,15 @@ export function isValidUserCode(userCode: string): boolean {
 /** Generates a random user code. */
 export function generateRandomUserCode(): string {
   return uuidv4();
+}
+
+/**
+ * Gets a random title (adjective + subject) generated from the list of
+ * possible in-game titles.
+ */
+ export function getRandomTitle(): string {
+  let subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
+  let adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+
+  return adjective + " " + subject;
 }

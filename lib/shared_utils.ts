@@ -33,6 +33,11 @@ export class NoSuchFilterError extends Error {
 	}
 }
 
+/** Returns a promise that resolves once the timeout is completed. */
+export async function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Gets a matching value for any key from a map with a default if the value is
  * undefined.
@@ -68,6 +73,12 @@ export function isValidUserCode(userCode: string): boolean {
 /** Generates a random user code. */
 export function generateRandomUserCode(): string {
   return uuidv4();
+}
+
+/** Checks whether a given nickname is valid. */
+export function isValidNickname(nickname: string): boolean {
+  // TODO: Implement nickname sanitization checks here.
+  return true;
 }
 
 /**

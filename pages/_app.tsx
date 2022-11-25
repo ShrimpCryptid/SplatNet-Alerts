@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import Layout from "../components/layout";
 import type { AppProps } from "next/app";
 import Filter from "../lib/filter";
-import { FE_LOCAL_USER_CODE } from "../constants";
+import { FE_ERROR_INVALID_USERCODE, FE_LOCAL_USER_CODE } from "../constants";
 
 import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { isValidUserCode } from "../lib/shared_utils";
 
 export type DefaultPageProps = {
 	usercode: string | null;
@@ -39,10 +40,13 @@ export default function App({ Component, pageProps }: AppProps) {
   // Method passed to children instead of a direct setter so we can update local
   // storage when the stored user code is updated.
   const onSetUserCode = (newUserCode: string) => {
-    // TODO: Validate usercode here?
-    setUserCode(newUserCode);
-    if (window) {
-      window.localStorage.setItem(FE_LOCAL_USER_CODE, newUserCode);
+    if (isValidUserCode(newUserCode)) {
+      setUserCode(newUserCode);
+      if (window) {
+        window.localStorage.setItem(FE_LOCAL_USER_CODE, newUserCode);
+      }
+    } else {
+      toast.error(FE_ERROR_INVALID_USERCODE);
     }
   }
 

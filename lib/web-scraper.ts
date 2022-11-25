@@ -6,16 +6,11 @@ import { fetchWithBotHeader } from "./backend_utils";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
 import { TITLE_JSON_KEY_ADJECTIVES, TITLE_JSON_KEY_SUBJECTS } from "../constants/titledata";
-
+import { sleep } from "./shared_utils";
 const SPLATOON_WIKI_URL_PREFIX = "https://splatoonwiki.org";
 const RARITY_FULL_STAR_ALT = "Star-full.png";
 
 const REQUEST_DELAY_MS = 200;
-
-/** Returns a promise that resolves once the timeout is completed. */
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // TODO: Replace gearType with an enum?
 
@@ -76,7 +71,7 @@ async function parseRowToGear(
 	if (children[1].firstChild) {
 		let childAElement = children[1].firstChild; // <a> tag
 		// Links are relative (ex: '/wiki/18K_Aviators') so must add URL prefix
-    // TODO: Retrieve highest-quality version (256x256) that the wiki has
+    // TODO: Retrieve highest-quality version (256x256) that the wiki has?
 		pageLink = SPLATOON_WIKI_URL_PREFIX + $(childAElement).attr("href");
 	}
 

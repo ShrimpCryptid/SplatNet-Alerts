@@ -20,9 +20,11 @@ import {
 	API_USER_CODE,
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
-  GEAR_NAME_TO_DATA
+  GEAR_NAME_TO_DATA,
+  FE_UNKNOWN_MSG
 } from "../constants";
 import Filter from "../lib/filter";
+import { sleep } from "../lib/shared_utils";
 
 import { abilityIcons } from "../public/icons/abilities";
 import { brandIcons } from "../public/icons/brands";
@@ -31,6 +33,7 @@ import styles from "../styles/filter.module.css";
 import { DefaultPageProps } from "./_app";
 
 const MAKE_USER_ATTEMPTS = 3;
+const REQUEST_DELAY_MS = 200;
 
 // ==============
 // Helper Methods
@@ -122,7 +125,6 @@ export default function FilterPage({
 	setUserCode,
 	editingFilter,
 }: DefaultPageProps) {
-	// TODO: Handle editing filters
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
 	let initFilter = editingFilter || new Filter();
@@ -217,8 +219,8 @@ export default function FilterPage({
 
 		async function saveFilter() {
 			// Generate a user code
-			let tempUserCode = usercode;
-			if (!usercode) {
+			let tempUserCode = usercode;  // used because usercode state updates late
+			if (!tempUserCode) { 
 				// Try making a new user. If it doesn't work, display an error message.
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
 					let response = await fetch(`/api/new-user`);
@@ -226,40 +228,40 @@ export default function FilterPage({
 						let tempUserCode = await response.json();
             setUserCode(tempUserCode);  // store new code
 						break;
-					}
+					} else {
+            await sleep(REQUEST_DELAY_MS);
+          }
 				}
+        if (!tempUserCode) {  // We were not able to make a new user code.
+          toast.error(FE_UNKNOWN_MSG);
+          setIsSaving(false);
+          return;
+        }
 			}
 
-			if (!tempUserCode) {
-				// TODO: Display an error message
-        console.log("Could not make new user.");
+      let responseCode = 0;
+      if (editingFilter) {
+        // we are editing an existing filter, must update
+        responseCode = await tryUpdateFilter(
+          tempUserCode,
+          currFilter,
+          editingFilter
+        );
+      } else {
+        // we are making a new filter
+        responseCode = await trySaveFilter(tempUserCode, currFilter);
+      }
+      if (responseCode == 200) {
+        // Successfully saved; return to main page
+        toast.success("Filter saved.");
+        setPageSwitchReady(true);
+      } else {
+        // TODO: Display an error message.
+        console.log("Response code: " + responseCode);
+        console.error("Could not complete request.");
         setIsSaving(false);
-				return;
-			} else {
-				let responseCode = 0;
-				if (editingFilter) {
-					// we are editing an existing filter, must update
-					responseCode = await tryUpdateFilter(
-						tempUserCode,
-						currFilter,
-						editingFilter
-					);
-				} else {
-					// we are making a new filter
-					responseCode = await trySaveFilter(tempUserCode, currFilter);
-				}
-				if (responseCode == 200) {
-					// Successfully saved; return to main page
-          toast.success("Filter saved.");
-          setPageSwitchReady(true);
-				} else {
-					// TODO: Display an error message.
-					console.log("Response code: " + responseCode);
-					console.error("Could not complete request.");
-          setIsSaving(false);
-					return;
-				}
-			}
+        return;
+      }
 		}
     setIsSaving(true);
 		saveFilter();

@@ -61,7 +61,7 @@ export default async function handler(
         title: "Hello!",
         body: "Welcome to the Splatnet Shop Alerts service!"
       };
-      configureWebPush();  // TODO: Move into centralized configuration?
+      configureWebPush();
       trySendNotification(client, subscription, JSON.stringify(notification));
     }
 

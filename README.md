@@ -29,15 +29,16 @@ I'm currently targeting December 2022 for launch. 🤞
 - [ ] Custom images + text for push notifications
 - [x] Scrape data from the Splatoon 3 wiki for gear items
 - [ ] Gear item selection screen on filter page (80%)
+- [x] Login flow for notifications
 - [ ] UI polish pass
   - [ ] Show favored/unfavored abilities for brands
-  - [ ] Replace some UI buttons with clickable icons (50%)
-  - [ ] Loading animations for database actions (50%)
+  - [x] Replace some UI buttons with clickable icons
+  - [x] Loading animations for database actions
   - [ ] Rarity selector for filter page
   - [ ] Background image assets
   - [ ] Custom toast notification animations and styling
   - [ ] Notification on/off slider, options for stopping all notifications
-  - [ ] User flow alerts (prompt for notifications, etc.)
+  - [ ] User flow alerts (prompt for notifications, etc.) (40%)
 - [ ] Set up metrics collection and server logging
 - [x] Configure server/database options, key security
 - [x] Web hosting setup

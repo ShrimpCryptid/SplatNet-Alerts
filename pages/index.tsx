@@ -202,9 +202,6 @@ export default function Home({
         onClickSubmitNickname={() => {}}
       />*/}
 
-			<div>
-				<h1>Splatnet Alerts</h1>
-			</div>
 			<div
 				style={{
 					display: "flex",

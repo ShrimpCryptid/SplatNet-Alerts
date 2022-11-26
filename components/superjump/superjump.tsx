@@ -55,7 +55,7 @@ const SuperJumpLoadAnimation = ({filterText, fillLevel=1.0}: SuperJumpLoadAnimat
         })}
       </div>
       <div className={styles.label}>
-        <h2>{filterText}</h2>
+        <h3>{filterText}</h3>
       </div>
     </div>
   )

@@ -29,7 +29,7 @@ export default function LoadingButton({
 	buttonStyle = ButtonStyle.DEFAULT,
 }: LoadingButtonProps) {
 	return (
-		<div style={style}>
+		<div>
 			<button
 				className={styles[buttonStyle]}
 				disabled={disabled}

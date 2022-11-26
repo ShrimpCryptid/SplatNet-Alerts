@@ -72,5 +72,6 @@
   position: absolute;
   text-align: center;
   top: calc(50% + 5vmin);
-  width: 100%;
+  width: 50%;
+  padding: 0 25%;
 }

@@ -34,6 +34,7 @@ export default function Home({
 	setEditingFilter,
 	updateLocalUserData,
 	userFilters,
+  userNickname,
 	setUserFilters,
 }: DefaultPageProps) {
 	// Flags for UI loading buttons
@@ -45,6 +46,7 @@ export default function Home({
 	let [awaitingRefresh, setAwaitingRefresh] = useState(false);
 	/** Whether we are currently waiting for the new filter page to load. */
 	let [awaitingNewFilter, setAwaitingNewFilter] = useState(false);
+  let [awaitingLogin, setAwaitingLogin] = useState(false);
 
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
 	let [notificationsToggle, setNotificationsToggle] = useState(false);
@@ -160,14 +162,22 @@ export default function Home({
 	};
 
 	const onClickLogin = () => {
-		if (!isValidUserCode(loginUserCode)) {
+    let formattedUserCode = loginUserCode.trim();
+
+		if (!isValidUserCode(formattedUserCode)) {
 			toast.error(FE_ERROR_INVALID_USERCODE);
 			return;
 		}
-		// TODO: Attempt to log user in, and only allow switch if the server has
-		// a valid entry for the user.
-		setUserCode(loginUserCode);
-		updateLocalUserData(loginUserCode, true);
+    setAwaitingLogin(true);
+		updateLocalUserData(formattedUserCode, true, false).then((didUpdateSuccessfully) => {
+      if (didUpdateSuccessfully) {
+        // Update our local user code
+        setUserCode(formattedUserCode);
+        setLoginUserCode(""); // blank login box
+        toast.success("Logged in as '" + userNickname + "'!");
+      }
+      setAwaitingLogin(false);
+    });
 	};
 
 	// Set different text prompts for the filter loading screen
@@ -258,9 +268,9 @@ export default function Home({
 				directly to the project on GitHub!
 			</p>
 
-			<h2>Settings</h2>
-			<h3>Notifications</h3>
-			<p>
+			<h2 style={{marginBottom: "0"}}>Settings</h2>
+			<h3 style={{marginBottom: "0"}}>Notifications</h3>
+			<p style={{marginTop: "0"}}>
 				You currently have notifications <b>ON/OFF</b>.
 			</p>
 			<p>
@@ -270,8 +280,8 @@ export default function Home({
 			<button disabled={false} onClick={toggleNotifications}>
 				Turn on notifications
 			</button>
-			<h3>User ID</h3>
-			<p>This is your unique user ID. Save and copy this somewhere secure!</p>
+			<h3 style={{marginBottom: "0"}}>User ID</h3>
+			<p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!</p>
 			<p>
 				You can use it to make changes to your notifications if you clear your
 				cookies or use another browser.
@@ -279,17 +289,27 @@ export default function Home({
 			<p>
 				<b>Your unique identifier is:</b>
 			</p>
-			<textarea value={userCode ? userCode : ""} readOnly={true} />
-			<LoadingButton buttonStyle={ButtonStyle.ICON}>
-				<span className="material-symbols-rounded">content_copy</span>
-			</LoadingButton>
+      <div style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+        <textarea value={userCode ? userCode : ""} readOnly={true} />
+        <LoadingButton buttonStyle={ButtonStyle.ICON}>
+          <span className="material-symbols-rounded">content_copy</span>
+        </LoadingButton>
+      </div>
 
-			<h3>Change User</h3>
-			<p>
+			<h3 style={{marginBottom: "0"}}>Change User</h3>
+			<p style={{marginTop: "0"}}>
 				Paste in your user ID to sync your notification settings across devices.
 			</p>
-			<textarea value={loginUserCode} onChange={handleLoginChange} />
-			<button onClick={onClickLogin}>Login</button>
+      <div style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+        <textarea value={loginUserCode} onChange={handleLoginChange} />
+        <LoadingButton
+          onClick={onClickLogin}
+          loading={awaitingLogin}
+          disabled={!isValidUserCode(loginUserCode.trim())}
+        >
+          Login
+        </LoadingButton>
+      </div>
 		</div>
 	);
 }

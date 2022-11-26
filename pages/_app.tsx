@@ -50,7 +50,8 @@ export async function getUserData(
 		let attempts = 0;
 
 		// If the initial response is not 200, make multiple attempts
-		while (attempts < maxAttempts && response.status !== 200) {
+    let skippableResponses = [200, 404];  // skip 404 because unrecoverable
+		while (attempts < maxAttempts && !skippableResponses.includes(response.status)) {
 			if (attempts > 0) {
 				// Add an additional sleep delay if multiple attempts made
 				await sleep(200); // 200 ms delay
@@ -108,12 +109,22 @@ export type DefaultPageProps = {
 	 */
 	userNickname: string | null | undefined;
 	setUserNickname: (newNickname: string | null | undefined) => void;
-	/** Callable function, retrieves and saves user data to local state vars
-	 * ({@link userFilters}, {@link userNickname}) */
+  /**
+   * Fetches most recent user data from the backend and stores it locally,
+   * returning whether the operation completed successfully.
+   * @param userCode user identifier.
+   * @param printErrors if true, prints error messages if unsuccessful.
+   * @param forceUpdate if true, updates internal state with (null) values even
+   *  if an error was encountered when retrieving user data.
+   *  
+   * @returns true if user data was succesfully retrieved from the backend.
+   * Otherwise, returns false.
+   */
 	updateLocalUserData: (
 		userCode: string,
-		printErrors: boolean
-	) => Promise<void>;
+		printErrors: boolean,
+    forceUpdate?: boolean
+	) => Promise<boolean>;
 };
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -144,25 +155,40 @@ export default function App({ Component, pageProps }: AppProps) {
 		if (userCode !== undefined && userCode !== null && !hasDoneInitialLoad) {
 			// We've loaded the user code, so update our local user data using it.
 			setHasDoneInitialLoad(true);
-			updateLocalUserData(userCode, false);
+			updateLocalUserData(userCode, false, true);
 		}
 	});
 
-	/** Fetches most recent user data from the backend and stores it locally. */
+  /**
+   * Fetches most recent user data from the backend and stores it locally,
+   * returning whether the operation completed successfully.
+   * @param userCode user identifier.
+   * @param printErrors if true, prints error messages if unsuccessful.
+   * @param forceUpdate if true, updates internal state with (null) values even
+   *  if an error was encountered when retrieving user data.
+   *  
+   * @returns true if user data was succesfully retrieved from the backend.
+   * Otherwise, returns false.
+   */
 	const updateLocalUserData = async (
 		userCode: string,
-		printErrors: boolean
-	) => {
+		printErrors: boolean,
+    forceUpdate = false,
+	): Promise<boolean> => {
 		let userData = await getUserData(userCode, printErrors);
 		if (userData !== null) {
 			// Successfully got state, so save values to constant props
 			const [filters, nickname] = userData;
 			setUserNickname(nickname);
 			setUserFilters(filters);
+      return true;
 		} else {
-			// Set local values to null.
-			setUserNickname(null);
-			setUserFilters(null);
+      if (forceUpdate) {
+        // Set local values to null.
+        setUserNickname(null);
+        setUserFilters(null);
+      }
+      return false;
 		}
 	};
 

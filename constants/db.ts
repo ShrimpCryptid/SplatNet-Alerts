@@ -18,7 +18,7 @@ export const DB_PAIR_ID = "pairid";
 
 // User table data
 /** User's unique internal integer index in the database. */
-export const DB_USER_ID = "userid";  // also used in UserToFilter, Subscriptions
+export const DB_USER_ID = "userid"; // also used in UserToFilter, Subscriptions
 export const DB_TABLE_USERS = "Users";
 /** User's unique user code, as a uuid string. */
 export const DB_USER_CODE = "usercode";

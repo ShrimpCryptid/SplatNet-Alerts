@@ -20,8 +20,8 @@ import {
 	API_USER_CODE,
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
-  GEAR_NAME_TO_DATA,
-  FE_UNKNOWN_MSG
+	GEAR_NAME_TO_DATA,
+	FE_UNKNOWN_MSG,
 } from "../constants";
 import Filter from "../lib/filter";
 import { sleep } from "../lib/shared_utils";
@@ -100,7 +100,7 @@ async function trySaveFilter(
 	userCode: string,
 	filter: Filter
 ): Promise<number> {
-  console.log(filter);
+	console.log(filter);
 	let url = `/api/add-filter`;
 	url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
 	let response = await fetch(url);
@@ -124,8 +124,8 @@ export default function FilterPage({
 	userCode,
 	setUserCode,
 	editingFilter,
-  userFilters,
-  setUserFilters
+	userFilters,
+	setUserFilters,
 }: DefaultPageProps) {
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
@@ -152,39 +152,38 @@ export default function FilterPage({
 
 	// Initialize page states, using existing filter values if present.
 	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
+	const [selectedRarity, setSelectedRarity] = useState(
+		initFilter.minimumRarity
+	);
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
 	const [currFilter, setCurrFilter] = useState(initFilter);
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
-  const [pageSwitchReady, setPageSwitchReady] = useState(false);
-  const [showGearSelection, setShowGearSelection] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+	const [pageSwitchReady, setPageSwitchReady] = useState(false);
+	const [showGearSelection, setShowGearSelection] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.
-	const updateFilter = (
-		category: GEAR_PROPERTY,
-		newValue: any,
-	) => {
+	const updateFilter = (category: GEAR_PROPERTY, newValue: any) => {
 		let newGearName = selectedGearName;
 		let newRarity = selectedRarity;
 		let newAbilities = selectedAbilities;
 		let newBrands = selectedBrands;
 		let newTypes = selectedTypes;
 
-    // either ability, brand, or gear types.
-    if (category == GEAR_PROPERTY.ABILITY) {
-      setSelectedAbilities(newValue);
-      newAbilities = newValue;
-    } else if (category == GEAR_PROPERTY.BRAND) {
-      setSelectedBrands(newValue);
-      newBrands = newValue;
-    } else if (category == GEAR_PROPERTY.TYPE) {
-      setSelectedTypes(newValue);
-      newTypes = newValue;
-    } else if (category == GEAR_PROPERTY.NAME) {
+		// either ability, brand, or gear types.
+		if (category == GEAR_PROPERTY.ABILITY) {
+			setSelectedAbilities(newValue);
+			newAbilities = newValue;
+		} else if (category == GEAR_PROPERTY.BRAND) {
+			setSelectedBrands(newValue);
+			newBrands = newValue;
+		} else if (category == GEAR_PROPERTY.TYPE) {
+			setSelectedTypes(newValue);
+			newTypes = newValue;
+		} else if (category == GEAR_PROPERTY.NAME) {
 			setSelectedGearName(newValue);
 			newGearName = newValue;
 		} else if (category == GEAR_PROPERTY.RARITY) {
@@ -202,17 +201,17 @@ export default function FilterPage({
 		setCurrFilter(newFilter);
 
 		// Update whether filter can be saved
-    if (newGearName !== "") {
-      // If gear item selected, ignore brands and type (set by default)
-      setCanSaveFilter(hasSelection(newAbilities));
-    } else {
-      // Otherwise, types, brands, and abilities must all be set.
-      setCanSaveFilter(
-        hasSelection(newTypes) &&
-        hasSelection(newBrands) &&
-        hasSelection(newAbilities)
-      );
-    }
+		if (newGearName !== "") {
+			// If gear item selected, ignore brands and type (set by default)
+			setCanSaveFilter(hasSelection(newAbilities));
+		} else {
+			// Otherwise, types, brands, and abilities must all be set.
+			setCanSaveFilter(
+				hasSelection(newTypes) &&
+					hasSelection(newBrands) &&
+					hasSelection(newAbilities)
+			);
+		}
 	}; // updateFilter
 
 	const onClickSave = () => {
@@ -221,60 +220,61 @@ export default function FilterPage({
 
 		async function saveFilter() {
 			// Generate a user code
-			let tempUserCode = userCode;  // used because usercode state updates late
-			if (!tempUserCode) { 
+			let tempUserCode = userCode; // used because usercode state updates late
+			if (!tempUserCode) {
 				// Try making a new user. If it doesn't work, display an error message.
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
 					let response = await fetch(`/api/new-user`);
 					if (response.status == 200) {
 						let tempUserCode = await response.json();
-            setUserCode(tempUserCode);  // store new code
+						setUserCode(tempUserCode); // store new code
 						break;
 					} else {
-            await sleep(REQUEST_DELAY_MS);
-          }
+						await sleep(REQUEST_DELAY_MS);
+					}
 				}
-        if (!tempUserCode) {  // We were not able to make a new user code.
-          toast.error(FE_UNKNOWN_MSG);
-          setIsSaving(false);
-          return;
-        }
+				if (!tempUserCode) {
+					// We were not able to make a new user code.
+					toast.error(FE_UNKNOWN_MSG);
+					setIsSaving(false);
+					return;
+				}
 			}
 
-      let responseCode = 0;
-      if (editingFilter) {
-        // we are editing an existing filter, must update
-        responseCode = await tryUpdateFilter(
-          tempUserCode,
-          currFilter,
-          editingFilter
-        );
-      } else {
-        // we are making a new filter
-        responseCode = await trySaveFilter(tempUserCode, currFilter);
-      }
-      if (responseCode == 200) {
-        // Successfully saved; return to main page
-        toast.success("Filter saved.");
-        setPageSwitchReady(true);
-      } else {
-        // TODO: Display an error message.
-        console.log("Response code: " + responseCode);
-        console.error("Could not complete request.");
-        setIsSaving(false);
-        return;
-      }
+			let responseCode = 0;
+			if (editingFilter) {
+				// we are editing an existing filter, must update
+				responseCode = await tryUpdateFilter(
+					tempUserCode,
+					currFilter,
+					editingFilter
+				);
+			} else {
+				// we are making a new filter
+				responseCode = await trySaveFilter(tempUserCode, currFilter);
+			}
+			if (responseCode == 200) {
+				// Successfully saved; return to main page
+				toast.success("Filter saved.");
+				setPageSwitchReady(true);
+			} else {
+				// TODO: Display an error message.
+				console.log("Response code: " + responseCode);
+				console.error("Could not complete request.");
+				setIsSaving(false);
+				return;
+			}
 		}
-    setIsSaving(true);
+		setIsSaving(true);
 		saveFilter();
 	};
 
-  // handle page switch only after page update has happened.
-  useEffect(() => {
-    if (pageSwitchReady) {
-      Router.push("/");
-    }
-  });
+	// handle page switch only after page update has happened.
+	useEffect(() => {
+		if (pageSwitchReady) {
+			Router.push("/");
+		}
+	});
 
 	// Resize the group of selectors so they are either a row or column based on
 	// the window width.
@@ -308,20 +308,32 @@ export default function FilterPage({
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
 			<p>Select the gear properties you want to be alerted for.</p>
-      <button onClick={() => {setShowGearSelection(true)}}>Select Gear (optional)</button>
-      {showGearSelection ?
-        <LabeledAlertbox header="Select Gear" onClickClose={() => setShowGearSelection(false)}>
-          <GearSelector
-            gearData={GEAR_NAME_TO_DATA}
-            onSelection={(selectedGear) => {
-              updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
-              setShowGearSelection(false)
-            }}
-            onClickClose={() => {setShowGearSelection(false)}}
-            />
-        </LabeledAlertbox>
-        : <></>
-      }
+			<button
+				onClick={() => {
+					setShowGearSelection(true);
+				}}
+			>
+				Select Gear (optional)
+			</button>
+			{showGearSelection ? (
+				<LabeledAlertbox
+					header="Select Gear"
+					onClickClose={() => setShowGearSelection(false)}
+				>
+					<GearSelector
+						gearData={GEAR_NAME_TO_DATA}
+						onSelection={(selectedGear) => {
+							updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
+							setShowGearSelection(false);
+						}}
+						onClickClose={() => {
+							setShowGearSelection(false);
+						}}
+					/>
+				</LabeledAlertbox>
+			) : (
+				<></>
+			)}
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
 					<Selector
@@ -334,7 +346,7 @@ export default function FilterPage({
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.TYPE, newSelected);
 						}}
-            lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
+						lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>
@@ -348,7 +360,7 @@ export default function FilterPage({
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.BRAND, newSelected);
 						}}
-            lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.brand}
+						lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.brand}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>
@@ -365,32 +377,43 @@ export default function FilterPage({
 					/>
 				</div>
 			</div>
-      <br/>
-      <div style={{minWidth: "fit-content", width: "80vmin", margin: "0 auto"}}>
-        <div className={styles.filterViewContainer}>
-          <FilterView
-            filter={currFilter}
-            brandsSelected={hasSelection(selectedBrands)}
-            abilitiesSelected={hasSelection(selectedAbilities)}
-            typesSelected={hasSelection(selectedTypes)}
-          />
-        </div>
-        <br/>
-        <div style={{display: "flex", flexDirection: "row", gap: "20px", flexWrap: "wrap", width: "100%", justifyContent: "space-between"}}>
-          <Link href="/">
-            <button style={{width: "fit-content"}}>
-              <div style={{width: "25vmin"}}>
-                Cancel
-              </div>
-            </button>
-          </Link>
-          <LoadingButton onClick={onClickSave} disabled={!canSaveFilter} loading={isSaving}>
-            <div style={{width: "25vmin"}}>
-              Save
-            </div>
-          </LoadingButton>
-        </div>
-      </div>
+			<br />
+			<div
+				style={{ minWidth: "fit-content", width: "80vmin", margin: "0 auto" }}
+			>
+				<div className={styles.filterViewContainer}>
+					<FilterView
+						filter={currFilter}
+						brandsSelected={hasSelection(selectedBrands)}
+						abilitiesSelected={hasSelection(selectedAbilities)}
+						typesSelected={hasSelection(selectedTypes)}
+					/>
+				</div>
+				<br />
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "row",
+						gap: "20px",
+						flexWrap: "wrap",
+						width: "100%",
+						justifyContent: "space-between",
+					}}
+				>
+					<Link href="/">
+						<button style={{ width: "fit-content" }}>
+							<div style={{ width: "25vmin" }}>Cancel</div>
+						</button>
+					</Link>
+					<LoadingButton
+						onClick={onClickSave}
+						disabled={!canSaveFilter}
+						loading={isSaving}
+					>
+						<div style={{ width: "25vmin" }}>Save</div>
+					</LoadingButton>
+				</div>
+			</div>
 		</div>
 	);
 }

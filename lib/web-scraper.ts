@@ -1,11 +1,14 @@
 import * as cheerio from "cheerio";
-import fs from 'fs';
+import fs from "fs";
 import { Gear } from "./gear";
 import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
 import { fetchWithBotHeader } from "./backend_utils";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
-import { TITLE_JSON_KEY_ADJECTIVES, TITLE_JSON_KEY_SUBJECTS } from "../constants/titledata";
+import {
+	TITLE_JSON_KEY_ADJECTIVES,
+	TITLE_JSON_KEY_SUBJECTS,
+} from "../constants/titledata";
 import { sleep } from "./shared_utils";
 const SPLATOON_WIKI_URL_PREFIX = "https://splatoonwiki.org";
 const RARITY_FULL_STAR_ALT = "Star-full.png";
@@ -71,7 +74,7 @@ async function parseRowToGear(
 	if (children[1].firstChild) {
 		let childAElement = children[1].firstChild; // <a> tag
 		// Links are relative (ex: '/wiki/18K_Aviators') so must add URL prefix
-    // TODO: Retrieve highest-quality version (256x256) that the wiki has?
+		// TODO: Retrieve highest-quality version (256x256) that the wiki has?
 		pageLink = SPLATOON_WIKI_URL_PREFIX + $(childAElement).attr("href");
 	}
 
@@ -126,8 +129,8 @@ async function scrapeGearDataFromWikiPage(
 			barCompleteChar: "\u2588",
 			barIncompleteChar: "\u2591",
 			hideCursor: true,
-      stopOnComplete: true,
-      clearOnComplete: false,
+			stopOnComplete: true,
+			clearOnComplete: false,
 		});
 		progressBar.start(gearCount, 0, { speed: "N/A" });
 
@@ -156,7 +159,7 @@ async function scrapeGearDataFromWikiPage(
 		});
 		await Promise.all(promises);
 		progressBar.update(gearCount);
-    progressBar.stop();
+		progressBar.stop();
 		return gear;
 	} catch (error) {
 		throw error;
@@ -168,7 +171,7 @@ async function scrapeGearDataFromWikiPage(
  * order on SplatNet by crawling the Splatoon wiki.
  */
 async function getAllGearData() {
-  console.log("Working... This may take a few minutes.");
+	console.log("Working... This may take a few minutes.");
 	let headGearList = await scrapeGearDataFromWikiPage(
 		"https://splatoonwiki.org/wiki/List_of_headgear_in_Splatoon_3",
 		"HeadGear"
@@ -190,52 +193,55 @@ async function getAllGearData() {
  * objects and saves the resulting JSON object locally.
  */
 async function updateLocalGearJSON(filepath: string) {
-  let startTime = Date.now();
-  let gearData = await getAllGearData();
-  // format gear data as a dictionary
-  let gearDict: {[key: string]: Gear} = {};
-  for (let gear of gearData) {
-    gearDict[gear.name] = gear;
-  }
-  let jsonString = JSON.stringify(gearDict);
+	let startTime = Date.now();
+	let gearData = await getAllGearData();
+	// format gear data as a dictionary
+	let gearDict: { [key: string]: Gear } = {};
+	for (let gear of gearData) {
+		gearDict[gear.name] = gear;
+	}
+	let jsonString = JSON.stringify(gearDict);
 
-  try {
-    fs.writeFileSync(filepath, jsonString);
-    let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
-    console.log("Wrote file successfully. Time elapsed: " + timeElapsedSeconds.toFixed(2) + "s");
-  } catch (err) {
-    throw err;
-  }
+	try {
+		fs.writeFileSync(filepath, jsonString);
+		let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
+		console.log(
+			"Wrote file successfully. Time elapsed: " +
+				timeElapsedSeconds.toFixed(2) +
+				"s"
+		);
+	} catch (err) {
+		throw err;
+	}
 }
 
 /** Gets a list of titles in English from the wiki page (either subjects or
  * adjectives) and returns them as an array.
  */
- async function scrapeTitleDataFromWikiPage(
-	wikiURL: string,
-): Promise<string[]> {
-  const titles: string[] = [];
+async function scrapeTitleDataFromWikiPage(wikiURL: string): Promise<string[]> {
+	const titles: string[] = [];
 	try {
 		const response = await fetchWithBotHeader(wikiURL);
 		const $ = cheerio.load(await response.text());
-    
-    $("div table tbody tr").each((_idx, rowElement) => {
-      if (_idx === 0) {  // Skip table name
-        return;
-      }
 
-      const children = $(rowElement).children();
-      // Find all <b> elements in the first column
-      const childBoldElements = $(children[0]).find('b')
-      childBoldElements.each((_idx, rowElement) => {
-        // Trim and add each bold element to our list
-        titles.push($(rowElement).text().trim());
-      })    
-    })
-  } catch (error) {
-    throw error;
-  }
-  return titles;
+		$("div table tbody tr").each((_idx, rowElement) => {
+			if (_idx === 0) {
+				// Skip table name
+				return;
+			}
+
+			const children = $(rowElement).children();
+			// Find all <b> elements in the first column
+			const childBoldElements = $(children[0]).find("b");
+			childBoldElements.each((_idx, rowElement) => {
+				// Trim and add each bold element to our list
+				titles.push($(rowElement).text().trim());
+			});
+		});
+	} catch (error) {
+		throw error;
+	}
+	return titles;
 }
 
 /**
@@ -243,22 +249,26 @@ async function updateLocalGearJSON(filepath: string) {
  * them to the designated local file.
  */
 async function updateLocalTitlesJSON(filepath: string) {
-  console.log("Retrieving title data from the Splatoon wiki...");
-  const subjects = await scrapeTitleDataFromWikiPage("https://splatoonwiki.org/wiki/Title/Subject");
-  await sleep(REQUEST_DELAY_MS);
-  const adjectives = await scrapeTitleDataFromWikiPage("https://splatoonwiki.org/wiki/Title/Adjective");
-  let titleDict: {[key: string]: string[]} = {};
-  titleDict[TITLE_JSON_KEY_ADJECTIVES] = adjectives;
-  titleDict[TITLE_JSON_KEY_SUBJECTS] = subjects;
+	console.log("Retrieving title data from the Splatoon wiki...");
+	const subjects = await scrapeTitleDataFromWikiPage(
+		"https://splatoonwiki.org/wiki/Title/Subject"
+	);
+	await sleep(REQUEST_DELAY_MS);
+	const adjectives = await scrapeTitleDataFromWikiPage(
+		"https://splatoonwiki.org/wiki/Title/Adjective"
+	);
+	let titleDict: { [key: string]: string[] } = {};
+	titleDict[TITLE_JSON_KEY_ADJECTIVES] = adjectives;
+	titleDict[TITLE_JSON_KEY_SUBJECTS] = subjects;
 
-  let jsonString = JSON.stringify(titleDict);
+	let jsonString = JSON.stringify(titleDict);
 
-  fs.writeFileSync(filepath, jsonString);
-  console.log("Wrote title data successfully.");
+	fs.writeFileSync(filepath, jsonString);
+	console.log("Wrote title data successfully.");
 }
 
 // =================
 // PROGRAM OPERATION
 // =================
-updateLocalGearJSON('./public/data/geardata.json');
-updateLocalTitlesJSON('./public/data/titledata.json');
+updateLocalGearJSON("./public/data/geardata.json");
+updateLocalTitlesJSON("./public/data/titledata.json");

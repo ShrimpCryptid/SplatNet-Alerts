@@ -8,13 +8,13 @@ type LoadingButtonProps = {
 	disabled?: boolean;
 	onClick?: CallableFunction;
 	buttonStyle?: ButtonStyle;
-  style?: any;
+	style?: any;
 };
 
 export enum ButtonStyle {
 	DEFAULT = "button",
 	ICON = "buttonIcon",
-  FILL = "buttonFill"
+	FILL = "buttonFill",
 }
 
 /** Shows a loading animation when loading is set to true.
@@ -25,7 +25,7 @@ export default function LoadingButton({
 	loading = false,
 	disabled = false,
 	onClick,
-  style,
+	style,
 	buttonStyle = ButtonStyle.DEFAULT,
 }: LoadingButtonProps) {
 	return (
@@ -34,20 +34,23 @@ export default function LoadingButton({
 				className={styles[buttonStyle]}
 				disabled={disabled}
 				onClick={() => {
-          if (onClick) {
-					  loading ? null : onClick();
-          }
+					if (onClick) {
+						loading ? null : onClick();
+					}
 				}}
-        style={style}
+				style={style}
 			>
 				<div className={loading ? styles.hidden : ""}>{children}</div>
-        {loading ? <div
-          className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
-          >
-            <div className={styles.loadingFiller}></div>
-            <Image src={loadingIcon} layout="fill" />
-          </div>
-        : <>  </>}
+				{loading ? (
+					<div
+						className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
+					>
+						<div className={styles.loadingFiller}></div>
+						<Image src={loadingIcon} layout="fill" />
+					</div>
+				) : (
+					<> </>
+				)}
 			</button>
 		</div>
 	);

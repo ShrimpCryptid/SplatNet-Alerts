@@ -5,7 +5,7 @@ import {
 	GEAR_RARITY_MIN,
 	GEAR_RARITY_MAX,
 	GEAR_ABILITIES,
-  GEAR_NAME_TO_DATA,
+	GEAR_NAME_TO_DATA,
 } from "../constants";
 import { IllegalArgumentError } from "./shared_utils";
 
@@ -40,17 +40,17 @@ export default class Filter {
 	) {
 		// Validate parameters
 		if (gearName !== "") {
-      if (!GEAR_NAMES.includes(gearName)) {
-			  throw new IllegalArgumentError(`No known gear '${gearName}'.`);
-      } else {
-        // Override rarity, type, and brand parameters.
-        let gear = GEAR_NAME_TO_DATA.get(gearName);
-        if (gear) {
-          minimumRarity = gear.rarity;
-          gearBrands = [gear.brand];
-          gearTypes = [gear.type];
-        }
-      }
+			if (!GEAR_NAMES.includes(gearName)) {
+				throw new IllegalArgumentError(`No known gear '${gearName}'.`);
+			} else {
+				// Override rarity, type, and brand parameters.
+				let gear = GEAR_NAME_TO_DATA.get(gearName);
+				if (gear) {
+					minimumRarity = gear.rarity;
+					gearBrands = [gear.brand];
+					gearTypes = [gear.type];
+				}
+			}
 		}
 
 		for (var brand of gearBrands) {

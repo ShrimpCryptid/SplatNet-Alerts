@@ -25,7 +25,7 @@ import {
 	DB_TABLE_SERVER_CACHE,
 	DB_CACHE_DATA,
 	DB_CACHE_KEY,
-  DB_NICKNAME,
+	DB_NICKNAME,
 } from "../constants/db";
 import Filter from "./filter";
 import {
@@ -35,15 +35,15 @@ import {
 	mapGetWithDefault,
 	IllegalArgumentError,
 	getEnvWithDefault,
-  isValidUserCode,
-  generateRandomUserCode,
-  isValidNickname,
+	isValidUserCode,
+	generateRandomUserCode,
+	isValidNickname,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from "web-push";
 import { configureWebPush } from "./backend_utils";
 import {
-  ENV_KEY_PGDATABASE,
+	ENV_KEY_PGDATABASE,
 	ENV_KEY_PGHOST,
 	ENV_KEY_PGPASSWORD,
 	ENV_KEY_PGPORT,
@@ -475,7 +475,9 @@ export async function makeNewUser(client: PoolClient | Pool): Promise<string> {
 	return newUserCode;
 }
 
-async function generateUnusedUserCode(client: PoolClient | Pool): Promise<string> {
+async function generateUnusedUserCode(
+	client: PoolClient | Pool
+): Promise<string> {
 	// generate number
 	let userCode = "";
 	// repeat until there is no user with this existing user code.
@@ -525,7 +527,7 @@ export async function addUserPushSubscription(
 				subscription.expirationTime,
 				subscription.keys.auth,
 				subscription.keys.p256dh,
-        getTimestamp()
+				getTimestamp(),
 			]
 		);
 	} else {
@@ -546,7 +548,7 @@ export async function addUserPushSubscription(
 				subscription.expirationTime,
 				subscription.keys.auth,
 				subscription.keys.p256dh,
-        getTimestamp()
+				getTimestamp(),
 			]
 		);
 	}
@@ -571,7 +573,7 @@ async function hasUser(
 	let result = await queryAndLog(
 		client,
 		`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = $1`,
-    [userID]
+		[userID]
 	);
 	return result ? result.rowCount > 0 : false;
 }
@@ -605,47 +607,54 @@ export async function getUserIDFromCode(
  * Updates the nickname field in the database for the given user ID.
  */
 export async function updateUserNickname(
-  client: PoolClient | Pool,
-  userID: number,
-  nickname: string
+	client: PoolClient | Pool,
+	userID: number,
+	nickname: string
 ) {
-  if(!isValidNickname) {
-    throw new IllegalArgumentError("Nickname '" + nickname + "' is invalid.");
-  }
-  await queryAndLog(
-    client,
-    `UPDATE ${DB_TABLE_USERS}
+	if (!isValidNickname) {
+		throw new IllegalArgumentError("Nickname '" + nickname + "' is invalid.");
+	}
+	await queryAndLog(
+		client,
+		`UPDATE ${DB_TABLE_USERS}
       SET ${DB_NICKNAME} = $1
       WHERE ${DB_USER_ID} = $2`,
-      [nickname, userID]  // passed via parameter array for sanitization
-  );
+		[nickname, userID] // passed via parameter array for sanitization
+	);
 }
 
 type UserData = {
-  usercode: string,
-  nickname: string,
-  lastModified: Date,
-  lastModifiedExpiration: Date
-}
+	usercode: string;
+	nickname: string;
+	lastModified: Date;
+	lastModifiedExpiration: Date;
+};
 
 /**
  * Returns an object with the user's data, including their usercode, nickname,
  * and last modified timestamp.
  */
-export async function getUserData(client: PoolClient | Pool, userID: number): Promise<UserData|null> {
-  let result = await queryAndLog(client,
-    `SELECT * FROM ${DB_TABLE_USERS}
+export async function getUserData(
+	client: PoolClient | Pool,
+	userID: number
+): Promise<UserData | null> {
+	let result = await queryAndLog(
+		client,
+		`SELECT * FROM ${DB_TABLE_USERS}
       WHERE ${DB_USER_CODE} = $1`,
-    [userID]);
-  if (result.rowCount > 0) {
-    return {
-      usercode: result.rows[0][DB_USER_CODE],
-      nickname: result.rows[0][DB_NICKNAME],
-      lastModified: new Date(result.rows[0][DB_LAST_MODIFIED]),
-      lastModifiedExpiration: new Date(result.rows[0][DB_LAST_NOTIFIED_EXPIRATION])
-    }
-  }
-  return null;
+		[userID]
+	);
+	if (result.rowCount > 0) {
+		return {
+			usercode: result.rows[0][DB_USER_CODE],
+			nickname: result.rows[0][DB_NICKNAME],
+			lastModified: new Date(result.rows[0][DB_LAST_MODIFIED]),
+			lastModifiedExpiration: new Date(
+				result.rows[0][DB_LAST_NOTIFIED_EXPIRATION]
+			),
+		};
+	}
+	return null;
 }
 
 // #endregion USER ACCESS
@@ -922,9 +931,13 @@ export async function trySendNotification(
 		return result;
 	} catch (error) {
 		if (error instanceof webpush.WebPushError) {
-			if (error.statusCode === 404 || error.statusCode === 410 || error.statusCode === 403) {
+			if (
+				error.statusCode === 404 ||
+				error.statusCode === 410 ||
+				error.statusCode === 403
+			) {
 				// 404: endpoint not found, 410: push subscription expired
-        // 403: incorrect/changed keys
+				// 403: incorrect/changed keys
 				// Remove this subscription from the database.
 				await deletePushSubscription(client, subscription);
 				return;

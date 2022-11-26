@@ -41,7 +41,11 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 	};
 
 	return (
-		<div className={className} onClick={onClickCallback} key={`${id}-${selected}`}>
+		<div
+			className={className}
+			onClick={onClickCallback}
+			key={`${id}-${selected}`}
+		>
 			<Image
 				className={`${styles.itemIcon} ${styles[category]}`}
 				src={imageSrc}
@@ -62,12 +66,12 @@ type SelectorProps = {
 	category: GEAR_PROPERTY;
 	items: string[];
 	selected: Map<string, boolean>;
-	itemImages?: Map<string, StaticImageData|string|undefined>;
+	itemImages?: Map<string, StaticImageData | string | undefined>;
 	wildcard?: boolean;
 	search?: boolean;
 	onChanged?: CallableFunction;
-  /** Locks the input to one of the items, disabling all options until cleared.*/
-  lockTo?: string | null;
+	/** Locks the input to one of the items, disabling all options until cleared.*/
+	lockTo?: string | null;
 };
 
 function countSelected(selections: Map<string, boolean>): number {
@@ -85,8 +89,8 @@ function countSelected(selections: Map<string, boolean>): number {
 
 /**
  * Displays a list of selectable items with image icons. Includes optional
- *  behavior for wildcard/Any selections. 
-*/
+ *  behavior for wildcard/Any selections.
+ */
 const Selector: FunctionComponent<SelectorProps> = ({
 	title,
 	category,
@@ -96,7 +100,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	wildcard,
 	search,
 	onChanged,
-  lockTo,
+	lockTo,
 }) => {
 	// check if items includes wildcard. if not, insert into our list of items and map of what
 	// items are selected.
@@ -146,12 +150,12 @@ const Selector: FunctionComponent<SelectorProps> = ({
 					let isSelected = selected.get(item);
 					let disabled = false;
 
-          if (lockTo) {
-            // Show the locked item as selected and disable all selections.
-            disabled = true;
-            isSelected = item === lockTo;
-          } else if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
-            // Disable every other item if wildcard is active and selected.
+					if (lockTo) {
+						// Show the locked item as selected and disable all selections.
+						disabled = true;
+						isSelected = item === lockTo;
+					} else if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
+						// Disable every other item if wildcard is active and selected.
 						isSelected = false;
 						disabled = true;
 					}
@@ -160,15 +164,15 @@ const Selector: FunctionComponent<SelectorProps> = ({
 					if (itemImages) {
 						image = itemImages.get(item);
 					}
-          if (image === undefined || image === null) {
-              // Show default image
-              itemCategory = GEAR_PROPERTY.ABILITY;  // formatting style
-              image = unknownIcon;
-          }
+					if (image === undefined || image === null) {
+						// Show default image
+						itemCategory = GEAR_PROPERTY.ABILITY; // formatting style
+						image = unknownIcon;
+					}
 
 					return (
 						<SelectorItem
-              key={index}
+							key={index}
 							id={index}
 							category={itemCategory}
 							name={item}

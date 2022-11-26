@@ -59,7 +59,9 @@ const FilterView: FunctionComponent<Props> = ({
 		);
 
 		// Gear item has a specific name, so we show it
-		gearNameElements = (<h3 className={styles.gearNameLabel}>{filter.gearName}</h3>);
+		gearNameElements = (
+			<h3 className={styles.gearNameLabel}>{filter.gearName}</h3>
+		);
 	} else {
 		// Filter is by gear TYPE, not a specific item.
 		if (filter.gearTypes.length == 0 || filter.gearTypes.length == 3) {
@@ -78,9 +80,9 @@ const FilterView: FunctionComponent<Props> = ({
 				GEAR_TYPE_ANY_ICON
 			);
 		}
-    // Put brands name inside of the gear name elements for formatting (matches
-    // up nicely with the edit/delete buttons)
-    gearNameElements = <h3 className={styles.categoryLabel}>Brands</h3>
+		// Put brands name inside of the gear name elements for formatting (matches
+		// up nicely with the edit/delete buttons)
+		gearNameElements = <h3 className={styles.categoryLabel}>Brands</h3>;
 
 		// Override icon if no type is defined
 		if (!typesSelected) {
@@ -93,12 +95,12 @@ const FilterView: FunctionComponent<Props> = ({
 			brandElements = (
 				<>
 					<div className={styles.brandIconContainer}>
-            <div className={styles.abilityIcon}>
-              <Image
-                src={brandsSelected ? unknownIcon : noneIcon}
-                layout={"fill"}
-              />
-              </div>
+						<div className={styles.abilityIcon}>
+							<Image
+								src={brandsSelected ? unknownIcon : noneIcon}
+								layout={"fill"}
+							/>
+						</div>
 					</div>
 				</>
 			);
@@ -108,12 +110,12 @@ const FilterView: FunctionComponent<Props> = ({
 					<div className={styles.brandIconContainer}>
 						{filter.gearBrands.map((value, index) => {
 							return (
-                <div className={styles.brandIcon} key={index}>
-                  <Image
-                    src={mapGetWithDefault(brandIcons, value, unknownIcon)}
-                    layout={"fill"}
-                  />
-                </div>
+								<div className={styles.brandIcon} key={index}>
+									<Image
+										src={mapGetWithDefault(brandIcons, value, unknownIcon)}
+										layout={"fill"}
+									/>
+								</div>
 							);
 						})}
 					</div>
@@ -124,7 +126,7 @@ const FilterView: FunctionComponent<Props> = ({
 
 	// ABILITIES SECTION
 	if (filter.gearAbilities.length == 0) {
-    // Show unknown icon if any ability will work
+		// Show unknown icon if any ability will work
 		abilityElements = (
 			<div className={styles.abilityIcon}>
 				<Image
@@ -135,16 +137,16 @@ const FilterView: FunctionComponent<Props> = ({
 			</div>
 		);
 	} else {
-    // Show full list of abilities, with images for each.
+		// Show full list of abilities, with images for each.
 		abilityElements = filter.gearAbilities.map((item, index) => {
 			return (
-        <div className={styles.abilityIcon}>
-          <Image
-            key={index}
-            src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
-            layout={"fill"}
-          />
-        </div>
+				<div className={styles.abilityIcon}>
+					<Image
+						key={index}
+						src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
+						layout={"fill"}
+					/>
+				</div>
 			);
 		});
 	}
@@ -152,20 +154,22 @@ const FilterView: FunctionComponent<Props> = ({
 	return (
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
-        <div className={styles.gearIcon}>
-          <Image
-            src={iconURL}
-            layout={"fill"}
-          />
-          <div className={styles.gearIconBrand}
-               style={{visibility: isItem ? "visible" : "hidden"}}
-          >
-            <Image
-              src={mapGetWithDefault(brandIcons, filter.gearBrands[0], unknownIcon)}
-              layout={"fill"}
-            />
-          </div>
-        </div>
+				<div className={styles.gearIcon}>
+					<Image src={iconURL} layout={"fill"} />
+					<div
+						className={styles.gearIconBrand}
+						style={{ visibility: isItem ? "visible" : "hidden" }}
+					>
+						<Image
+							src={mapGetWithDefault(
+								brandIcons,
+								filter.gearBrands[0],
+								unknownIcon
+							)}
+							layout={"fill"}
+						/>
+					</div>
+				</div>
 				<div className={styles.rarityMeter}>
 					<RarityMeter
 						minRarity={filter.minimumRarity}
@@ -174,26 +178,34 @@ const FilterView: FunctionComponent<Props> = ({
 				</div>
 			</div>
 			<div className={styles.rcontainer}>
-        <div className={styles.gearNameContainer}>
-          {/** Gear name is either specific gear name OR the 'Brands' label */}
-          {gearNameElements}
-          <div className={styles.buttonGroup}>
-            {onClickEdit ? (
-              <LoadingButton onClick={onClickEdit} loading={awaitingEdit} buttonStyle={ButtonStyle.ICON}>
-                <span className="material-symbols-rounded">edit_square</span>
-              </LoadingButton>
-            ) : (
-              <></>
-            )}
-            {onClickDelete ? (
-              <LoadingButton onClick={onClickDelete} loading={awaitingDelete} buttonStyle={ButtonStyle.ICON}>
-                <span className="material-symbols-rounded">delete</span>
-              </LoadingButton>
-            ) : (
-              <></>
-            )}
-          </div>
-        </div>
+				<div className={styles.gearNameContainer}>
+					{/** Gear name is either specific gear name OR the 'Brands' label */}
+					{gearNameElements}
+					<div className={styles.buttonGroup}>
+						{onClickEdit ? (
+							<LoadingButton
+								onClick={onClickEdit}
+								loading={awaitingEdit}
+								buttonStyle={ButtonStyle.ICON}
+							>
+								<span className="material-symbols-rounded">edit_square</span>
+							</LoadingButton>
+						) : (
+							<></>
+						)}
+						{onClickDelete ? (
+							<LoadingButton
+								onClick={onClickDelete}
+								loading={awaitingDelete}
+								buttonStyle={ButtonStyle.ICON}
+							>
+								<span className="material-symbols-rounded">delete</span>
+							</LoadingButton>
+						) : (
+							<></>
+						)}
+					</div>
+				</div>
 				{brandElements}
 
 				<h3 className={styles.categoryLabel}>Abilities</h3>

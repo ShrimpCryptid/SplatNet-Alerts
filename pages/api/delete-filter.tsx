@@ -5,8 +5,8 @@ import {
 	getUserIDFromCode,
 	tryAddFilter,
 	addFilterToUser,
-  getMatchingFilterID,
-  removeUserFilter,
+	getMatchingFilterID,
+	removeUserFilter,
 } from "../../lib/database_utils";
 import Filter from "../../lib/filter";
 
@@ -48,17 +48,16 @@ export default async function handler(
 		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
 		if (userID == -1) {
 			// no matching user
-			res.status(404)
-				.json({
-					err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
-				});
-      return res.end();
+			res.status(404).json({
+				err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
+			});
+			return res.end();
 		}
 
 		// Find the matching filter and unsubscribe the user from it.
 		let filter = Filter.deserialize(req.query[API_FILTER_JSON]);
 		let filterID = await getMatchingFilterID(client, filter);
-    await removeUserFilter(client, userID, filterID);
+		await removeUserFilter(client, userID, filterID);
 
 		return res.status(200).end(); // ok
 	} catch (err) {

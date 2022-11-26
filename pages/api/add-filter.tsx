@@ -46,11 +46,10 @@ export default async function handler(
 		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
 		if (userID == -1) {
 			// no matching user
-			res.status(404)
-				.json({
-					err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
-				});
-      return res.end();
+			res.status(404).json({
+				err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
+			});
+			return res.end();
 		}
 
 		// Find or create matching filter and subscribe user to it.

@@ -1,9 +1,8 @@
 /**
  * Utility methods shared across backend and frontend.
-*/
+ */
 import { validate, v4 as uuidv4 } from "uuid";
 import { ADJECTIVES, SUBJECTS } from "../constants/titledata";
-
 
 export class IllegalArgumentError extends Error {
 	constructor(message: string) {
@@ -55,39 +54,39 @@ export function mapGetWithDefault<T>(
 	}
 }
 
-export function getEnvWithDefault<T>(key: string, defaultValue: T): string|T {
-  let value = process.env[key];
-  if (value) {
-    return value;
-  } else {
-    return defaultValue;
-  }
+export function getEnvWithDefault<T>(key: string, defaultValue: T): string | T {
+	let value = process.env[key];
+	if (value) {
+		return value;
+	} else {
+		return defaultValue;
+	}
 }
 
 /** Checks whether the given user code is valid. */
 export function isValidUserCode(userCode: string): boolean {
 	const allowedCharsPattern = new RegExp(/^[a-z0-9-]*$/);
-  return allowedCharsPattern.test(userCode) && validate(userCode);
+	return allowedCharsPattern.test(userCode) && validate(userCode);
 }
 
 /** Generates a random user code. */
 export function generateRandomUserCode(): string {
-  return uuidv4();
+	return uuidv4();
 }
 
 /** Checks whether a given nickname is valid. */
 export function isValidNickname(nickname: string): boolean {
-  // TODO: Implement nickname sanitization checks here.
-  return true;
+	// TODO: Implement nickname sanitization checks here.
+	return true;
 }
 
 /**
  * Gets a random title (adjective + subject) generated from the list of
  * possible in-game titles.
  */
- export function getRandomTitle(): string {
-  let subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
-  let adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+export function getRandomTitle(): string {
+	let subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
+	let adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
 
-  return adjective + " " + subject;
+	return adjective + " " + subject;
 }

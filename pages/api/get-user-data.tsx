@@ -1,24 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { API_USER_CODE } from "../../constants";
+import { API_NICKNAME, API_RESPONSE_FILTER_LIST, API_USER_CODE } from "../../constants";
 import {
 	getDBClient,
 	getUserIDFromCode,
 	getUserFilters,
+  getUserData,
 } from "../../lib/database_utils";
 import { IllegalArgumentError } from "../../lib/shared_utils";
 
 /**
- * Retrieves the list of filters that the user is subscribed to.
+ * Retrieves the data for the given users, including the list of filters and
+ * nickname data.
  *
  * @param req http request. Requires the following parameters, as defined in
- *  `/constants`:
- *  - `API_USER_CODE` string
+ *  `/constants`.
+ *  - {@link API_USER_CODE} string
  *
  * @return A response with one of the following response codes:
- *  - 200 if filter was successfully updated.
+ *  - 200 if data was successfully retrieved.
  *  - 400 if one or more arguments was missing.
  *  - 404 if no matching user was found.
  *  - 500 if any other errors encountered.
+ * 
  */
 export default async function handler(
 	req: NextApiRequest,
@@ -49,8 +52,15 @@ export default async function handler(
 
 		// Get list of filters owned by user
 		let filters = await getUserFilters(client, userID);
+    let userData = await getUserData(client, userID);
 
-		res.status(200).json(filters);
+    // Extract properties and save them to a return object with defined keys.
+    // TODO: Also pass the last modified and last notified items?
+    let returnedData: {[key: string]: any} = {};
+    returnedData[API_NICKNAME] = userData?.nickname;
+    returnedData[API_RESPONSE_FILTER_LIST] = filters;
+
+		res.status(200).json(returnedData);
 		return res.end();
 	} catch (err) {
     if (err instanceof IllegalArgumentError) {

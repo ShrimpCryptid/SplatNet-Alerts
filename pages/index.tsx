@@ -11,105 +11,53 @@ import { API_FILTER_JSON, API_SEND_TEST_NOTIFICATION, API_SUBSCRIPTION, API_USER
 import { DefaultPageProps } from "./_app";
 import { requestNotificationPermission, registerServiceWorker, createNotificationSubscription } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
-import { isValidUserCode } from "../lib/shared_utils";
+import { isValidUserCode, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
-import LabeledAlertbox, { Alertbox, WelcomeAlertbox } from "../components/alertbox";
-
-/**
- * Retrieves a list of the user's current filters from the database. Returns
- * null if filters could not be retrieved (due to a 404 or 500 error).
- * @param userCode the unique string identifier for this user.
- */
-async function getUserFilters(userCode: string): Promise<Filter[]|null> {
-	// TODO: Use SWR fetcher?
-  // TODO: URL-ify usercode.
-  // TODO: Make multiple attempts to get a 200 response in case the server is
-  // misbehaving.
-	let url = `/api/get-user-filters?${API_USER_CODE}=${userCode}`;
-  try {
-    let response = await fetch(url);
-    if (response.status == 200) {
-      // ok
-      let jsonList = await response.json();
-      let filterList = [];
-      for (let json of jsonList) {
-        filterList.push(Filter.deserializeObject(json));
-      }
-      return filterList;
-    } else if (response.status === 404 && isValidUserCode(userCode)) {
-      toast.error(FE_ERROR_404_MSG);
-    } else if (response.status === 500 || response.status === 400) {
-      toast.error(FE_ERROR_500_MSG);
-    }
-  } catch (e) {
-    toast.error(FE_UNKNOWN_MSG);
-  }
-  return null;
-}
+import LabeledAlertbox, { WelcomeAlertbox } from "../components/alertbox";
 
 
 export default function Home({
-	usercode,
+	userCode,
 	setUserCode,
 	setEditingFilter,
+  updateLocalUserData,
+  userFilters,
+  setUserFilters,
 }: DefaultPageProps) {
-  let [filterList, setFilterList] = useState<Filter[]|null>(null);
-  let [lastUserCode, setLastUserCode] = useState<string|null>(usercode);
-
   // Flags for UI loading buttons
   /** The index of any filter we are waiting to edit. -1 by default. */
   let [awaitingEdit, setAwaitingEdit] = useState(-1);
   /** The index of any filters we are waiting to delete. -1 by default. */
   let [awaitingDelete, setAwaitingDelete] = useState(-1);
+  /** Whether we are currently awaiting updated user data. */
   let [awaitingRefresh, setAwaitingRefresh] = useState(false);
+  /** Whether we are currently waiting for the new filter page to load. */
+  let [awaitingNewFilter, setAwaitingNewFilter] = useState(false);
 
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
   let [notificationsToggle, setNotificationsToggle] = useState(false);
-  let [shouldFetchFilters, setShouldFetchFilters] = useState<boolean>(true);
   let [loginUserCode, setLoginUserCode] = useState("");
-  let [filterText, setFilterText] = useState("Loading...");
 
 	// Retrieve the user's filters from the database.
   const updateFilterViews = async () => {
-    setAwaitingRefresh(true);
-    setFilterText("Loading...");  // Reset filter text while loading in text
-    if (usercode !== null && usercode !== undefined) {
-      getUserFilters(usercode).then((filterList) => {
-          if (filterList && filterList.length > 0) {
-            setFilterList(filterList);
-          } else {
-            // TODO: Check for an error state here (filter list === null)
-            setFilterList([]);
-            setFilterText("There's nothing here yet.");
-          }
-          setAwaitingRefresh(false);
-        }
-      );
+    setAwaitingRefresh(true); 
+    if (userCode === null || userCode === undefined) {
+      // There is no user to retrieve data for, so we do not attempt to load.
+      // Delay reset so user knows that an action is being taken.
+      sleep(500).then(() => setAwaitingRefresh(false));
     } else {
-      setFilterList(null);  // store empty list
-      setFilterText("There's nothing here yet. Make a new filter to get started.");
-      setAwaitingRefresh(false);
+      // Request latest user data
+      updateLocalUserData(userCode, true).then(() => {
+        sleep(500).then(() => setAwaitingRefresh(false));
+      });
     }
-  }
-  // Check for changes to the user code and fetch filter views again if changed
-  // this is necessary because retrieval of the user code happens AFTER initial
-  // render)
-  if (lastUserCode !== usercode) {
-    setShouldFetchFilters(true);
-    setLastUserCode(usercode);
-  }
-  // Reload filters
-  if (shouldFetchFilters) {
-    setEditingFilter(null);  // clear any filters that we may have been editing
-    updateFilterViews();
-    setShouldFetchFilters(false);
   }
 
   /** Edit an existing filter */
 	const onClickEditFilter = (filterIndex: number) => {
 		// Switch page contexts, save the editing filter to the state.
-    if (filterList) {
-      setEditingFilter(filterList[filterIndex]);
+    if (userFilters && !pageSwitchReady) {
+      setEditingFilter(userFilters[filterIndex]);
       setAwaitingEdit(filterIndex);
       setPageSwitchReady(true);
     }
@@ -118,30 +66,29 @@ export default function Home({
   // Switches page to the filter edit/creation, but only when state has finished
   // changing.
 	useEffect(() => {
+    // Manually prefetch the filters page (since we're not using a Next.js Link
+    // which normally handles this for us :)).
+    Router.prefetch("filter");
 		if (pageSwitchReady) {
-			Router.push("/filter");
+			Router.push("filter");
 		}
 	});
 
   /** Attempts to delete the filter given by the index from the server. */
   const onClickDeleteFilter = (filterIndex: number) => {
     async function deleteFilter(filterIndex: number) {
-      if (filterList) {
+      if (userFilters && filterIndex >= 0 && filterIndex < userFilters.length) {
         try {
-
-          let filter = filterList[filterIndex];
-          let url = `/api/delete-filter?${API_USER_CODE}=${usercode}`;
+          let filter = userFilters[filterIndex];
+          // Query the backend, requesting deletion
+          let url = `/api/delete-filter?${API_USER_CODE}=${userCode}`;
           url += `&${API_FILTER_JSON}=${filter.serialize()}`
           let result = await fetch(url);
           if (result.status == 200) {
             // Remove filter from the list locally too
-            let newFilterList = [...filterList];  // shallow copy
-            newFilterList.splice(filterIndex, 1);
-            setFilterList(newFilterList);
-            if (newFilterList.length === 0) {
-              // Reset filter text
-              setFilterText("There's nothing here yet.");
-            }
+            let newUserFilters = [...userFilters];  // shallow copy
+            newUserFilters.splice(filterIndex, 1);
+            setUserFilters(newUserFilters);
           } else {
             // TODO: Error message
           }
@@ -180,7 +127,7 @@ export default function Home({
       
       // Send the subscription data to the server and save.
       let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
-      url += `&${API_USER_CODE}=${usercode}`;
+      url += `&${API_USER_CODE}=${userCode}`;
       url += `&${API_SEND_TEST_NOTIFICATION}`;  // flag: send test notif.
       let result = await fetch(url);
       if (result.status === 200) {
@@ -206,17 +153,28 @@ export default function Home({
     // TODO: Attempt to log user in, and only allow switch if the server has
     // a valid entry for the user.
     setUserCode(loginUserCode);
-    setShouldFetchFilters(true);
+    updateLocalUserData(loginUserCode, true);
   }
+
+  // Set different text prompts for the filter loading screen
+  let loadingText = "Loading...";
+  if (userCode === null) {
+    // No user filters could be loaded because the user does not exist yet.
+    loadingText = "There's nothing here yet. Make a new filter to get started!";
+  } else if (userFilters && userFilters.length === 0) {
+    // User was loaded but has no filters.
+    loadingText = "There's nothing here yet.";
+  }
+  // Otherwise, filter list will be shown instead.
 
 	return (
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
 
-      {/** 
-      <WelcomeAlertbox
+      {/**
+        <WelcomeAlertbox
         onClickClose={() => {}}
-        usercode={usercode ? usercode : ""}
+        usercode={userCode ? userCode : ""}
         onClickSubmitNickname={() => {}}
       />*/}
 
@@ -225,31 +183,49 @@ export default function Home({
 			</div>
       <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
         <h2>Your Filters</h2>
-        <LoadingButton onClick={updateFilterViews} loading={awaitingRefresh}>Refresh</LoadingButton>
+        <LoadingButton
+          onClick={updateFilterViews}
+          loading={awaitingRefresh}
+          disabled={!userCode}
+        >
+          Refresh
+        </LoadingButton>
       </div>
 			<div className={styles.filterListContainer}>
-        {(filterList && filterList.length > 0) ? filterList.map((filter, index) => {
-          return (
-            <FilterView
-              onClickEdit={() => onClickEditFilter(index)}
-              onClickDelete={() => onClickDeleteFilter(index)}
-              awaitingEdit={index === awaitingEdit}
-              awaitingDelete={index === awaitingDelete}
-              filter={filter}
-              key={index}
+        {userFilters && userFilters.length > 0 ? 
+          // User has filters, so we can show them the filter list!
+          userFilters.map((filter, index) => {
+            return (
+              <FilterView
+                onClickEdit={() => onClickEditFilter(index)}
+                onClickDelete={() => onClickDeleteFilter(index)}
+                awaitingEdit={index === awaitingEdit}
+                awaitingDelete={index === awaitingDelete}
+                filter={filter}
+                key={index}
+              />
+            );
+          }) :
+          // Show loading animation and text
+          (<div className={styles.emptyFilterList}>
+            <SuperJumpLoadAnimation
+              filterText={loadingText}
+              fillLevel={0.5}
             />
-          );
-        }) :
-        (<div className={styles.emptyFilterList}>
-          <SuperJumpLoadAnimation
-            filterText={filterText}
-            fillLevel={0.5}
-          />
-        </div>)}
+          </div>) 
+        }
       </div>
-			<Link href="filter">
-				<button>New Filter</button>
-			</Link>
+      <LoadingButton
+        onClick={() => {
+          setEditingFilter(null);  // clear any filters being edited
+          setAwaitingNewFilter(true);  // set loading animation on new filter
+          setPageSwitchReady(true);  // ready page to transition
+        }}
+        loading={awaitingNewFilter}
+        disabled={awaitingEdit !== -1}
+      >
+        New Filter
+      </LoadingButton>
 
       <h3>Get notified about gear from the SplatNet 3 app!</h3>
         <p>
@@ -285,7 +261,7 @@ export default function Home({
 			<p>
 				<b>Your unique identifier is:</b>
 			</p>
-			<textarea value={usercode ? usercode : ""} readOnly={true}/>
+			<textarea value={userCode ? userCode : ""} readOnly={true}/>
       <LoadingButton buttonStyle={ButtonStyle.ICON}>
         <span className="material-symbols-rounded">content_copy</span>
       </LoadingButton>

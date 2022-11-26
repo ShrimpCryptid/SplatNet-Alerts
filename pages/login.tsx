@@ -9,7 +9,7 @@ import LoadingButton from "../components/loading-button";
 import Image from "next/image";
 import { loadingIcon } from "../public/icons/utils";
 
-export default function Login({usercode, setUserCode}: DefaultPageProps) {
+export default function Login({userCode, setUserCode}: DefaultPageProps) {
   // Wait until we receive the usercode to show the alert box.
   const [showAlertbox, setShowAlertbox] = useState(false);
   const [newUserCode, setNewUserCode] = useState("");
@@ -20,7 +20,7 @@ export default function Login({usercode, setUserCode}: DefaultPageProps) {
   const router = useRouter();
 
   useEffect(() => {
-    if (usercode !== undefined && router.isReady) {  // Wait until app has retrieved user code
+    if (userCode !== undefined && router.isReady) {  // Wait until app has retrieved user code
       let urlUserCode = router.query[FE_USER_CODE_URL];  // login code is in url
 
       if (typeof(urlUserCode) !== "string" || !isValidUserCode(urlUserCode)) {
@@ -28,14 +28,14 @@ export default function Login({usercode, setUserCode}: DefaultPageProps) {
       } else {
         // newUserCode is valid
         // TODO: Check if server has this user registered
-        if (urlUserCode === usercode) {
+        if (urlUserCode === userCode) {
           // No change to user code, so log in user right away.
           router.push("/");
-        } else if (urlUserCode && usercode === null) {
+        } else if (urlUserCode && userCode === null) {
           // No usercode is set locally, so we override it.
           setUserCode(urlUserCode);
           router.push("/");
-        } else if (urlUserCode && usercode) {
+        } else if (urlUserCode && userCode) {
           // There are two usercodes, so we prompt the user about which one they
           // want to use.
           setNewUserCode(urlUserCode);
@@ -65,7 +65,7 @@ export default function Login({usercode, setUserCode}: DefaultPageProps) {
         <div className={styles.codeContainer}>
           <div style={{height: "fit-content"}}>
             <h3 style={{marginBottom: "0"}}>Current user code:</h3>
-            <p style={{marginTop: "0"}} className={styles.usercodeText}>{usercode}</p>
+            <p style={{marginTop: "0"}} className={styles.usercodeText}>{userCode}</p>
           </div>
           <div className={styles.buttonDiv}>
             <LoadingButton

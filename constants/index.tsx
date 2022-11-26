@@ -2,6 +2,7 @@ import { DB_FILTER_ID, DB_USER_ID } from "./db";
 
 export const VERSION = "1.0.0";
 
+export const API_NICKNAME = "nickname"
 export const API_USER_CODE = "usercode";
 export const API_FILTER_JSON = "filter";
 export const API_PREVIOUS_FILTER_JSON = "prev-filter";
@@ -10,8 +11,13 @@ export const API_SUBSCRIPTION = "subscription";
 export const API_SEND_TEST_NOTIFICATION = "sendtestnotif";
 
 export const API_RESPONSE_FILTER_LIST = "filters";
+export const API_RESPONSE_USER_NICKNAME = API_NICKNAME;
+
+// TODO: Implement limits on user subscribed devices and filters.
 /** The maximum number of subscribed devices/browsers a user can have. */
 export const API_MAX_SUBSCRIPTIONS = 5;
+/** The maximum number of filters allowed per user. */
+export const API_MAX_FILTERS = 100;
 
 export * from './geardata';
 

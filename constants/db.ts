@@ -22,6 +22,8 @@ export const DB_USER_ID = "userid";  // also used in UserToFilter, Subscriptions
 export const DB_TABLE_USERS = "Users";
 /** User's unique user code, as a uuid string. */
 export const DB_USER_CODE = "usercode";
+/** An optional, non-unique user display name. */
+export const DB_NICKNAME = "nickname";
 /** The expiration time of the last item this user was notified about.*/
 export const DB_LAST_NOTIFIED_EXPIRATION = "lastnotifiedexpiration";
 export const DB_LAST_MODIFIED = "lastmodified";

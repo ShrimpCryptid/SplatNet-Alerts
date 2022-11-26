@@ -121,9 +121,11 @@ async function tryUpdateFilter(
 // Page Content
 // ============
 export default function FilterPage({
-	usercode,
+	userCode,
 	setUserCode,
 	editingFilter,
+  userFilters,
+  setUserFilters
 }: DefaultPageProps) {
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
@@ -219,7 +221,7 @@ export default function FilterPage({
 
 		async function saveFilter() {
 			// Generate a user code
-			let tempUserCode = usercode;  // used because usercode state updates late
+			let tempUserCode = userCode;  // used because usercode state updates late
 			if (!tempUserCode) { 
 				// Try making a new user. If it doesn't work, display an error message.
 				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {

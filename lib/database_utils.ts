@@ -25,6 +25,7 @@ import {
 	DB_TABLE_SERVER_CACHE,
 	DB_CACHE_DATA,
 	DB_CACHE_KEY,
+  DB_NICKNAME,
 } from "../constants/db";
 import Filter from "./filter";
 import {
@@ -36,9 +37,11 @@ import {
 	getEnvWithDefault,
   isValidUserCode,
   generateRandomUserCode,
+  isValidNickname,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from "web-push";
+import { configureWebPush } from "./backend_utils";
 import {
   ENV_KEY_PGDATABASE,
 	ENV_KEY_PGHOST,
@@ -215,7 +218,8 @@ export function setupDatabaseTables() {
 			client,
 			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_USERS} (
             ${DB_USER_ID} SERIAL UNIQUE,
-            ${DB_USER_CODE} varchar(255),
+            ${DB_USER_CODE} varchar(255) UNIQUE,
+            ${DB_NICKNAME} varchar(60),
             ${DB_LAST_NOTIFIED_EXPIRATION} varchar(30),
             ${DB_LAST_MODIFIED} varchar(30),
             PRIMARY KEY (${DB_USER_ID})
@@ -514,13 +518,14 @@ export async function addUserPushSubscription(
             ${DB_EXPIRATION} = $2,
             ${DB_AUTH_KEY} = $3,
             ${DB_P256DH_KEY} = $4,
-            ${DB_LAST_MODIFIED} = ${getTimestamp()}
+            ${DB_LAST_MODIFIED} = $5
         WHERE ${DB_SUBSCRIPTION_ID} = ${subscriptionID};`,
 			[
 				subscription.endpoint,
 				subscription.expirationTime,
 				subscription.keys.auth,
 				subscription.keys.p256dh,
+        getTimestamp()
 			]
 		);
 	} else {
@@ -535,12 +540,13 @@ export async function addUserPushSubscription(
           ${DB_P256DH_KEY},
           ${DB_LAST_MODIFIED}
         )
-        VALUES (${userID}, $1, $2, $3, $4, ${getTimestamp()});`,
+        VALUES (${userID}, $1, $2, $3, $4, $5);`,
 			[
 				subscription.endpoint,
 				subscription.expirationTime,
 				subscription.keys.auth,
 				subscription.keys.p256dh,
+        getTimestamp()
 			]
 		);
 	}
@@ -564,7 +570,8 @@ async function hasUser(
 ): Promise<boolean> {
 	let result = await queryAndLog(
 		client,
-		`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = ${userID}`
+		`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = $1`,
+    [userID]
 	);
 	return result ? result.rowCount > 0 : false;
 }
@@ -578,7 +585,6 @@ export async function getUserIDFromCode(
 	client: PoolClient | Pool,
 	userCode: string
 ): Promise<number> {
-	// TODO: Add extra manual regex check here for other illegal characters
 	if (!isValidUserCode(userCode)) {
 		throw new IllegalArgumentError(userCode + " is not a valid uuid.");
 	}
@@ -593,6 +599,53 @@ export async function getUserIDFromCode(
 	} else {
 		return result.rows[0][DB_USER_ID];
 	}
+}
+
+/**
+ * Updates the nickname field in the database for the given user ID.
+ */
+export async function updateUserNickname(
+  client: PoolClient | Pool,
+  userID: number,
+  nickname: string
+) {
+  if(!isValidNickname) {
+    throw new IllegalArgumentError("Nickname '" + nickname + "' is invalid.");
+  }
+  await queryAndLog(
+    client,
+    `UPDATE ${DB_TABLE_USERS}
+      SET ${DB_NICKNAME} = $1
+      WHERE ${DB_USER_ID} = $2`,
+      [nickname, userID]  // passed via parameter array for sanitization
+  );
+}
+
+type UserData = {
+  usercode: string,
+  nickname: string,
+  lastModified: Date,
+  lastModifiedExpiration: Date
+}
+
+/**
+ * Returns an object with the user's data, including their usercode, nickname,
+ * and last modified timestamp.
+ */
+export async function getUserData(client: PoolClient | Pool, userID: number): Promise<UserData|null> {
+  let result = await queryAndLog(client,
+    `SELECT * FROM ${DB_TABLE_USERS}
+      WHERE ${DB_USER_CODE} = $1`,
+    [userID]);
+  if (result.rowCount > 0) {
+    return {
+      usercode: result.rows[0][DB_USER_CODE],
+      nickname: result.rows[0][DB_NICKNAME],
+      lastModified: new Date(result.rows[0][DB_LAST_MODIFIED]),
+      lastModifiedExpiration: new Date(result.rows[0][DB_LAST_NOTIFIED_EXPIRATION])
+    }
+  }
+  return null;
 }
 
 // #endregion USER ACCESS
@@ -847,12 +900,13 @@ export async function getUserIDsToBeNotified(
 /**
  * Attempts to send a notification to the given subscription endpoint, and
  * handles cleanup if the message was unsuccessful. Returns the result (as
- * returned from webpush.sendNotification) on completion.
+ * returned from {@link webpush.sendNotification()}) on completion.
  *
  * Deletes the push subscription from the server if the request returned with
  * status codes 404 (endpoint not found) or 410 (subscription expired).
  *
  * Note: you must configure webpush BEFORE attempting to send notifications.
+ * (aka, call {@link configureWebPush()} before running.)
  */
 export async function trySendNotification(
 	client: Pool | PoolClient,

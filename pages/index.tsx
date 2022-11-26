@@ -31,7 +31,7 @@ import LabeledAlertbox, { WelcomeAlertbox } from "../components/alertbox";
 export default function Home({
 	userCode,
 	setUserCode,
-	setEditingFilter,
+	setEditingFilterIndex,
 	updateLocalUserData,
 	userFilters,
   userNickname,
@@ -71,7 +71,7 @@ export default function Home({
 	const onClickEditFilter = (filterIndex: number) => {
 		// Switch page contexts, save the editing filter to the state.
 		if (userFilters && !pageSwitchReady) {
-			setEditingFilter(userFilters[filterIndex]);
+			setEditingFilterIndex(filterIndex);
 			setAwaitingEdit(filterIndex);
 			setPageSwitchReady(true);
 		}
@@ -104,7 +104,7 @@ export default function Home({
 						newUserFilters.splice(filterIndex, 1);
 						setUserFilters(newUserFilters);
 					} else {
-						// TODO: Error message
+            toast.error(FE_UNKNOWN_MSG + " (error: " + result.status + ")");
 					}
 				} catch (e) {
 					toast.error(FE_UNKNOWN_MSG);
@@ -246,7 +246,7 @@ export default function Home({
 			</div>
 			<LoadingButton
 				onClick={() => {
-					setEditingFilter(null); // clear any filters being edited
+					setEditingFilterIndex(null); // clear any filters being edited
 					setAwaitingNewFilter(true); // set loading animation on new filter
 					setPageSwitchReady(true); // ready page to transition
 				}}

@@ -55,8 +55,8 @@ export default async function handler(
 			return res.end();
 		}
 
-		// Get list of filters owned by user
-		let filters = await getUserFilters(client, userID);
+		// Get list of filters owned by user, reverse so most recent is first
+		let filters = await (await getUserFilters(client, userID)).reverse();
 		let userData = await getUserData(client, userID);
 
 		// Extract properties and save them to a return object with defined keys.

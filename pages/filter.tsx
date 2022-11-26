@@ -100,7 +100,6 @@ async function trySaveFilter(
 	userCode: string,
 	filter: Filter
 ): Promise<number> {
-	console.log(filter);
 	let url = `/api/add-filter`;
 	url += `?${API_USER_CODE}=${userCode}&${API_FILTER_JSON}=${filter.serialize()}`;
 	let response = await fetch(url);
@@ -123,38 +122,37 @@ async function tryUpdateFilter(
 export default function FilterPage({
 	userCode,
 	setUserCode,
-	editingFilter,
+	editingFilterIndex,
 	userFilters,
 	setUserFilters,
 }: DefaultPageProps) {
 	let initAbilities, initBrands, initTypes;
 	let initCanSaveFilter;
-	let initFilter = editingFilter || new Filter();
+	let initFilter = new Filter();
+
+  if (editingFilterIndex !== null && userFilters) {
+    initFilter = userFilters[editingFilterIndex];
+  }
 
 	// Load current filter properties
-	if (!editingFilter) {
+  if (userFilters && editingFilterIndex !== null) {
+		// Have existing filter, populate values in page state.
+		initAbilities = selectedListToMap(GEAR_ABILITIES, initFilter.gearAbilities);
+		initBrands = selectedListToMap(GEAR_BRANDS, initFilter.gearBrands);
+		initTypes = selectedListToMap(GEAR_TYPES, initFilter.gearTypes);
+		initCanSaveFilter = true;
+	} else {
 		// Making a new filter from scratch, so use defaults for abilities, etc.
 		// We use the GEAR_ABILITIES, etc. constants as keys in the map.
 		initAbilities = makeSelectedMap(GEAR_ABILITIES);
 		initBrands = makeSelectedMap(GEAR_BRANDS);
 		initTypes = makeSelectedMap(GEAR_TYPES);
 		initCanSaveFilter = false;
-	} else {
-		// Have existing filter, populate values in page state.
-		initAbilities = selectedListToMap(
-			GEAR_ABILITIES,
-			editingFilter.gearAbilities
-		);
-		initBrands = selectedListToMap(GEAR_BRANDS, editingFilter.gearBrands);
-		initTypes = selectedListToMap(GEAR_TYPES, editingFilter.gearTypes);
-		initCanSaveFilter = true;
 	}
 
 	// Initialize page states, using existing filter values if present.
 	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(
-		initFilter.minimumRarity
-	);
+	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
@@ -223,15 +221,19 @@ export default function FilterPage({
 			let tempUserCode = userCode; // used because usercode state updates late
 			if (!tempUserCode) {
 				// Try making a new user. If it doesn't work, display an error message.
-				for (let attempts = MAKE_USER_ATTEMPTS - 1; attempts > 0; attempts--) {
-					let response = await fetch(`/api/new-user`);
-					if (response.status == 200) {
-						let tempUserCode = await response.json();
-						setUserCode(tempUserCode); // store new code
-						break;
-					} else {
-						await sleep(REQUEST_DELAY_MS);
-					}
+				for (let attempts = MAKE_USER_ATTEMPTS; attempts > 0 && !tempUserCode; attempts--) {
+          try {
+            let response = await fetch(`/api/new-user`);
+            if (response.status == 200) {
+              tempUserCode = await response.json();
+              setUserCode(tempUserCode); // store new code
+              break;
+            } else {
+              await sleep(REQUEST_DELAY_MS);
+            }
+          } catch (e) {
+            console.log(e);
+          }
 				}
 				if (!tempUserCode) {
 					// We were not able to make a new user code.
@@ -242,29 +244,51 @@ export default function FilterPage({
 			}
 
 			let responseCode = 0;
-			if (editingFilter) {
+			if (editingFilterIndex !== null && userFilters) {
 				// we are editing an existing filter, must update
 				responseCode = await tryUpdateFilter(
 					tempUserCode,
 					currFilter,
-					editingFilter
+					userFilters[editingFilterIndex]
 				);
 			} else {
 				// we are making a new filter
 				responseCode = await trySaveFilter(tempUserCode, currFilter);
 			}
 			if (responseCode == 200) {
-				// Successfully saved; return to main page
+        // Modify filter list so we don't need to reload user data
+        if (editingFilterIndex !== null && userFilters) {  // editing existing
+          if (userFilters[editingFilterIndex] === currFilter) {
+            // No change to filter, so no changes are made
+          } else {  // We replaced a filter.
+            // Delete the old filter and insert the newest filter
+            let newUserFilters = [...userFilters] 
+            newUserFilters.splice(editingFilterIndex, 1);
+            newUserFilters.splice(0, 0, currFilter);
+            setUserFilters(newUserFilters);
+          }
+        } else {
+          // We are making a new filter
+          let newUserFilters: Filter[] = [];
+          if (userFilters) {
+            newUserFilters = [...userFilters];
+          }
+          newUserFilters.splice(0, 0, currFilter);
+          setUserFilters(newUserFilters);
+        }
+
+        // Successfully saved; return to main page
 				toast.success("Filter saved.");
 				setPageSwitchReady(true);
+
 			} else {
-				// TODO: Display an error message.
-				console.log("Response code: " + responseCode);
-				console.error("Could not complete request.");
+        // Some error occurred while saving.
+        toast.error(FE_UNKNOWN_MSG + " (error: " + responseCode + ")");
 				setIsSaving(false);
 				return;
 			}
 		}
+    // Run our async method
 		setIsSaving(true);
 		saveFilter();
 	};

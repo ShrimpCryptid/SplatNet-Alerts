@@ -97,8 +97,8 @@ export type DefaultPageProps = {
 	/** The filter currently being edited when opening the filters page. Null if
 	 * we are instead making a new filter.
 	 */
-	editingFilter: Filter | null;
-	setEditingFilter: (newFilter: Filter | null) => void;
+	editingFilterIndex: number | null;
+	setEditingFilterIndex: (newFilter: number | null) => void;
 	/** List of filters user is subscribed to. Undefined when unloaded
 	 * yet, and null if there is no user or an error was encountered on load.
 	 */
@@ -130,7 +130,7 @@ export type DefaultPageProps = {
 export default function App({ Component, pageProps }: AppProps) {
 	// Initialize as undefined until we render, then get the local user data
 	// and transition it to either a string or null value.
-	const [editingFilter, setEditingFilter] = useState<null | Filter>(null);
+	const [editingFilterIndex, setEditingFilterIndex] = useState<null | number>(null);
 	const [userCode, setUserCode] = useState<null | string | undefined>(undefined);
 	const [userFilters, setUserFilters] = useState<Filter[] | null | undefined>(undefined);
 	const [userNickname, setUserNickname] = useState<string | null | undefined>(undefined);
@@ -212,9 +212,9 @@ export default function App({ Component, pageProps }: AppProps) {
 					{...pageProps}
 					userCode={userCode}
 					setUserCode={onSetUserCode}
-					editingFilter={editingFilter}
-					setEditingFilter={(filter: Filter) => {
-						setEditingFilter(filter);
+					editingFilterIndex={editingFilterIndex}
+					setEditingFilterIndex={(filterIndex: number) => {
+						setEditingFilterIndex(filterIndex);
 					}}
 					userNickname={userNickname}
 					setUserNickname={setUserNickname}

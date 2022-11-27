@@ -140,9 +140,8 @@ const FilterView: FunctionComponent<Props> = ({
 		// Show full list of abilities, with images for each.
 		abilityElements = filter.gearAbilities.map((item, index) => {
 			return (
-				<div className={styles.abilityIcon}>
+				<div className={styles.abilityIcon} key={index}>
 					<Image
-						key={index}
 						src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
 						layout={"fill"}
 					/>

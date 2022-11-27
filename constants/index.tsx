@@ -9,7 +9,7 @@ export const API_PREVIOUS_FILTER_JSON = "prev-filter";
 export const API_FILTER_ID = DB_FILTER_ID;
 export const API_SUBSCRIPTION = "subscription";
 export const API_SEND_TEST_NOTIFICATION = "sendtestnotif";
-
+export const API_SUBSCRIPTION_REMOVE_ALL = "removeall";
 export const API_RESPONSE_FILTER_LIST = "filters";
 export const API_RESPONSE_USER_NICKNAME = API_NICKNAME;
 
@@ -23,6 +23,7 @@ export * from './geardata';
 
 export const FE_WILDCARD = "Any";
 export const FE_LOCAL_USER_CODE = DB_USER_ID;
+export const FE_LOCAL_SUBSCRIPTION_INFO = "subscription_info";
 export const FE_USER_CODE_URL = "user";
 
 export const FE_ERROR_404_MSG = "The server could not find your user ID. Please check your ID or make a new account.";

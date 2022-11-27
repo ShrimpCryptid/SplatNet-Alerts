@@ -775,7 +775,12 @@ export async function removeUserPushSubscription(
 	userID: number,
 	subscription: Subscription
 ) {
-	throw new NotYetImplementedError("");
+  await queryAndLog(
+		client,
+		`DELETE FROM ${DB_TABLE_SUBSCRIPTIONS}
+      WHERE ${DB_ENDPOINT} = $1 AND ${DB_USER_ID} = $2;`,
+		[subscription.endpoint, userID]
+	);
 }
 
 /** Deletes all subscriptions with a matching endpoint, regardless of user. */

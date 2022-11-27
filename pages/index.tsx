@@ -15,6 +15,7 @@ import {
 	FE_ERROR_404_MSG,
 	FE_ERROR_500_MSG,
 	FE_ERROR_INVALID_USERCODE,
+	FE_LOCAL_SUBSCRIPTION_INFO,
 	FE_UNKNOWN_MSG,
 } from "../constants";
 import { DefaultPageProps } from "./_app";
@@ -24,9 +25,10 @@ import {
 	createNotificationSubscription,
 } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
-import { isValidUserCode, sleep } from "../lib/shared_utils";
+import { fetchWithAttempts, isValidUserCode, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
 import LabeledAlertbox, { WelcomeAlertbox } from "../components/alertbox";
+import Switch from "../components/switch";
 
 export default function Home({
 	userCode,
@@ -49,7 +51,10 @@ export default function Home({
   let [awaitingLogin, setAwaitingLogin] = useState(false);
 
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
+
 	let [notificationsToggle, setNotificationsToggle] = useState(false);
+  let [notificationsLoading, setNotificationsLoading] = useState(false);
+  
 	let [loginUserCode, setLoginUserCode] = useState("");
 
 	// Retrieve the user's filters from the database.
@@ -116,44 +121,93 @@ export default function Home({
 		deleteFilter(filterIndex);
 	};
 
-	const toggleNotifications = async () => {
-		if (notificationsToggle) {
-			// Turn OFF notifications
-			// TODO: Remove subscription from server -> await then
+  // Notification initial state is defined by whether we local subscription info
+  // stored, AND there's a service worker currently running.
+  useEffect(() => {
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      setNotificationsToggle(
+        window && window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO) !== null
+        && registration !== undefined && Notification.permission === "granted");
+    });
+  })
+
+	const toggleNotifications = async (newState: boolean) => {
+    setNotificationsLoading(true);
+		if (newState) {
+			// Turn ON notifications
+      try {
+        if (Notification.permission !== "granted") {
+          await requestNotificationPermission();
+        }
+        if (Notification.permission !== "granted") {
+          // User denied notifications
+          toast.error("Notifications have been voluntarily disabled. Check the webpage settings in your browser to reenable them.");
+          return;
+        }
+        // Start a local service worker
+        await registerServiceWorker();
+  
+        const publicVAPIDKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicVAPIDKey) {
+          console.error("Cannot find public VAPID key environment variable.");
+          return;
+        }
+        // TODO: Handle 'DOMException: Registration failed' when VAPID keys have changed. => instead, handle when loading initial status
+        let subscription = await createNotificationSubscription(publicVAPIDKey);
+        let subscriptionString = JSON.stringify(subscription);
+  
+        // Send the subscription data to the server and save.
+        let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
+        url += `&${API_USER_CODE}=${userCode}`;
+        url += `&${API_SEND_TEST_NOTIFICATION}`; // flag: send test notif.
+        let result = await fetchWithAttempts(url, 3, [200, 404]);
+
+        if (result && result.status === 200) {
+          toast.success("Success! A test notification has been sent to your device.");
+          setNotificationsToggle(true);
+          // Save subscription info to local state
+          if (window) {
+            window.localStorage.setItem(FE_LOCAL_SUBSCRIPTION_INFO, subscriptionString);
+          }
+        } else if (result && result.status === 404) {  // could not find user
+            toast.error(FE_ERROR_404_MSG);
+        } else if (result && result.status === 500) {  // unknown server error
+          toast.error(FE_ERROR_500_MSG);
+        } else {  // unknown error
+          toast.error(FE_UNKNOWN_MSG);
+        }
+      } catch (e) {
+        console.log(e);
+        toast.error(FE_UNKNOWN_MSG);
+      } finally {
+        // Add a slight delay so users know that something is happening
+        sleep(500).then(() => setNotificationsLoading(false));
+      }
+		} else {
+      // Turn OFF notifications
+      // Unregister all local service workers
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+      if (window) {
+        let subscriptionString = window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO);
+        if (subscriptionString) {
+          // Some saved subscription information, so attempt to remove from server
+          // (This is just a courtesy, as the server will auto-delete failed
+          // service workers when notifying them.)
+          let url = `/api/unsubscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
+          url += `&${API_USER_CODE}=${userCode}`;
+          await fetchWithAttempts(url, 3, [200, 400, 404]);
+        }
+        // Clear stored subscription information
+        window.localStorage.removeItem(FE_LOCAL_SUBSCRIPTION_INFO);
+      }
 			toast("Notifications have been disabled for this device.");
 			setNotificationsToggle(false);
-		} else {
-			// Turn ON notifications
-			// Start a local service worker
-			await requestNotificationPermission();
-			await registerServiceWorker();
-
-			const publicVAPIDKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-			if (!publicVAPIDKey) {
-				console.error("Cannot find public VAPID key environment variable.");
-				return;
-			}
-			// TODO: Handle 'DOMException: Registration failed' when VAPID keys have changed.
-			// TODO: Determine why notifications don't work correctly the first time they're registered?
-			let subscription = await createNotificationSubscription(publicVAPIDKey);
-			let subscriptionString = JSON.stringify(subscription);
-			// TODO: Store locally?
-
-			// Send the subscription data to the server and save.
-			let url = `/api/subscribe?${API_SUBSCRIPTION}=${subscriptionString}`;
-			url += `&${API_USER_CODE}=${userCode}`;
-			url += `&${API_SEND_TEST_NOTIFICATION}`; // flag: send test notif.
-			let result = await fetch(url);
-			if (result.status === 200) {
-				toast.success(
-					"Success! A test notification has been sent to your device."
-				);
-			} else if (result.status === 404) {
-				toast.error(FE_ERROR_404_MSG);
-			} else if (result.status === 500) {
-				toast.error(FE_ERROR_500_MSG);
-			}
-		}
+      setNotificationsLoading(false);
+    }
 	};
 
 	/** Updates the login field as the user types. */
@@ -266,17 +320,18 @@ export default function Home({
 			</p>
 
 			<h2 style={{marginBottom: "0"}}>Settings</h2>
-			<h3 style={{marginBottom: "0"}}>Notifications</h3>
-			<p style={{marginTop: "0"}}>
-				You currently have notifications <b>ON/OFF</b>.
-			</p>
+			<h3 style={{marginBottom: "0"}}>Notifications: {notificationsToggle ? "ON" : "OFF"} </h3>
+
+      <Switch 
+        state={notificationsToggle}
+        onToggled={toggleNotifications}
+        loading={notificationsLoading}
+        disabled={false  /** TODO: Check if push is supported by browser */}
+      />
 			<p>
 				SSA sends push notifications via your browser. You can turn off
 				notifications at any time.
 			</p>
-			<button disabled={false} onClick={toggleNotifications}>
-				Turn on notifications
-			</button>
 			<h3 style={{marginBottom: "0"}}>User ID</h3>
 			<p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!</p>
 			<p>

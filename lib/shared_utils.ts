@@ -90,3 +90,25 @@ export function getRandomTitle(): string {
 
 	return adjective + " " + subject;
 }
+
+/**
+ * Attempts to fetch the given URL, retrying on failure. Returns when the return code
+ * is one of the allowed codes, or if attempts are exhausted.
+ * @param url 
+ * @param attempts 
+ * @param allowedCodes 
+ */
+export async function fetchWithAttempts(url: string, attempts=3, allowedCodes: number[] = [200]): Promise<Response|undefined> {
+  let result;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      result = await fetch(url);
+      if (allowedCodes.includes(result.status)) {
+        return result;
+      }
+    } catch (e) {
+      // do nothing
+    }
+  }
+  return result;
+}

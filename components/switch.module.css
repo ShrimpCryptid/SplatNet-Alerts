@@ -1,0 +1,107 @@
+.sliderContainer {
+  --height: 32px;
+  --gap: 3px;
+  height: var(--height);
+  width: calc(2.25 * var(--height));
+  border-radius: 100000px;
+  background-color: grey;
+  position: relative;
+  cursor: pointer;
+  transition: ease-in-out background-color 0.25s;
+}
+
+.sliderContainer.stateTrue {
+  background-color: var(--button-background)
+}
+
+button.sliderContainer:hover {
+  background-color: grey;
+  filter: brightness(1.2);
+}
+
+.sliderContainer.stateTrue:hover {
+  filter: brightness(1.2);
+  background-color: var(--button-background);
+}
+
+.sliderContainer.disabled {
+  cursor: not-allowed;
+}
+
+button.sliderContainer.disabled:hover {
+  filter: none;
+}
+
+.slider {
+  position: absolute;
+  background-color: white;
+  border-radius: 100000px;
+  height: calc(var(--height) - 2 * var(--gap));
+  width: calc(var(--height) - 2 * var(--gap));
+  
+  margin: var(--gap);
+
+  left: 0;
+  top: 0;
+  transform: translateX(0);
+  transition-timing-function: ease-in-out;
+  transition: left 0.25s, transform 0.25s,;
+}
+
+.slider.disabled {
+  background-color: lightgrey;
+}
+
+.slider.stateTrue {
+  left: 100%;
+  display: flex;
+  transform: translateX(calc(-100% - 2 * var(--gap)));
+}
+
+.disabledIcon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: left top;
+  transform: rotateZ(0deg) translateX(-50%) translateY(-50%);
+  color: grey;
+  font-size: calc(var(--height) - 4 * var(--gap));
+
+  visibility: hidden;
+}
+
+.disabled .disabledIcon {
+  visibility: visible;
+}
+
+.loadingIcon {
+  --size: 50%;
+  width: var(--size);
+  height: var(--size);
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: left top;
+  transform: rotateZ(0deg) translateX(-50%) translateY(-50%);
+  
+  vertical-align: middle;
+  margin: auto;
+
+  border-radius: 1000000px;
+  border-color: grey grey transparent;
+  border-style: solid;
+  border-width: 2px;
+  visibility: hidden;
+}
+
+.loading .loadingIcon{
+  visibility: visible;
+  animation: spin 1.0s infinite linear;
+}
+
+@keyframes spin {
+  to {
+    transform: rotateZ(360deg) translateX(-50%) translateY(-50%);
+  }
+}

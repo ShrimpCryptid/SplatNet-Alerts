@@ -72,7 +72,7 @@ export default async function handler(
 				body: "Welcome to the Splatnet Shop Alerts service!",
 			};
 			configureWebPush();
-			trySendNotification(client, subscription, JSON.stringify(notification));
+			await trySendNotification(client, subscription, JSON.stringify(notification));
 		}
 
 		res.status(200);

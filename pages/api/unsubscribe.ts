@@ -57,7 +57,8 @@ export default async function handler(
 		let subscriptionJSON = JSON.parse(req.query[API_SUBSCRIPTION]);
 		let subscription = Subscription.deserialize(subscriptionJSON);
 
-    await removeUserPushSubscription(client, userID, subscription);
+    // TODO: Undo after testing
+    // await removeUserPushSubscription(client, userID, subscription);
 
 		res.status(200);
 		return res.end();

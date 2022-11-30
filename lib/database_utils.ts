@@ -521,13 +521,14 @@ export async function addUserPushSubscription(
             ${DB_AUTH_KEY} = $3,
             ${DB_P256DH_KEY} = $4,
             ${DB_LAST_MODIFIED} = $5
-        WHERE ${DB_SUBSCRIPTION_ID} = ${subscriptionID};`,
+        WHERE ${DB_SUBSCRIPTION_ID} = $6;`,
 			[
 				subscription.endpoint,
 				subscription.expirationTime,
 				subscription.keys.auth,
 				subscription.keys.p256dh,
 				getTimestamp(),
+        subscriptionID
 			]
 		);
 	} else {
@@ -562,7 +563,6 @@ async function removeUser(client: PoolClient | Pool, userID: number) {
 	if (!(await hasUser(client, userID))) {
 		throw new NoSuchUserError(userID);
 	}
-
 	throw new NotYetImplementedError("");
 }
 
@@ -888,6 +888,7 @@ export async function getUserIDsToBeNotified(
 	}
 	// Match filters by properties, either by specific brand/ability/type or by
 	// wildcard selectors. Then, select all users that match any of those filters.
+  // TODO: Ignore users who have already been notified via timestamp param?
 	let result = await client.query(
 		`WITH matchingFilters(${DB_FILTER_ID}) AS 
         (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
@@ -927,6 +928,7 @@ export async function trySendNotification(
 	subscription: Subscription,
 	notification: string
 ): Promise<webpush.SendResult | undefined> {
+  // TODO: Make multiple attempts at notifying users?
 	try {
 		let result = await webpush.sendNotification(
 			subscription,

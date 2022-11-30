@@ -3,6 +3,9 @@ import { DB_FILTER_ID, DB_USER_ID } from "./db";
 export const VERSION = "1.0.0";
 
 export const API_NICKNAME = "nickname"
+export const API_NICKNAME_MAX_LENGTH = 30;
+export const API_NICKNAME_ALLOWED_CHARS = /^[a-zA-Z0-9- .]*$/;
+
 export const API_USER_CODE = "usercode";
 export const API_FILTER_JSON = "filter";
 export const API_PREVIOUS_FILTER_JSON = "prev-filter";

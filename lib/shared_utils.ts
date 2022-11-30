@@ -1,7 +1,9 @@
 /**
  * Utility methods shared across backend and frontend.
  */
+import { toast } from "react-toastify";
 import { validate, v4 as uuidv4 } from "uuid";
+import { API_NICKNAME_ALLOWED_CHARS, API_NICKNAME_MAX_LENGTH, FE_ERROR_404_MSG, FE_ERROR_500_MSG, FE_UNKNOWN_MSG } from "../constants";
 import { ADJECTIVES, SUBJECTS } from "../constants/titledata";
 
 export class IllegalArgumentError extends Error {
@@ -76,39 +78,88 @@ export function generateRandomUserCode(): string {
 
 /** Checks whether a given nickname is valid. */
 export function isValidNickname(nickname: string): boolean {
-	// TODO: Implement nickname sanitization checks here.
-	return true;
+	return (
+		API_NICKNAME_ALLOWED_CHARS.test(nickname) &&
+		nickname.length > 0 &&
+		nickname.length <= API_NICKNAME_MAX_LENGTH
+	);
+}
+
+/**
+ * Removes all disallowed characters from a nickname.
+ * @param nickname
+ */
+export function sanitizeNickname(nickname: string): string {
+  let retString = "";
+  for (let i = 0; i < nickname.length; i++) {
+    let char = nickname.charAt(i);
+    if (API_NICKNAME_ALLOWED_CHARS.test(char)) {
+      retString += char;
+    }
+  }
+  if (retString.length > API_NICKNAME_MAX_LENGTH) {
+    retString = retString.substring(0, API_NICKNAME_MAX_LENGTH);
+  }
+  return retString;
 }
 
 /**
  * Gets a random title (adjective + subject) generated from the list of
- * possible in-game titles.
+ * possible in-game titles. Title will be a valid nickname, tested using
+ * {@link isValidNickname}.
  */
 export function getRandomTitle(): string {
-	let subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
-	let adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-
-	return adjective + " " + subject;
+	let title = "";
+	do {
+		let subject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
+		let adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+		title = adjective + " " + subject;
+	} while (!isValidNickname(title));
+	return title;
 }
 
 /**
  * Attempts to fetch the given URL, retrying on failure. Returns when the return code
- * is one of the allowed codes, or if attempts are exhausted.
- * @param url 
- * @param attempts 
- * @param allowedCodes 
+ * is one of the allowed codes, or if attempts are exhausted. Handles encoding
+ * of URI sequences.
+ * @param url
+ * @param attempts
+ * @param allowedCodes
  */
-export async function fetchWithAttempts(url: string, attempts=3, allowedCodes: number[] = [200]): Promise<Response|undefined> {
-  let result;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      result = await fetch(url);
-      if (allowedCodes.includes(result.status)) {
-        return result;
-      }
-    } catch (e) {
-      // do nothing
-    }
+export async function fetchWithAttempts(
+	url: string,
+	attempts = 3,
+	allowedCodes: number[] = [200]
+): Promise<Response | undefined> {
+	let result;
+	for (let i = 0; i < attempts; i++) {
+		try {
+			result = await fetch(encodeURI(url));
+			if (allowedCodes.includes(result.status)) {
+				return result;
+			}
+		} catch (e) {
+			// do nothing
+		}
+	}
+	return result;
+}
+
+// TODO: Move to a frontend utilities file?
+export function printStandardErrorMessage(response: Response | undefined) {
+  if (!response) {
+    toast.error(FE_UNKNOWN_MSG);
+    return;
   }
-  return result;
+  switch (response.status) {
+    case 404:
+      toast.error(FE_ERROR_404_MSG);
+      break;
+    case 500:
+      toast.error(FE_ERROR_500_MSG);
+      break;
+    default:
+      toast.error(FE_UNKNOWN_MSG + " (error " + response.status + ")");
+
+  }
 }

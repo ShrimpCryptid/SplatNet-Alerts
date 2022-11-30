@@ -110,6 +110,12 @@ export type DefaultPageProps = {
 	userNickname: string | null | undefined;
 	setUserNickname: (newNickname: string | null | undefined) => void;
   /**
+   * A flag for when the user was newly created, and should be shown a series of
+   * informational prompts.
+   */
+  isUserNew: boolean | undefined;
+  setIsUserNew: (value: boolean | undefined) => void;
+  /**
    * Fetches most recent user data from the backend and stores it locally,
    * returning whether the operation completed successfully.
    * @param userCode user identifier.
@@ -127,6 +133,7 @@ export type DefaultPageProps = {
 	) => Promise<boolean>;
 };
 
+
 export default function App({ Component, pageProps }: AppProps) {
 	// Initialize as undefined until we render, then get the local user data
 	// and transition it to either a string or null value.
@@ -134,7 +141,7 @@ export default function App({ Component, pageProps }: AppProps) {
 	const [userCode, setUserCode] = useState<null | string | undefined>(undefined);
 	const [userFilters, setUserFilters] = useState<Filter[] | null | undefined>(undefined);
 	const [userNickname, setUserNickname] = useState<string | null | undefined>(undefined);
-
+  const [isUserNew, setIsUserNew] = useState<boolean | undefined>(undefined);
 	const [hasDoneInitialLoad, setHasDoneInitialLoad] = useState(false);
 
 	// Wrapped in useEffect because this needs to run on the client side
@@ -212,14 +219,18 @@ export default function App({ Component, pageProps }: AppProps) {
 					{...pageProps}
 					userCode={userCode}
 					setUserCode={onSetUserCode}
+          userNickname={userNickname}
+          setUserNickname={setUserNickname}
+          userFilters={userFilters}
+          setUserFilters={setUserFilters}
+
 					editingFilterIndex={editingFilterIndex}
 					setEditingFilterIndex={(filterIndex: number) => {
 						setEditingFilterIndex(filterIndex);
 					}}
-					userNickname={userNickname}
-					setUserNickname={setUserNickname}
-					userFilters={userFilters}
-					setUserFilters={setUserFilters}
+          isUserNew={isUserNew}
+          setIsUserNew={setIsUserNew}
+
 					updateLocalUserData={updateLocalUserData}
 				/>
 			</>

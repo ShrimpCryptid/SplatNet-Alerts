@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useState } from "react";
 import { toast } from "react-toastify";
-import { getRandomTitle } from "../lib/shared_utils";
+import { getRandomTitle, sanitizeNickname } from "../lib/shared_utils";
 import styles from "./alertbox.module.css";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 
@@ -56,16 +56,16 @@ export default function LabeledAlertbox(props: LabeledAlertboxProps) {
 
 /** Predefined alertbox that shows once the user makes their first filter. */
 type WelcomeAlertboxProps = {
-	onClickClose: MouseEventHandler<HTMLElement>;
+	onClickSubmit: (nickname: string) => Promise<void>;
 	usercode: string;
-	onClickSubmitNickname: MouseEventHandler<HTMLElement>;
+  loading: boolean;
 };
-export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
-	const [nickname, setNickname] = useState(getRandomTitle());
 
-	// TODO: Register nickname to server on submit
-	const onChangedNickname = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setNickname(event.currentTarget.value);
+export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
+	const [nickname, setNickname] = useState("");
+
+	const onChangedNickname = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setNickname(sanitizeNickname(event.currentTarget.value));
 	};
 
 	return (
@@ -96,7 +96,9 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 
 			<h3 style={{ marginBottom: "0" }}>Nickname</h3>
 			<p style={{ marginTop: "0" }}>
-				Set a nickname to remember this account by.
+				Set a nickname to remember this account by. You can also generate a
+        random in-game title using the button.
+        <br/><i>(Limited to alphanumeric characters, dashes, and spaces!)</i>
 			</p>
 			<div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
 				<textarea value={nickname} onChange={onChangedNickname} />
@@ -108,7 +110,13 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 				</LoadingButton>
 			</div>
 			<br />
-			<LoadingButton disabled={nickname === ""}>Submit</LoadingButton>
+			<LoadingButton
+        disabled={nickname === ""}
+        loading={props.loading}
+        onClick={() => {props.onClickSubmit(nickname)}}
+      >
+        Submit
+      </LoadingButton>
 		</LabeledAlertbox>
 	);
 }

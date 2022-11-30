@@ -9,6 +9,7 @@ import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
 import {
 	API_FILTER_JSON,
+	API_NICKNAME,
 	API_SEND_TEST_NOTIFICATION,
 	API_SUBSCRIPTION,
 	API_USER_CODE,
@@ -25,10 +26,16 @@ import {
 	createNotificationSubscription,
 } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
-import { fetchWithAttempts, isValidUserCode, sleep } from "../lib/shared_utils";
+import { fetchWithAttempts, isValidNickname, isValidUserCode, printStandardErrorMessage, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
-import LabeledAlertbox, { WelcomeAlertbox } from "../components/alertbox";
+import { WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
+
+enum NEW_USER_FLOW {
+  NONE=0,
+  NICKNAME_PROMPT=1,
+  NOTIFICATION_PROMPT=2,
+}
 
 export default function Home({
 	userCode,
@@ -37,7 +44,10 @@ export default function Home({
 	updateLocalUserData,
 	userFilters,
   userNickname,
+  isUserNew,
+  setIsUserNew,
 	setUserFilters,
+  setUserNickname,
 }: DefaultPageProps) {
 	// Flags for UI loading buttons
 	/** The index of any filter we are waiting to edit. -1 by default. */
@@ -49,6 +59,9 @@ export default function Home({
 	/** Whether we are currently waiting for the new filter page to load. */
 	let [awaitingNewFilter, setAwaitingNewFilter] = useState(false);
   let [awaitingLogin, setAwaitingLogin] = useState(false);
+  let [awaitingUpdateNickname, setAwaitingUpdateNickname] = useState(false);
+
+  let [visiblePrompt, setVisiblePrompt] = useState(NEW_USER_FLOW.NONE);
 
 	let [pageSwitchReady, setPageSwitchReady] = useState(false);
 
@@ -131,6 +144,7 @@ export default function Home({
     });
   })
 
+  // Turn on/off notifications
 	const toggleNotifications = async (newState: boolean) => {
     setNotificationsLoading(true);
 		if (newState) {
@@ -139,7 +153,10 @@ export default function Home({
         if (Notification.permission !== "granted") {
           await requestNotificationPermission();
         }
-        if (Notification.permission !== "granted") {
+        if (Notification.permission === "default") {
+          // User closed notification prompt without selecting an option
+          return;
+        } else if (Notification.permission !== "granted") {
           // User denied notifications
           toast.error("Notifications have been voluntarily disabled. Check the webpage settings in your browser to reenable them.");
           return;
@@ -169,12 +186,8 @@ export default function Home({
           if (window) {
             window.localStorage.setItem(FE_LOCAL_SUBSCRIPTION_INFO, subscriptionString);
           }
-        } else if (result && result.status === 404) {  // could not find user
-            toast.error(FE_ERROR_404_MSG);
-        } else if (result && result.status === 500) {  // unknown server error
-          toast.error(FE_ERROR_500_MSG);
-        } else {  // unknown error
-          toast.error(FE_UNKNOWN_MSG);
+        } else {
+          printStandardErrorMessage(result);
         }
       } catch (e) {
         console.log(e);
@@ -234,6 +247,44 @@ export default function Home({
     });
 	};
 
+  /** Handle page flow and nickname/notification prompts */
+  useEffect(() => {
+    // Advance to the first login prompt
+    if (isUserNew && visiblePrompt === NEW_USER_FLOW.NONE) {
+      setVisiblePrompt(NEW_USER_FLOW.NICKNAME_PROMPT);
+    }
+    // Advance to the notification prompt once a nickname is set
+    if (visiblePrompt === NEW_USER_FLOW.NICKNAME_PROMPT && userNickname && isValidNickname(userNickname)) {
+      setVisiblePrompt(NEW_USER_FLOW.NOTIFICATION_PROMPT);
+    }
+  })
+
+  /** Update the nickname of a user! */
+  const onClickUpdateNickname = async (nickname: string) => {
+    setAwaitingUpdateNickname(true);
+    try {
+      let encodedNickname = encodeURIComponent(nickname);
+      let url = `/api/update-nickname?${API_NICKNAME}=${encodedNickname}`
+      url += `&${API_USER_CODE}=${userCode}`
+      let response = await fetchWithAttempts(url, 3, [200, 400, 404])
+      if (!response) {
+        toast.error(FE_UNKNOWN_MSG);
+        return;
+      }
+      if (response.status === 200) { // Get updated nickname from the JSON body
+        let savedNickname = await response.json();
+        setUserNickname(savedNickname);
+        toast.success("Nickname saved as '" + savedNickname + "'!");
+      } else {
+        printStandardErrorMessage(response);
+      }
+    } catch (e) {
+      toast.error(FE_UNKNOWN_MSG);
+    } finally {
+      setAwaitingUpdateNickname(false);
+    }
+  }
+
 	// Set different text prompts for the filter loading screen
 	let loadingText = "Loading...";
 	if (userCode === null) {
@@ -249,12 +300,15 @@ export default function Home({
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
 
-			{/**
+      {visiblePrompt === NEW_USER_FLOW.NICKNAME_PROMPT ?
         <WelcomeAlertbox
-        onClickClose={() => {}}
-        usercode={userCode ? userCode : ""}
-        onClickSubmitNickname={() => {}}
-      />*/}
+          onClickSubmit={onClickUpdateNickname}
+          usercode={userCode ? userCode : ""}
+          loading={awaitingUpdateNickname}
+        /> : <></>
+      }
+
+      
 
 			<div
 				style={{
@@ -320,7 +374,9 @@ export default function Home({
 			</p>
 
 			<h2 style={{marginBottom: "0"}}>Settings</h2>
-			<h3 style={{marginBottom: "0"}}>Notifications: {notificationsToggle ? "ON" : "OFF"} </h3>
+			<h3 style={{marginBottom: "0"}}>
+        Notifications: {notificationsToggle ? "ON" : "OFF"} 
+      </h3>
 
       <Switch 
         state={notificationsToggle}

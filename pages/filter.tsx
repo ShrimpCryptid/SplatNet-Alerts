@@ -124,6 +124,7 @@ export default function FilterPage({
 	setUserCode,
 	editingFilterIndex,
 	userFilters,
+  setIsUserNew,
 	setUserFilters,
 }: DefaultPageProps) {
 	let initAbilities, initBrands, initTypes;
@@ -227,6 +228,7 @@ export default function FilterPage({
             if (response.status == 200) {
               tempUserCode = await response.json();
               setUserCode(tempUserCode); // store new code
+              setIsUserNew(true);  // mark that we made a new user
               break;
             } else {
               await sleep(REQUEST_DELAY_MS);

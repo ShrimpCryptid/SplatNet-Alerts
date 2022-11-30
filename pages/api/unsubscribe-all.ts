@@ -1,19 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
-	API_SUBSCRIPTION,
 	API_USER_CODE,
-	API_SEND_TEST_NOTIFICATION,
-  API_SUBSCRIPTION_REMOVE_ALL,
 } from "../../constants";
 import {
 	getDBClient,
 	getUserIDFromCode,
 	getUserSubscriptions,
 	removeUserPushSubscription,
-	trySendNotification,
 } from "../../lib/database_utils";
-import { Subscription } from "../../lib/notifications";
-import { configureWebPush } from "../../lib/backend_utils";
 
 /**
  * Removes all push subscriptions for the given user.

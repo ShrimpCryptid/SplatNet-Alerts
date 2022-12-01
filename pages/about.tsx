@@ -6,7 +6,7 @@ export default function About({}: DefaultPageProps) {
   return (
     <div style={{width: "calc(90vmin - 30px)", justifySelf: "center", margin: "0 auto"}}>
       <br/>
-      <p>Splatnet Shop Alerts (SSA for short!) is an unofficial, fan-made 
+      <p>SplatNet Alerts is an unofficial, fan-made 
         web service that lets you set up notifications for gear items in the
         Splatnet app.
         <br/><br/>It uses push notifications to send notifications directly to your

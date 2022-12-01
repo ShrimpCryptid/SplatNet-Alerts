@@ -150,6 +150,12 @@ export default function Home({
 		if (newState) {
 			// Turn ON notifications
       try {
+        // Stop if user doesn't have an account yet.
+        if (userCode === null || userCode === undefined) {
+          toast("Make a filter first to enable notifications!");
+          return;
+        }
+
         if (Notification.permission !== "granted") {
           await requestNotificationPermission();
         }

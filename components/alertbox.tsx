@@ -120,3 +120,55 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 		</LabeledAlertbox>
 	);
 }
+
+type NotificationAlertboxProps = {
+  onClickCancel: () => void,
+  onClickSignUp: () => void,
+  loading: boolean
+}
+
+export function NotificationAlertbox(props: NotificationAlertboxProps) {
+  const [cancelClicked, setCancelClicked] = useState(false);
+
+  return (
+    <LabeledAlertbox header="Enable Notifications">
+      <p>
+        SplatNet Alerts needs notifications to be enabled in order to work
+        properly! When enabled, a push notification will be sent to this device
+        whenever matching gear appears in the SplatNet shop.
+      </p>
+      <p>
+        Notifications can be switched on or off again at any time, and will
+        never be used for advertising or spam.
+      </p>
+      <p>
+        <b>When prompted, set notifications to 'Forever' or else you may stop
+          getting notified!</b>
+      </p>
+      <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+        <LoadingButton
+          onClick={() => {props.onClickCancel(); setCancelClicked(true);}}
+          disabled={props.loading}
+        >
+					<span className="material-symbols-rounded md-24 md-light"
+            style={{lineHeight: "100%"}}
+          >
+            block
+          </span> No Thanks
+        </LoadingButton>
+
+        <LoadingButton
+          onClick={props.onClickSignUp}
+          loading={props.loading}
+          disabled={cancelClicked}
+        >
+					<span className="material-symbols-rounded md-24 md-light"
+            style={{lineHeight: "100%"}}
+          >
+            notifications
+          </span> Sign Me Up!
+        </LoadingButton>
+      </div>
+    </LabeledAlertbox>
+  )
+}

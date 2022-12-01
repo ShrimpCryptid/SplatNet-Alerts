@@ -28,7 +28,7 @@ import {
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { fetchWithAttempts, isValidNickname, isValidUserCode, printStandardErrorMessage, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
-import { WelcomeAlertbox } from "../components/alertbox";
+import LabeledAlertbox, { NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
 
 enum NEW_USER_FLOW {
@@ -144,7 +144,14 @@ export default function Home({
     });
   })
 
-  // Turn on/off notifications
+  /** 
+   * Toggles notification state on/off, logging the subscriber information with
+   * the backend.
+   * 
+   * Returns true if the operation was completed successfully. Returns false if
+   * an explicit error was encountered. Returns null if the operation was
+   * cancelled by the user but could be reattempted.
+   */
 	const toggleNotifications = async (newState: boolean) => {
     setNotificationsLoading(true);
 		if (newState) {
@@ -153,7 +160,7 @@ export default function Home({
         // Stop if user doesn't have an account yet.
         if (userCode === null || userCode === undefined) {
           toast("Make a filter first to enable notifications!");
-          return;
+          return false;
         }
 
         if (Notification.permission !== "granted") {
@@ -161,11 +168,11 @@ export default function Home({
         }
         if (Notification.permission === "default") {
           // User closed notification prompt without selecting an option
-          return;
+          return null;
         } else if (Notification.permission !== "granted") {
           // User denied notifications
           toast.error("Notifications have been voluntarily disabled. Check the webpage settings in your browser to reenable them.");
-          return;
+          return false;
         }
         // Start a local service worker
         await registerServiceWorker();
@@ -192,12 +199,15 @@ export default function Home({
           if (window) {
             window.localStorage.setItem(FE_LOCAL_SUBSCRIPTION_INFO, subscriptionString);
           }
+          return true;
         } else {
           printStandardErrorMessage(result);
+          return false;
         }
       } catch (e) {
         console.log(e);
         toast.error(FE_UNKNOWN_MSG);
+        return false;
       } finally {
         // Add a slight delay so users know that something is happening
         sleep(500).then(() => setNotificationsLoading(false));
@@ -226,6 +236,7 @@ export default function Home({
 			toast("Notifications have been disabled for this device.");
 			setNotificationsToggle(false);
       setNotificationsLoading(false);
+      return true;
     }
 	};
 
@@ -258,6 +269,7 @@ export default function Home({
     // Advance to the first login prompt
     if (isUserNew && visiblePrompt === NEW_USER_FLOW.NONE) {
       setVisiblePrompt(NEW_USER_FLOW.NICKNAME_PROMPT);
+      setIsUserNew(false);
     }
     // Advance to the notification prompt once a nickname is set
     if (visiblePrompt === NEW_USER_FLOW.NICKNAME_PROMPT && userNickname && isValidNickname(userNickname)) {
@@ -313,6 +325,24 @@ export default function Home({
           loading={awaitingUpdateNickname}
         /> : <></>
       }
+
+      {visiblePrompt === NEW_USER_FLOW.NOTIFICATION_PROMPT ?
+      <NotificationAlertbox
+        onClickCancel={() => {
+          setVisiblePrompt(NEW_USER_FLOW.NONE);
+          toast("Notifications can be enabled at any time from the Settings pane.");
+        }}
+        onClickSignUp={() => {
+          toggleNotifications(true).then((result) => {
+            if (result === true) {
+              // Succeeded, close dialog
+              setVisiblePrompt(NEW_USER_FLOW.NONE);
+            }
+          })
+        }}
+        loading={notificationsLoading}
+      />
+      : <></>}
 
       
 

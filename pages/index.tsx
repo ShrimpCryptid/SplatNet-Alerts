@@ -352,6 +352,7 @@ export default function Home({
 					flexDirection: "row",
 					alignItems: "center",
 					justifyContent: "space-between",
+          margin: "10px 0"
 				}}
 			>
 				<h2>Your Filters</h2>
@@ -397,6 +398,7 @@ export default function Home({
 				New Filter
 			</LoadingButton>
 
+      <br/>
 			<h3>Get notified about gear from the SplatNet 3 app!</h3>
 			<p>
 				Splatnet Alerts lets you sign up for notifications about new gear items.
@@ -408,7 +410,8 @@ export default function Home({
 				Splatnet Alerts is maintained by @ShrimpCryptid. You can contribute
 				directly to the project on GitHub!
 			</p>
-
+      
+      <br/>
 			<h2 style={{marginBottom: "0"}}>Settings</h2>
 			<h3 style={{marginBottom: "0"}}>
         Notifications: {notificationsToggle ? "ON" : "OFF"} 
@@ -420,10 +423,11 @@ export default function Home({
         loading={notificationsLoading}
         disabled={false  /** TODO: Check if push is supported by browser */}
       />
-			<p>
+			<p><i><br/>
 				SSA sends push notifications via your browser. You can turn off
 				notifications at any time.
-			</p>
+			</i></p>
+      <br/>
 			<h3 style={{marginBottom: "0"}}>User ID</h3>
 			<p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!</p>
 			<p>
@@ -435,11 +439,18 @@ export default function Home({
 			</p>
       <div style={{display: "flex", flexDirection: "row", gap: "10px"}}>
         <textarea value={userCode ? userCode : ""} readOnly={true} />
-        <LoadingButton buttonStyle={ButtonStyle.ICON}>
+        <LoadingButton buttonStyle={ButtonStyle.ICON}
+          onClick={() => {
+            navigator.clipboard.writeText(userCode ? userCode : "");
+            toast("Copied to clipboard!");
+          }}
+          disabled={!userCode || userCode === ""}
+          >
           <span className="material-symbols-rounded">content_copy</span>
         </LoadingButton>
       </div>
-
+      
+      <br/>
 			<h3 style={{marginBottom: "0"}}>Change User</h3>
 			<p style={{marginTop: "0"}}>
 				Paste in your user ID to sync your notification settings across devices.

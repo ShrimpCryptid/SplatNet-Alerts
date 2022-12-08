@@ -6,6 +6,7 @@ export default function About({}: DefaultPageProps) {
   return (
     <div style={{width: "calc(90vmin - 30px)", justifySelf: "center", margin: "0 auto"}}>
       <br/>
+      <p><b><Link href="/">🠔 Back to Home</Link></b></p>
       <p>SplatNet Alerts is an unofficial, fan-made 
         web service that lets you set up notifications for gear items in the
         Splatnet app.
@@ -13,13 +14,15 @@ export default function About({}: DefaultPageProps) {
         device whenever new items arrive in the shop!
       </p>
 
+      <br/>
       <h2>Acknowledgements</h2>
       <p>Gear images and icons were sourced from <Link href="https://splatoonwiki.org/">Inkipedia</Link>, the Splatoon wiki.
       Gear rotation data is fetched from the <Link href="https://splatoon3.ink/">Splatoon3.ink API</Link>, built by Matt Isenhower.</p>
       <p>Splatoon and the SplatNet app belong to Nintendo.</p>
       <p>Special thanks to the <Link href="https://discord.com/invite/4D82rFkXRv">Nintendo APIs/nxapi Discord server</Link> for their help and advice!</p>
 
-      <h2>FAQ</h2>
+      <br/>
+      <h2>Frequently Asked Questions (FAQ)</h2>
 
       <h3>What data does this website store?</h3>
       <p>This website assigns you a user ID when you make your first filter, so no passwords or logins are collected.
@@ -64,7 +67,7 @@ export default function About({}: DefaultPageProps) {
       <p>You can contact me via Twitter at @ShrimpCryptid!</p>
 
       <br/>
-      <p><b><Link href="/">Back to Home</Link></b></p>
+      <p><b><Link href="/">🠔 Back to Home</Link></b></p>
     </div>
   )
 }

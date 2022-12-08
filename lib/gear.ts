@@ -2,6 +2,8 @@
  * Data class for gear items
  */
 
+import { GEAR_TYPES } from "../constants";
+
 export class Gear {
 	id: string;
 	price: number;
@@ -51,7 +53,19 @@ export class Gear {
 		return newGear;
 	}
 
+  /** Sorts gear in ascending order of expiration. Ties are broken by gear type,
+   * then gear name.
+   */
 	static expirationComparator = (a: Gear, b: Gear) => {
-		return a.expiration - b.expiration;
+    let ret = a.expiration - b.expiration;
+    if (ret === 0) {
+      // Reversed because earlier indexes (headgear) should come before later
+      // ones (clothing/shoes)
+      ret = GEAR_TYPES.indexOf(b.type) - GEAR_TYPES.indexOf(a.type);
+    }
+    if (ret === 0) {
+      ret = a.name.localeCompare(b.name);
+    }
+		return ret;
 	};
 }

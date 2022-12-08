@@ -20,6 +20,8 @@ import { configureWebPush } from "../../lib/backend_utils";
 import { getEnvWithDefault } from "../../lib/shared_utils";
 import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
 
+const MILLISECONDS_PER_SECOND = 1000.0;
+
 function getUserGear(
 	gearToUsers: Map<Gear, Set<number>>,
 	userID: number
@@ -33,10 +35,27 @@ function getUserGear(
 	return gearList;
 }
 
+/**
+ * Generates an options object for the web push notifications. Currently just
+ * generates the TTL (time to life) parameter so that the notification expires
+ * if any gear items also expire.
+ */
+function generateNotificationOptions(gearList: Gear[]): any {
+  // Calculate timeout-- should be from now until gear's expiration date.
+  let lastGear = gearList.sort(Gear.expirationComparator)[gearList.length - 1];
+  let timeDiffMilliseconds = lastGear.expiration - Date.now();
+  let timeDiffSeconds = timeDiffMilliseconds / MILLISECONDS_PER_SECOND;
+
+  return {
+    TTL: timeDiffSeconds  // Time (in seconds) that notification is retained
+  }
+}
+
 function generateNotificationPayload(gearList: Gear[]): any {
 	let title,
 		body = "",
 		image = "";
+  
 	if (gearList.length == 1) {
 		title = "A new item you were looking for is available on SplatNet.";
 		body = gearList[0].name + "(" + gearList[0].ability + ")";
@@ -139,8 +158,8 @@ export default async function handler(
 			// Set up the notification *this* user should receive.
 			let userGear = getUserGear(gearToUserIDs, userID);
 			let notification = JSON.stringify(generateNotificationPayload(userGear));
+      let options = generateNotificationOptions(userGear);
 			let latestExpiration = userGear[userGear.length - 1].expiration;
-			``;
 
 			// Check that we haven't already notified this user
 			if (
@@ -163,7 +182,7 @@ export default async function handler(
 			for (let subscription of userSubscriptions) {
 				devicesNotified++;
 				notificationPromises.push(
-					trySendNotification(client, subscription, notification).then(
+					trySendNotification(client, subscription, notification, options).then(
 						(result) => {
 							if (!result) {
 								devicesFailed++;

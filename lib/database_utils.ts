@@ -926,13 +926,15 @@ export async function getUserIDsToBeNotified(
 export async function trySendNotification(
 	client: Pool | PoolClient,
 	subscription: Subscription,
-	notification: string
+	notification: string,
+  options = {}
 ): Promise<webpush.SendResult | undefined> {
   // TODO: Make multiple attempts at notifying users?
 	try {
 		let result = await webpush.sendNotification(
 			subscription,
-			notification
+			notification,
+      options
 			// {timeout: 5}
 		);
 		return result;

@@ -1,8 +1,8 @@
 name: Fetch gear
 on:
   schedule:
-    - cron: '0,10,20,30,40,50 * * * *'
-    # run every 10 minutes
+    - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * *'
+    # run every 5 minutes
 jobs:
   fetch_gear:
     runs-on: ubuntu-latest

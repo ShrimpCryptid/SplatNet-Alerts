@@ -11,7 +11,7 @@ import { typeIcons, GEAR_TYPE_ANY_ICON } from "../public/icons/gear-type";
 
 import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
-import { GEAR_NAME_TO_IMAGE } from "../constants";
+import { GEAR_NAME_TO_IMAGE } from "../lib/geardata";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 
 const ABILITY_ICON_WIDTH = 49;

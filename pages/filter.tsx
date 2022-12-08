@@ -20,10 +20,10 @@ import {
 	API_USER_CODE,
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
-	GEAR_NAME_TO_DATA,
 	FE_UNKNOWN_MSG,
 } from "../constants";
 import Filter from "../lib/filter";
+import { GEAR_NAME_TO_DATA } from "../lib/geardata";
 import { sleep } from "../lib/shared_utils";
 
 import { abilityIcons } from "../public/icons/abilities";

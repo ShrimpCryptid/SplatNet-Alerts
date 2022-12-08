@@ -1,12 +1,11 @@
 import {
-	GEAR_NAMES,
 	GEAR_BRANDS,
 	GEAR_TYPES,
 	GEAR_RARITY_MIN,
 	GEAR_RARITY_MAX,
 	GEAR_ABILITIES,
-	GEAR_NAME_TO_DATA,
 } from "../constants";
+import { GEAR_NAMES, GEAR_NAME_TO_DATA } from "./geardata";
 import { IllegalArgumentError } from "./shared_utils";
 
 /**

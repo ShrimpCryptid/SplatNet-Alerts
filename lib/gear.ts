@@ -1,8 +1,23 @@
 /**
- * Data class for gear items
+ * Data class for gear items.
  */
 
-import { GEAR_TYPES } from "../constants";
+import { GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES } from "../constants";
+
+const WIKI_IMAGE_PREFIX = "https://cdn.wikimg.net/en/splatoonwiki/images/thumb/";
+const PREFIX_PLACEHOLDER = "{@}";
+
+/** A compacted form of gear data, useful for file storage. Note that this
+ * WILL break if changes are made to {@link GEAR_ABILITIES},
+ * {@link GEAR_BRANDS}, or {@link GEAR_TYPES}.
+*/
+export type CompactGearData = {
+  t: number;
+  a: number;
+  b: number;
+  r: number;
+  i: string;
+};
 
 export class Gear {
 	id: string;
@@ -68,4 +83,43 @@ export class Gear {
     }
 		return ret;
 	};
+
+  /**
+   * Creates a new object with shortened keys and type/brand/ability values,
+   * useful for reducing file sizes. Removes the name, price, expiration, and id
+   * fields. Also reduces size of image links from the Splatoon wiki.
+   * Compacted gear data objects can be deserialized with
+   * {@link deserializeCompact()} back into Gear objects.
+   */
+  static serializeCompact(gear: Gear): CompactGearData {
+    let newImageURL = gear.image.replace(WIKI_IMAGE_PREFIX, PREFIX_PLACEHOLDER);
+    return {
+      t: GEAR_TYPES.indexOf(gear.type),
+      a: GEAR_ABILITIES.indexOf(gear.ability),
+      b: GEAR_BRANDS.indexOf(gear.brand),
+      r: gear.rarity,
+      i: newImageURL
+    }
+  }
+
+  /** Deserializes compacted gear data (as given by {@link serializeCompact()} 
+   * back into a Gear object.
+   */
+  static deserializeCompact(name: string, data: CompactGearData): Gear {
+    try {
+      return new Gear(
+        "",
+        0,
+        GEAR_BRANDS[data.b],
+        GEAR_TYPES[data.t],
+        name,
+        GEAR_ABILITIES[data.a],
+        data.r,
+        0,
+        data["i"]?.replace(PREFIX_PLACEHOLDER, WIKI_IMAGE_PREFIX));
+    } catch (e) {
+      console.log(data);
+      throw (e);
+    }
+  }
 }

@@ -1,7 +1,13 @@
 import * as cheerio from "cheerio";
 import fs from "fs";
-import { Gear } from "./gear";
-import { IGNORED_GEAR_ABILITIES, IGNORED_GEAR_BRANDS } from "../constants";
+import { CompactGearData, Gear } from "./gear";
+import {
+	GEAR_ABILITIES,
+	GEAR_BRANDS,
+	GEAR_TYPES,
+	IGNORED_GEAR_ABILITIES,
+	IGNORED_GEAR_BRANDS,
+} from "../constants";
 import { fetchWithBotHeader } from "./backend_utils";
 import cliProgress from "cli-progress";
 import colors from "ansi-colors";
@@ -51,6 +57,7 @@ async function parseRowToGear(
 	// Parse column data
 	name = $(children[1]).text().trim();
 	brand = $(children[2]).text().trim();
+	// TODO: Fix incorrect prices in geardata?
 	cost = $(children[3]).text().trim(); // note, can be amiibo and not num
 	ability = $(children[4]).text().trim();
 
@@ -196,10 +203,11 @@ async function updateLocalGearJSON(filepath: string) {
 	let startTime = Date.now();
 	let gearData = await getAllGearData();
 	// format gear data as a dictionary
-	let gearDict: { [key: string]: Gear } = {};
+	let gearDict: { [key: string]: CompactGearData } = {};
 	for (let gear of gearData) {
-		gearDict[gear.name] = gear;
+		gearDict[gear.name] = Gear.serializeCompact(gear);
 	}
+	// TODO: Save image data separately so it doesn't take up extra bandwidth?
 	let jsonString = JSON.stringify(gearDict);
 
 	try {
@@ -270,5 +278,6 @@ async function updateLocalTitlesJSON(filepath: string) {
 // =================
 // PROGRAM OPERATION
 // =================
-updateLocalGearJSON("./public/data/geardata.json");
-updateLocalTitlesJSON("./public/data/titledata.json");
+updateLocalGearJSON("./public/data/geardata.json").then(() => {
+	updateLocalTitlesJSON("./public/data/titledata.json");
+});

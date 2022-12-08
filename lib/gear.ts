@@ -106,20 +106,15 @@ export class Gear {
    * back into a Gear object.
    */
   static deserializeCompact(name: string, data: CompactGearData): Gear {
-    try {
-      return new Gear(
-        "",
-        0,
-        GEAR_BRANDS[data.b],
-        GEAR_TYPES[data.t],
-        name,
-        GEAR_ABILITIES[data.a],
-        data.r,
-        0,
-        data["i"]?.replace(PREFIX_PLACEHOLDER, WIKI_IMAGE_PREFIX));
-    } catch (e) {
-      console.log(data);
-      throw (e);
-    }
+    return new Gear(
+      "",
+      0,
+      GEAR_BRANDS[data.b],
+      GEAR_TYPES[data.t],
+      name,
+      GEAR_ABILITIES[data.a],
+      data.r,
+      0,
+      data["i"]?.replace(PREFIX_PLACEHOLDER, WIKI_IMAGE_PREFIX));
   }
 }

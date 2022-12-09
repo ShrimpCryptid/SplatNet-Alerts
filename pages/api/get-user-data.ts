@@ -31,8 +31,6 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	// Set up cache
-	res.setHeader("Cache-Control", "max-age=10");
 
 	// Validate input
 	if (

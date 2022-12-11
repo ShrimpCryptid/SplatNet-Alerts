@@ -44,7 +44,7 @@ function generateNotificationOptions(gearList: Gear[]): any {
   // Calculate timeout-- should be from now until gear's expiration date.
   let lastGear = gearList.sort(Gear.expirationComparator)[gearList.length - 1];
   let timeDiffMilliseconds = lastGear.expiration - Date.now();
-  let timeDiffSeconds = timeDiffMilliseconds / MILLISECONDS_PER_SECOND;
+  let timeDiffSeconds = Math.floor(timeDiffMilliseconds / MILLISECONDS_PER_SECOND);
 
   return {
     TTL: timeDiffSeconds  // Time (in seconds) that notification is retained
@@ -98,10 +98,7 @@ export default async function handler(
 		let providedKey = req.headers.authorization;
 		if (!secretKey) {
 			// Secret key is undefined-- assume that this is an error.
-			console.error("Secret key 'ACTION_SECRET' is not defined.");
-			return res.status(500).end();
-		} else if (secretKey === "") {
-			console.log("Secret key is empty-- no checks will be run.");
+			console.warn("Secret key 'ACTION_SECRET' is not defined. This is okay ONLY in testing environments.");
 		} else if (secretKey === providedKey) {
 			console.log("Secret key matches. Request authenticated.");
 		} else {

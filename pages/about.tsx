@@ -64,7 +64,7 @@ export default function About({}: DefaultPageProps) {
       </p>
 
       <h3>How can I reach you?</h3>
-      <p>You can contact me via Twitter at @ShrimpCryptid!</p>
+      <p>You can contact me via Twitter at <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>!</p>
 
       <br/>
       <p><b><Link href="/">🠔 Back to Home</Link></b></p>

@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 import { getRandomTitle, sanitizeNickname } from "../lib/shared_utils";
 import styles from "./alertbox.module.css";
 import LoadingButton, { ButtonStyle } from "./loading-button";
+import notificationImage from "../public/images/notifications-forever.jpg";
+import Image from "next/image";
 
 export function Alertbox(props: React.PropsWithChildren) {
 	return (
@@ -131,30 +133,41 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
   const [cancelClicked, setCancelClicked] = useState(false);
 
   return (
-    <LabeledAlertbox header="Enable Notifications">
+    <LabeledAlertbox header="Enable Notifications!">
       <p>
-        SplatNet Alerts needs notifications to be enabled in order to work
+        SplatNet Alerts needs notifications enabled to work
         properly! When enabled, a push notification will be sent to this device
         whenever matching gear appears in the SplatNet shop.
       </p>
       <p>
-        Notifications can be switched on or off again at any time, and will
+        Notifications can be switched on/off at any time, and will
         never be used for advertising or spam.
       </p>
-      <p>
-        <b>When prompted, set notifications to 'Forever' or else you may stop
-          getting notified!</b>
-      </p>
+      <div className="gap" style={{alignContent: "center"}}>
+        <div style={{width: "50%", position: "relative", margin: "0 auto"}}>
+          <Image src={notificationImage} layout="responsive"/>
+        </div>
+        <div className="hdiv gap" style={{padding: "5px", alignItems: "center", color: "var(--highlight)"}}>
+          <span className="material-symbols-rounded md-36">info</span>
+          <p style={{margin: "0", color: "var(--highlight)"}}>
+            <b>When prompted, set notifications to 'Forever' or else you may stop
+              getting notified!</b>
+          </p>
+        </div>
+      </div>
+      <br/>
       <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
         <LoadingButton
           onClick={() => {props.onClickCancel(); setCancelClicked(true);}}
           disabled={props.loading}
         >
-					<span className="material-symbols-rounded md-24 md-light"
-            style={{lineHeight: "100%"}}
-          >
-            block
-          </span> No Thanks
+          <div className="hdiv gap">
+            <span className="material-symbols-rounded md-24 md-light"
+              style={{lineHeight: "100%"}}
+              >
+              block
+            </span> No Thanks
+          </div>
         </LoadingButton>
 
         <LoadingButton
@@ -162,11 +175,13 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
           loading={props.loading}
           disabled={cancelClicked}
         >
-					<span className="material-symbols-rounded md-24 md-light"
-            style={{lineHeight: "100%"}}
-          >
-            notifications
-          </span> Sign Me Up!
+          <div className="hdiv gap">
+            <span className="material-symbols-rounded md-24 md-light"
+              style={{lineHeight: "100%"}}
+              >
+              notifications
+            </span> Sign Me Up!
+          </div>
         </LoadingButton>
       </div>
     </LabeledAlertbox>

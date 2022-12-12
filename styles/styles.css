@@ -4,6 +4,8 @@
   --background: black;
   --ability-background: black;
   --selected-color: rgb(220, 255, 65);
+
+  --highlight: var(--selected-color);
   
   --button-background: rgb(55, 35, 143);
   --button-hover: rgb(88, 72, 158);
@@ -146,11 +148,14 @@ input:active {
 
 /** Google Material Symbols: https://fonts.google.com/icons */
 .material-symbols-rounded {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
   font-size: 24px;  /* Preferred icon size */
-  display: inline-block;
   line-height: 1;
   text-transform: none;
   letter-spacing: normal;
@@ -164,6 +169,15 @@ input:active {
   'opsz' 48;
 }
 
+.hdiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.gap {
+  gap: 5px;
+}
+
 textarea {
   border-radius: 10px;
   resize: none;
@@ -172,7 +186,8 @@ textarea {
   font-size: 16px;
   padding-bottom: 0;
   padding: 5px;
-  min-width: 300px;
+  min-width: 200px;
+  height: 30px;
   width: 20vw;
   vertical-align: middle;
   overflow: hidden;

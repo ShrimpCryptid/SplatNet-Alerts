@@ -1,0 +1,30 @@
+.mainIcon {
+  width: 80px;
+  margin: 0 5px;
+  position: relative;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.headerTextContainer {
+  
+}
+
+.headerMainText {
+  margin: 0;
+  cursor: pointer;
+  line-height: 100%;
+  font-size: 24px;
+}
+
+.headerSubText {
+  padding-top: 10px;
+  margin-bottom: 0;
+}

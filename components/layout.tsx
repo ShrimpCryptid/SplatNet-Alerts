@@ -1,7 +1,10 @@
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import mainLogo from "../public/images/main_logo.svg";
+import styles from "./layout.module.css";
 
 type LayoutProps = {
 	children: JSX.Element;
@@ -12,6 +15,11 @@ export default function Layout({ children }: LayoutProps) {
 	return (
 		<>
 			<Head>
+        <title>SplatNet Alerts</title>
+        <meta name="description" content="A notification service for Splatoon gear!"/>
+        <meta name="keywords" content="Splatoon 3, SplatNet, gear, notification, alert, clothing"/>
+        <meta name="author" content="@ShrimpCryptid"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 				<link
 					rel="stylesheet"
 					href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -21,27 +29,24 @@ export default function Layout({ children }: LayoutProps) {
           href="https://fonts.googleapis.com/css2?family=Inter"
         />
 			</Head>
-      <div style={{display: "flex", flexDirection: "row", justifyContent:"space-between", padding: "10px"}}>
-        <div>
-          <Link href="/">
-            <h1 style={{margin: "0", cursor: "pointer"}}>SplatNet Alerts</h1>
-          </Link>
-          <p style={{marginTop: "0"}}>A Splatoon gear alerts service by <a href="https://twitter.com/ShrimpCryptid" target="_blank" rel="noopener noreferrer">@ShrimpCryptid</a>!</p>
+      <div className={styles.header}>
+        <div className="hdiv">
+          <div className={styles.mainIcon}>
+            <Image src={mainLogo} layout={"fill"}/>
+          </div>
+          <div>
+            <Link href="/">
+              <h1 className={styles.headerMainText}>SplatNet Alerts</h1>
+            </Link>
+            <p className={styles.headerSubText}>A Splatoon gear alerts service by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>!</p>
+          </div>
         </div>
-        <div style={{fontSize: "48px", gap: "10px"}}>
-          <Link href="/about">
-            <span style={{cursor: "pointer"}} className="material-symbols-rounded md-36">help</span>
-          </Link>
+        <div className="hdiv" style={{gap: "15px", marginLeft: "auto"}}>
+          <p><Link href="/about">Source</Link></p>
+          <p><Link href="/about">About</Link></p>
         </div>
       </div>
-      <hr
-        style={{
-          color: "white",
-          backgroundColor: "white",
-          height: 0,
-          borderStyle: "solid"
-        }}
-        />
+
 			<div className="container">
 				{children}
 				<ToastContainer
@@ -52,7 +57,7 @@ export default function Layout({ children }: LayoutProps) {
 			</div>
       <br/>
 
-      <div style={{display: "flex", flexDirection: "row", justifyContent:"center", padding: "5px"}}>
+      <div className="hdiv" style={{justifyContent:"center", padding: "5px"}}>
 
         <p
         style={{

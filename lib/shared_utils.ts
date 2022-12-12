@@ -65,15 +65,20 @@ export function getEnvWithDefault<T>(key: string, defaultValue: T): string | T {
 	}
 }
 
-/** Checks whether the given user code is valid. */
+/** Checks whether the given user code is valid. User codes must be in
+ * lowercase with hex characters (0-9, a-f), in the format xxxx-xxxx-xxxx.
+ */
 export function isValidUserCode(userCode: string): boolean {
-	const allowedCharsPattern = new RegExp(/^[a-z0-9-]*$/);
-	return allowedCharsPattern.test(userCode) && validate(userCode);
+	const allowedCharsPattern = new RegExp(/^[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}$/);
+	return allowedCharsPattern.test(userCode);
 }
 
 /** Generates a random user code. */
 export function generateRandomUserCode(): string {
-	return uuidv4();
+	let uuid = uuidv4();
+  // Trim the uuid to a set length and add an additional dash character.
+  let trimmedUUID = uuid.substring(0, 4) + "-" + uuid.substring(4, 13);
+  return trimmedUUID;
 }
 
 /** Checks whether a given nickname is valid. */

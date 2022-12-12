@@ -151,8 +151,12 @@ export default function App({ Component, pageProps }: AppProps) {
 		if (userCode === undefined) {
 			if (window && window.localStorage.getItem(FE_LOCAL_USER_CODE) !== null) {
 				let storedUserCode = window.localStorage.getItem(FE_LOCAL_USER_CODE);
-				// Update internally stored usercode
-				setUserCode(storedUserCode);
+				// Update internally stored usercode-- ignore if invalid.
+        if (storedUserCode && isValidUserCode(storedUserCode)) {
+          setUserCode(storedUserCode);
+        } else {
+          setUserCode(null);
+        }
 			} else {
 				setUserCode(null);
 			}

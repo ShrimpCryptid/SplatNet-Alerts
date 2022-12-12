@@ -137,11 +137,13 @@ export default function Home({
   // Notification initial state is defined by whether we local subscription info
   // stored, AND there's a service worker currently running.
   useEffect(() => {
-    navigator.serviceWorker.getRegistration().then((registration) => {
-      setNotificationsToggle(
-        window && window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO) !== null
-        && registration !== undefined && Notification.permission === "granted");
-    });
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.getRegistration().then((registration) => {
+        setNotificationsToggle(
+          window && window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO) !== null
+          && registration !== undefined && Notification.permission === "granted");
+      });
+    }
   })
 
   /** 
@@ -307,7 +309,7 @@ export default function Home({
 	let loadingText = "Loading...";
 	if (userCode === null) {
 		// No user filters could be loaded because the user does not exist yet.
-		loadingText = "There's nothing here yet. Make a new filter to get started!";
+		loadingText = "There's nothing here yet. Make a new filter or log in to get started!";
 	} else if (userFilters && userFilters.length === 0) {
 		// User was loaded but has no filters.
 		loadingText = "There's nothing here yet.";
@@ -407,8 +409,8 @@ export default function Home({
 				within 30 minutes of new items arriving in the shop!
 				<br />
 				<br />
-				Splatnet Alerts is maintained by @ShrimpCryptid. You can contribute
-				directly to the project on GitHub!
+				Splatnet Alerts is maintained by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>. You can contribute
+				directly to the project on <Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">GitHub</Link>!
 			</p>
       
       <br/>

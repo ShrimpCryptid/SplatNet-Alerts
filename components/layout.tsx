@@ -62,7 +62,7 @@ export default function Layout({ children }: LayoutProps) {
         <p
         style={{
           opacity: "70%",
-          fontSize: "14px"
+          fontSize: "12px"
         }}
         >
           This website is not affiliated with Nintendo. Logos and artwork are property of their respective owners.

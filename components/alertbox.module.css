@@ -38,3 +38,14 @@
   justify-content: center;
   gap: 20px;
 }
+
+/** TODO: Align to right edge? */
+.twoButtonContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap-reverse;
+  gap: 10px;
+  align-items: flex-end;
+}

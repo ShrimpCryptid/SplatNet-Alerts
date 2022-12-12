@@ -34,7 +34,7 @@ export default function LabeledAlertbox(props: LabeledAlertboxProps) {
 			) : (
 				<></>
 			)}
-			<h1 style={{ margin: "0 auto" }}>{props.header}</h1>
+			<h2 style={{marginBottom: "10px"}}>{props.header}</h2>
 			{props.children}
 			<div className={styles.buttonDiv}>
 				{props.secondaryButton ? (
@@ -144,7 +144,7 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
         never be used for advertising or spam.
       </p>
       <div className="gap" style={{alignContent: "center"}}>
-        <div style={{width: "50%", position: "relative", margin: "0 auto"}}>
+        <div style={{width: "calc(200px + 10vmin)", position: "relative", margin: "0 auto"}}>
           <Image src={notificationImage} layout="responsive"/>
         </div>
         <div className="hdiv gap" style={{padding: "5px", alignItems: "center", color: "var(--highlight)"}}>
@@ -156,11 +156,12 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
         </div>
       </div>
       <br/>
-      <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+      <div className={styles.twoButtonContainer}>
         <LoadingButton
           onClick={() => {props.onClickCancel(); setCancelClicked(true);}}
           disabled={props.loading}
         >
+          {/**TODO: Make "No Thanks" button have secondary colors */}
           <div className="hdiv gap">
             <span className="material-symbols-rounded md-24 md-light"
               style={{lineHeight: "100%"}}

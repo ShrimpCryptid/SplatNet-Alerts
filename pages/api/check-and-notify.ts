@@ -56,7 +56,6 @@ async function getUsersToNotify(client: Pool, newGear: Gear[]) {
     }));
   }
   await Promise.all(promises);
-  console.log(gearToUserMap);
   return gearToUserMap;
 }
 
@@ -131,7 +130,6 @@ export default async function handler(
 			return res.status(401).end();
 		}
 
-    console.log("step 0");
 		// 1. Check for new/expired gear items.
 		let cachedRawGearData = await fetchCachedRawGearData(client);
 		let cachedGear: Gear[];

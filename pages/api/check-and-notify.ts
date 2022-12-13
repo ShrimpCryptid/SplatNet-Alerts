@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
-	deletePushSubscription,
 	getDBClient,
 	getLastNotifiedExpiration,
-	getUserIDsToBeNotified,
+	getUsersToBeNotified,
 	getUserSubscriptions,
 	trySendNotification,
 	updateLastNotifiedExpiration,
@@ -17,22 +16,48 @@ import {
 } from "../../lib/gear_loader";
 import { Gear } from "../../lib/gear";
 import { configureWebPush } from "../../lib/backend_utils";
-import { getEnvWithDefault } from "../../lib/shared_utils";
+import { getEnvWithDefault, mapGetWithDefault } from "../../lib/shared_utils";
 import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
+import { FE_USER_CODE_URL } from "../../constants";
+import { Pool } from "pg";
 
 const MILLISECONDS_PER_SECOND = 1000.0;
+const BASE_SPLATNET_URL = "https://s.nintendo.com/av5ja-lp1/znca/game/4834290508791808?p=gesotown/";
+const BASE_LOGIN_URL = "https://splatnet-alerts.netlify.com/login?";
 
 function getUserGear(
-	gearToUsers: Map<Gear, Set<number>>,
+	gearToUsers: Map<Gear, Map<number, string>>,
 	userID: number
 ): Gear[] {
 	let gearList = [];
-	for (let [gear, userSet] of gearToUsers.entries()) {
-		if (userSet.has(userID)) {
+	for (let [gear, userMap] of gearToUsers.entries()) {
+		if (userMap.has(userID)) {
 			gearList.push(gear);
 		}
 	}
 	return gearList;
+}
+
+function aggregateUsers(gearToUserMap: Map<Gear, Map<number, string>>) {
+  let allUserMap = new Map<number, string>();
+  for (let userMap of gearToUserMap.values()) {
+    allUserMap = new Map([...allUserMap, ...userMap]);
+  }
+  return allUserMap;
+}
+
+async function getUsersToNotify(client: Pool, newGear: Gear[]) {
+  let promises: Promise<any>[] = [];
+  let gearToUserMap = new Map<Gear, Map<number, string>>();
+  // Parallelize requests for user data due to network
+  for (let gear of newGear) {
+    promises.push(getUsersToBeNotified(client, gear).then((value: Map<number, string>) => {
+      gearToUserMap.set(gear, value);
+    }));
+  }
+  await Promise.all(promises);
+  console.log(gearToUserMap);
+  return gearToUserMap;
 }
 
 /**
@@ -51,7 +76,7 @@ function generateNotificationOptions(gearList: Gear[]): any {
   }
 }
 
-function generateNotificationPayload(gearList: Gear[]): any {
+function generateNotificationPayload(userCode: string, gearList: Gear[]): any {
 	let title,
 		body = "",
 		image = "";
@@ -106,6 +131,7 @@ export default async function handler(
 			return res.status(401).end();
 		}
 
+    console.log("step 0");
 		// 1. Check for new/expired gear items.
 		let cachedRawGearData = await fetchCachedRawGearData(client);
 		let cachedGear: Gear[];
@@ -131,30 +157,27 @@ export default async function handler(
 		let newGear = getNewGearItems(cachedGear, fetchedGear);
 
 		// 3. Get lists of users to notify.
-		let gearToUserIDs = new Map<Gear, Set<number>>();
-		let allUserIDs = new Set<number>();
-		for (let gear of newGear) {
-			let userIDs = await getUserIDsToBeNotified(client, gear);
-			gearToUserIDs.set(gear, userIDs);
-			allUserIDs = new Set([...allUserIDs, ...userIDs]);
-		}
-		console.log("Notifying " + allUserIDs.size + " users.");
+		let gearToUserMap = await getUsersToNotify(client, newGear);
+    let allUserMap = aggregateUsers(gearToUserMap);
+
+		console.log("Notifying " + allUserMap.size + " users.");
 
 		// 4. Configure webpush
 		configureWebPush();
 
 		// 5. Send each user notifications to their subscribed devices.
-		let startTime = Date.now();
+		// TODO: Refactor into a separate method.
+    let startTime = Date.now();
 		let numAlreadyNotified = 0;
 		let numNoSubscriber = 0;
 		let devicesNotified = 0;
 		let devicesFailed = 0;
 
 		let promises = [];
-		for (let userID of allUserIDs) {
+		for (let [userID, userCode] of allUserMap) {
 			// Set up the notification *this* user should receive.
-			let userGear = getUserGear(gearToUserIDs, userID);
-			let notification = JSON.stringify(generateNotificationPayload(userGear));
+			let userGear = getUserGear(gearToUserMap, userID);
+			let notification = JSON.stringify(generateNotificationPayload(userCode, userGear));
       let options = generateNotificationOptions(userGear);
 			let latestExpiration = userGear[userGear.length - 1].expiration;
 
@@ -207,20 +230,10 @@ export default async function handler(
 
 		// 8. Logging
 		let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;
-		console.log(
-			`Notifications done. (Finished in ${timeElapsedSeconds.toFixed(
-				2
-			)} seconds)`
-		);
-		let usersNotified = allUserIDs.size - numAlreadyNotified - numNoSubscriber;
-		console.log(
-			`Users notified: ${usersNotified} users (${numAlreadyNotified} already notified, ${numNoSubscriber} with no devices)`
-		);
-		console.log(
-			`Devices notified: ${
-				devicesNotified - devicesFailed
-			} devices (${devicesFailed} failures)`
-		);
+		console.log(`Notifications done. (Finished in ${timeElapsedSeconds.toFixed(2)} seconds)`);
+		let usersNotified = allUserMap.size - numAlreadyNotified - numNoSubscriber;
+		console.log(`Users notified: ${usersNotified} users (${numAlreadyNotified} already notified, ${numNoSubscriber} with no devices)`);
+		console.log(`Devices notified: ${devicesNotified - devicesFailed} devices (${devicesFailed} failures)`);
 
 		return res.status(200).end(); // ok
 	} catch (err) {

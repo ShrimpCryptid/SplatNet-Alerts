@@ -871,16 +871,16 @@ export async function getUserSubscriptions(
 }
 
 /**
- * Returns a set of all the user IDs with filters that match the gear item.
- * @param {*} gearData
+ * Returns all users with filters that match the gear item. Users are returned
+ * as mappings of user ID and user code.
  */
-export async function getUserIDsToBeNotified(
+export async function getUsersToBeNotified(
 	client: PoolClient | Pool,
 	gear: Gear
-): Promise<Set<number>> {
+): Promise<Map<number, string>> {
 	// Prevent SQL injection attacks.
 	// Allow only alphanumeric characters, spaces, and -, +, (, and ) chars.
-	const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()& ]*$/);
+	const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()&' ]*$/);
 	if (!allowedCharsPattern.test(gear.name)) {
 		throw new IllegalArgumentError(
 			"Gear name '" + gear.name + "' contains special characters."
@@ -890,26 +890,32 @@ export async function getUserIDsToBeNotified(
 	// wildcard selectors. Then, select all users that match any of those filters.
   // TODO: Ignore users who have already been notified via timestamp param?
 	let result = await client.query(
-		`WITH matchingFilters(${DB_FILTER_ID}) AS 
-        (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
-          WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
-          AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = $1)
-          AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
-          AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
-          AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)}))
-    SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}, matchingFilters
-      WHERE ${DB_TABLE_USERS_TO_FILTERS}.${DB_FILTER_ID} = matchingFilters.${DB_FILTER_ID};`,
+		`WITH matchingUserIDs(_${DB_USER_ID}) AS (
+      WITH matchingFilters(_${DB_FILTER_ID}) AS (
+        SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_FILTERS}
+            WHERE ${DB_GEAR_RARITY} <= ${gear.rarity}
+            AND (${DB_GEAR_NAME} = '' OR ${DB_GEAR_NAME} = $1)
+            AND (${DB_GEAR_ABILITY_WILDCARD} OR ${formatCol(gear.ability)})
+            AND (${DB_GEAR_TYPE_WILDCARD} OR ${formatCol(gear.type)})
+            AND (${DB_GEAR_BRAND_WILDCARD} OR ${formatCol(gear.brand)})
+      )
+      SELECT ${DB_USER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}, matchingFilters
+        WHERE ${DB_TABLE_USERS_TO_FILTERS}.${DB_FILTER_ID} = matchingFilters._${DB_FILTER_ID}
+    )
+    SELECT DISTINCT ON (${DB_USER_ID}) ${DB_USER_ID}, ${DB_USER_CODE} FROM ${DB_TABLE_USERS}, matchingUserIDs
+      WHERE ${DB_TABLE_USERS}.${DB_USER_ID} = matchingUserIDs._${DB_USER_ID}
+    ;`,
 		[gear.name] // passed as a parameter for safety
 	);
 
-	// Get all users, adding them to a set because there may be duplicates.
-	let userSet = new Set<number>();
+	// Return user data as a map from ID to code.
+	let userMap = new Map<number, string>();
 	if (result && result.rowCount > 0) {
 		for (let row of result.rows) {
-			userSet.add(row[DB_USER_ID]);
+			userMap.set(row[DB_USER_ID], row[DB_USER_CODE]);
 		}
 	}
-	return userSet;
+	return userMap;
 }
 
 /**

@@ -32,11 +32,11 @@ const GET_USER_DATA_DEFAULT_ATTEMPTS = 3;
  * - null if the usercode is invalid or if the backend returned any error codes
  */
 export async function getUserData(
-	userCode: string,
+	userCode: string | null,
 	printErrors = true,
 	maxAttempts = GET_USER_DATA_DEFAULT_ATTEMPTS
 ): Promise<[Filter[], string] | null> {
-	if (!isValidUserCode(userCode)) {
+	if (userCode === null || !isValidUserCode(userCode)) {
 		if (printErrors) {
 			toast.error(FE_ERROR_INVALID_USERCODE);
 		}
@@ -123,14 +123,15 @@ export type DefaultPageProps = {
    * @param forceUpdate if true, updates internal state with (null) values even
    *  if an error was encountered when retrieving user data.
    *  
-   * @returns true if user data was succesfully retrieved from the backend.
-   * Otherwise, returns false.
+   * @returns An array, where the first value is a boolean representing if the
+   * data was fetched successfully, and second an object with the
+   * new updated data values.
    */
 	updateLocalUserData: (
-		userCode: string,
+		userCode: string | null,
 		printErrors: boolean,
     forceUpdate?: boolean
-	) => Promise<boolean>;
+	) => Promise<[boolean, {nickname: string | null, filters: Filter[] | null}]>;
 };
 
 
@@ -182,24 +183,25 @@ export default function App({ Component, pageProps }: AppProps) {
    * Otherwise, returns false.
    */
 	const updateLocalUserData = async (
-		userCode: string,
+		userCode: string | null,
 		printErrors: boolean,
     forceUpdate = false,
-	): Promise<boolean> => {
+	) => {
 		let userData = await getUserData(userCode, printErrors);
 		if (userData !== null) {
 			// Successfully got state, so save values to constant props
 			const [filters, nickname] = userData;
 			setUserNickname(nickname);
 			setUserFilters(filters);
-      return true;
+      return [true, {nickname: nickname, filters: filters}];
 		} else {
       if (forceUpdate) {
         // Set local values to null.
+        console.log("die");
         setUserNickname(null);
         setUserFilters(null);
       }
-      return false;
+      return [false, {nickname: null, filters: null}];
 		}
 	};
 
@@ -211,7 +213,12 @@ export default function App({ Component, pageProps }: AppProps) {
 			if (window) {
 				window.localStorage.setItem(FE_LOCAL_USER_CODE, newUserCode);
 			}
-		} else {
+		} else if (newUserCode === null) {
+      setUserCode(null);
+      if (window) {
+        window.localStorage.removeItem(FE_LOCAL_USER_CODE);
+      }
+    }else {
 			toast.error(FE_ERROR_INVALID_USERCODE);
 		}
 	};

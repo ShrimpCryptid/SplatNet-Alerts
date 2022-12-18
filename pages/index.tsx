@@ -4,7 +4,6 @@ import Router from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import Filter from "../lib/filter";
 import FilterView from "../components/filter-view";
 import styles from "../styles/index.module.css";
 import {
@@ -13,8 +12,6 @@ import {
 	API_SEND_TEST_NOTIFICATION,
 	API_SUBSCRIPTION,
 	API_USER_CODE,
-	FE_ERROR_404_MSG,
-	FE_ERROR_500_MSG,
 	FE_ERROR_INVALID_USERCODE,
 	FE_LOCAL_SUBSCRIPTION_INFO,
 	FE_UNKNOWN_MSG,
@@ -22,7 +19,7 @@ import {
 import { DefaultPageProps } from "./_app";
 import {
 	requestNotificationPermission,
-	registerServiceWorker,
+  registerServiceWorker,
 	createNotificationSubscription,
 } from "../lib/notifications";
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
@@ -67,6 +64,8 @@ export default function Home({
 
 	let [notificationsToggle, setNotificationsToggle] = useState(false);
   let [notificationsLoading, setNotificationsLoading] = useState(false);
+
+  let [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
   
 	let [loginUserCode, setLoginUserCode] = useState("");
 
@@ -156,8 +155,7 @@ export default function Home({
    */
 	const toggleNotifications = async (newState: boolean) => {
     setNotificationsLoading(true);
-		if (newState) {
-			// Turn ON notifications
+		if (newState) {  // Turn ON notifications
       try {
         // Stop if user doesn't have an account yet.
         if (userCode === null || userCode === undefined) {
@@ -165,6 +163,8 @@ export default function Home({
           return false;
         }
 
+        // Request permission for notifications, and handle cases where the user
+        // denies the permission.
         if (Notification.permission !== "granted") {
           await requestNotificationPermission();
         }
@@ -173,10 +173,10 @@ export default function Home({
           return null;
         } else if (Notification.permission !== "granted") {
           // User denied notifications
-          toast.error("Notifications have been voluntarily disabled. Check the webpage settings in your browser to reenable them.");
+          toast.error("Notifications have been disabled. Check the webpage settings in your browser to reenable them.");
           return false;
         }
-        // Start a local service worker
+
         await registerServiceWorker();
   
         const publicVAPIDKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -214,8 +214,8 @@ export default function Home({
         // Add a slight delay so users know that something is happening
         sleep(500).then(() => setNotificationsLoading(false));
       }
-		} else {
-      // Turn OFF notifications
+
+		} else { // Turn OFF notifications
       // Unregister all local service workers
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (let registration of registrations) {
@@ -255,12 +255,12 @@ export default function Home({
 			return;
 		}
     setAwaitingLogin(true);
-		updateLocalUserData(formattedUserCode, true, false).then((didUpdateSuccessfully) => {
-      if (didUpdateSuccessfully) {
+		updateLocalUserData(formattedUserCode, true, false).then(([succeeded, values]) => {
+      if (succeeded) {
         // Update our local user code
         setUserCode(formattedUserCode);
         setLoginUserCode(""); // blank login box
-        toast.success("Logged in as '" + userNickname + "'!");
+        toast.success("Logged in as '" + values.nickname + "'!");
       }
       setAwaitingLogin(false);
     });
@@ -346,7 +346,27 @@ export default function Home({
       />
       : <></>}
 
-      
+      {showLogoutPrompt ? 
+        <LabeledAlertbox
+          header="Log Out"
+          onClickClose={() => setShowLogoutPrompt(false)}
+          primaryButton="Log Out"
+          primaryButtonOnClick={() => {
+            toast("Logged out successfully. (user: " + userCode + ")");
+            setUserCode(null);
+            updateLocalUserData(null, false, true);  // force cleaning user data
+            setShowLogoutPrompt(false);
+          }}
+          secondaryButton="Cancel"
+          secondaryButtonOnClick={() => setShowLogoutPrompt(false)}
+        >
+          <p>Are you sure you want to log out?</p>
+          <p><b className="highlight">Please make sure you've saved your user ID
+            somewhere safe as your account cannot be recovered without it!</b>
+          </p>
+        </LabeledAlertbox> :
+        <></>
+      }
 
 			<div
 				style={{
@@ -449,6 +469,12 @@ export default function Home({
           disabled={!userCode || userCode === ""}
           >
           <span className="material-symbols-rounded">content_copy</span>
+        </LoadingButton>
+        <LoadingButton
+          onClick={() => {setShowLogoutPrompt(true)}}
+          loading={showLogoutPrompt}
+        >
+          Log Out
         </LoadingButton>
       </div>
       

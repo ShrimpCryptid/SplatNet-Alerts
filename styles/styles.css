@@ -186,6 +186,10 @@ input:active {
   gap: 5px;
 }
 
+.highlight {
+  color: var(--highlight);
+}
+
 textarea {
   border-radius: 10px;
   resize: none;

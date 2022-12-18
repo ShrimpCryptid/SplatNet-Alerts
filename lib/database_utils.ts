@@ -641,7 +641,7 @@ export async function getUserData(
 	let result = await queryAndLog(
 		client,
 		`SELECT * FROM ${DB_TABLE_USERS}
-      WHERE ${DB_USER_CODE} = $1`,
+      WHERE ${DB_USER_ID} = $1;`,
 		[userID]
 	);
 	if (result.rowCount > 0) {

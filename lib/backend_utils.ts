@@ -3,10 +3,15 @@ import fetch from "node-fetch";
 import { VERSION } from "../constants";
 import {
 	ENV_KEY_DEV_EMAIL,
+	ENV_KEY_SPLATNET_URL,
 	ENV_KEY_VAPID_PRIVATE,
 	ENV_KEY_VAPID_PUBLIC,
+  ENV_KEY_WEBSITE_URL,
 } from "../constants/env";
 import { getEnvWithDefault } from "./shared_utils";
+
+export const BASE_SPLATNET_URL = getEnvWithDefault(ENV_KEY_SPLATNET_URL, "/");
+export const BASE_WEBSITE_URL = getEnvWithDefault(ENV_KEY_WEBSITE_URL, "/");
 
 /**
  * Sets up the webpush configuration using the environment variables, including

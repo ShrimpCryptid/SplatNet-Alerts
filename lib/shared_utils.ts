@@ -2,7 +2,7 @@
  * Utility methods shared across backend and frontend.
  */
 import { toast } from "react-toastify";
-import { validate, v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { API_NICKNAME_ALLOWED_CHARS, API_NICKNAME_MAX_LENGTH, FE_ERROR_404_MSG, FE_ERROR_500_MSG, FE_UNKNOWN_MSG } from "../constants";
 import { ADJECTIVES, SUBJECTS } from "../constants/titledata";
 

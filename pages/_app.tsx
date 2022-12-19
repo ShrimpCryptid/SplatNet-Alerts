@@ -197,7 +197,6 @@ export default function App({ Component, pageProps }: AppProps) {
 		} else {
       if (forceUpdate) {
         // Set local values to null.
-        console.log("die");
         setUserNickname(null);
         setUserFilters(null);
       }

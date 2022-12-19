@@ -3,16 +3,16 @@ import {
 	API_SUBSCRIPTION,
 	API_USER_CODE,
 	API_SEND_TEST_NOTIFICATION,
+  FE_USER_CODE_URL,
 } from "../../constants";
 import {
 	getDBClient,
 	getUserIDFromCode,
-	makeNewUser,
 	addUserPushSubscription,
 	trySendNotification,
 } from "../../lib/database_utils";
 import { Subscription } from "../../lib/notifications";
-import { configureWebPush } from "../../lib/backend_utils";
+import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
 
 /**
  * Updates the user's notification subscription.
@@ -49,11 +49,12 @@ export default async function handler(
 		let client = getDBClient();
 
 		// Validate user
-		let userID = await getUserIDFromCode(client, req.query[API_USER_CODE]);
+    let userCode = req.query[API_USER_CODE];
+		let userID = await getUserIDFromCode(client, userCode);
 		if (userID == -1) {
 			// no matching user
 			res.status(404).json({
-				err: `Could not find user with code '${req.query[API_USER_CODE]}'.`,
+				err: `Could not find user with code '${userCode}'.`,
 			});
 			return res.end();
 		}
@@ -70,6 +71,8 @@ export default async function handler(
 			let notification = {
 				title: "Hello!",
 				body: "Welcome to the Splatnet Shop Alerts service!",
+        siteURL: BASE_WEBSITE_URL,
+        loginURL: `${BASE_WEBSITE_URL}/login?${FE_USER_CODE_URL}=${userCode}`,
 			};
 			configureWebPush();
 			await trySendNotification(client, subscription, JSON.stringify(notification));

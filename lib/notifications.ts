@@ -42,7 +42,7 @@ export function isPushNotificationSupported() {
 }
 
 export function registerServiceWorker() {
-	return navigator.serviceWorker.register("/serviceworker.js");
+	return navigator.serviceWorker.register("/serviceworker.js", {scope: "/"});
 }
 
 export async function requestNotificationPermission() {

@@ -15,15 +15,13 @@ import {
 	updateCachedRawGearData,
 } from "../../lib/gear_loader";
 import { Gear } from "../../lib/gear";
-import { configureWebPush } from "../../lib/backend_utils";
-import { getEnvWithDefault, mapGetWithDefault } from "../../lib/shared_utils";
+import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
+import { getEnvWithDefault } from "../../lib/shared_utils";
 import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
 import { FE_USER_CODE_URL } from "../../constants";
 import { Pool } from "pg";
 
 const MILLISECONDS_PER_SECOND = 1000.0;
-const BASE_SPLATNET_URL = "https://s.nintendo.com/av5ja-lp1/znca/game/4834290508791808?p=gesotown/";
-const BASE_LOGIN_URL = "https://splatnet-alerts.netlify.com/login?";
 
 function getUserGear(
 	gearToUsers: Map<Gear, Map<number, string>>,
@@ -80,21 +78,37 @@ function generateNotificationPayload(userCode: string, gearList: Gear[]): any {
 		body = "",
 		image = "";
   
+  let loginURL = `${BASE_WEBSITE_URL}/login?${FE_USER_CODE_URL}=${userCode}`;
+  /** Stored gearID. If more than one item was matched, is empty. */
+  let gearID = gearList[0].id;
+
 	if (gearList.length == 1) {
-		title = "A new item you were looking for is available on SplatNet.";
+		title = "A new item is available on SplatNet!";
 		body = gearList[0].name + "(" + gearList[0].ability + ")";
 		image = gearList[0].image;
+
 	} else if (gearList.length > 1) {
-		title = "One or more items you're interested in are available on SplatNet!";
+		title = "New items on SplatNet!";
 		for (let gear of gearList) {
 			body += gear.name + " (" + gear.ability + ") / ";
 		}
+    // Override gearID because there are multiple items
+    gearID = "";
 	}
 
+  // When updating this, remember to make changes in serviceworker.js!
 	return {
 		title: title,
 		body: body,
 		image: image,
+    iconURL: null,  // TODO: Generate icon for notifications
+    loginURL: loginURL,  // used to log in to the website
+    siteURL: BASE_WEBSITE_URL,
+    shopURL: BASE_SPLATNET_URL,
+    gearID: gearID,
+    userCode: userCode,
+    tag: gearList[0].id,  // tag for this notification, to prevent duplicates
+    expiration: gearList[0].expiration
 	};
 }
 

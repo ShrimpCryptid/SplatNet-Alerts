@@ -6,9 +6,17 @@ import LoadingButton, { ButtonStyle } from "./loading-button";
 import notificationImage from "../public/images/notifications-forever.jpg";
 import Image from "next/image";
 
-export function Alertbox(props: React.PropsWithChildren) {
+type AlertboxProps = {
+  children?: React.ReactNode;
+  visible?: boolean;
+}
+
+export function Alertbox(props: AlertboxProps) {
+  let visible = props.visible === undefined ? true : props.visible;
 	return (
-		<div className={styles.background}>
+		<div className={styles.background}
+      style={{visibility: visible ? "visible" : "hidden"}}
+    >
 			<div className={styles.alertbox}>{props.children}</div>
 		</div>
 	);
@@ -22,10 +30,13 @@ type LabeledAlertboxProps = {
 	primaryButtonOnClick?: CallableFunction;
 	secondaryButton?: string;
 	secondaryButtonOnClick?: CallableFunction;
+  visible?: boolean;
 };
 export default function LabeledAlertbox(props: LabeledAlertboxProps) {
+  let visibility = props.visible === undefined ? true : props.visible;
+
 	return (
-		<Alertbox>
+		<Alertbox visible={visibility}>
 			{props.onClickClose ? (
 				// Render close button ONLY if there's a closing behavior defined.
 				<div className={styles.closeButton} onClick={props.onClickClose}>

@@ -3,7 +3,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
-import React from "react";
+import React, { useMemo } from "react";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import LabeledAlertbox from "../components/alertbox";
@@ -23,6 +23,7 @@ import {
 	FE_UNKNOWN_MSG,
 } from "../constants";
 import Filter from "../lib/filter";
+import { Gear } from "../lib/gear";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
 import { sleep } from "../lib/shared_utils";
 
@@ -158,8 +159,10 @@ export default function FilterPage({
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
 	const [currFilter, setCurrFilter] = useState(initFilter);
+
 	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
 	const [pageSwitchReady, setPageSwitchReady] = useState(false);
+
 	const [showGearSelection, setShowGearSelection] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 
@@ -329,37 +332,47 @@ export default function FilterPage({
 		window.addEventListener("resize", handleResize, false);
 	});
 
+  const onGearSelection = useMemo(() => {
+    return (selectedGear: Gear) => {
+      updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
+      setShowGearSelection(false);
+    };
+  }, []);
+
 	return (
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
 			<h1>New Filter</h1>
 			<p>Select the gear properties you want to be alerted for.</p>
-			<button
+      
+			<LoadingButton
 				onClick={() => {
 					setShowGearSelection(true);
 				}}
+        loading={showGearSelection}
 			>
 				Select Gear (optional)
-			</button>
-			{showGearSelection ? (
-				<LabeledAlertbox
-					header="Select Gear"
-					onClickClose={() => setShowGearSelection(false)}
-				>
-					<GearSelector
-						gearData={GEAR_NAME_TO_DATA}
-						onSelection={(selectedGear) => {
-							updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
-							setShowGearSelection(false);
-						}}
-						onClickClose={() => {
-							setShowGearSelection(false);
-						}}
-					/>
-				</LabeledAlertbox>
-			) : (
-				<></>
-			)}
+			</LoadingButton>
+      <LoadingButton onClick={
+        () => {updateFilter(GEAR_PROPERTY.NAME, "")}
+        }
+      >
+        Clear
+      </LoadingButton>
+      
+      <LabeledAlertbox
+        header="Select Gear"
+        onClickClose={() => setShowGearSelection(false)}
+        visible={showGearSelection}
+      >
+        <>
+          <GearSelector
+            onSelection={onGearSelection}
+          />
+          <button onClick={() => setShowGearSelection(false)}>Cancel</button>
+        </>
+      </LabeledAlertbox>
+
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
 					<Selector

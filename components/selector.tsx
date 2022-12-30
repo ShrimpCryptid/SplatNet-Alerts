@@ -46,14 +46,15 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 			onClick={onClickCallback}
 			key={`${id}-${selected}`}
 		>
+      <div
+      	className={`${styles.itemIcon} ${styles[category]}`}
+      >
 			<Image
-				className={`${styles.itemIcon} ${styles[category]}`}
 				src={imageSrc}
 				alt={name}
-				layout={"fixed"}
-				height={"50px"}
-				width={"50px"}
-			/>
+				layout={"responsive"}
+        />
+      </div>
 			<div className={styles.itemLabelContainer}>
 				<h3 className={styles.itemLabelText}>{name}</h3>
 			</div>

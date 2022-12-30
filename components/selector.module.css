@@ -6,7 +6,7 @@
   border-radius: 10px;
   padding: 5px;
   gap: 5px;
-  max-height: 50vmin;
+  max-height: 50vh;
   overflow-y: auto;
 }
 
@@ -16,13 +16,14 @@
 
 .itemContainer {
     width: 100%;
+    height: min-content;
     position: relative;
     background-color: var(--background-alt);
     display: flex;
     flex-direction: row;
-    gap: 5px;
-    padding: 10px;
-    border-radius: 22px;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 8px;
     border-width: 2px;
     border-color: transparent;
     border-style: solid;
@@ -56,8 +57,9 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    height: 100%;
-    width: 100%;
+    position: relative;
+    height: 35px;
+    width: 35px;
     user-select: none;
     background-color: white;
     border-radius: 10%;

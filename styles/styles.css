@@ -4,6 +4,7 @@
   --background: black;
   --ability-background: black;
   --selected-color: rgb(220, 255, 65);
+  /** --selected-color: rgb(255, 163, 65); */
 
   --highlight: var(--selected-color);
   
@@ -14,9 +15,11 @@
   
   --background-alt: rgb(42, 42, 42);
   --item-background: rgb(42, 42, 42);
-  --item-hover: rgb(66, 66, 66);
+  --item-hover: rgb(90, 90, 90);
   --item-active: rgb(35, 35, 35);
   --item-disabled-filter: brightness(50%);
+  /* --item-selected-background: rgb(69, 71, 54); */
+  --item-selected-background: rgb(70, 70, 70);
 }
 
 body {
@@ -173,6 +176,14 @@ input:active {
   font-variation-settings:
   'FILL' 0,
   'wght' 500,
+  'GRAD' 0,
+  'opsz' 48;
+}
+
+.symbol-filled {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 700,
   'GRAD' 0,
   'opsz' 48;
 }

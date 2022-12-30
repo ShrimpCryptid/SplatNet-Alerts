@@ -46,13 +46,19 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 			onClick={onClickCallback}
 			key={`${id}-${selected}`}
 		>
+      <span
+        className={
+          `material-symbols-rounded symbol-filled ${styles.checkmark}`}
+      >
+        {selected ? "check_box" : "check_box_outline_blank"}
+      </span>
       <div
       	className={`${styles.itemIcon} ${styles[category]}`}
       >
-			<Image
-				src={imageSrc}
-				alt={name}
-				layout={"responsive"}
+			  <Image
+          src={imageSrc}
+          alt={name}
+          layout={"responsive"}
         />
       </div>
 			<div className={styles.itemLabelContainer}>

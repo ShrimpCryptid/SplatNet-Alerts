@@ -37,6 +37,6 @@
 }
 
 .filterViewContainer {
-  width: 100%;
-  max-width: 90vmin;
+  width: 90vmin;
+  margin: 0 auto;
 }

@@ -24,7 +24,6 @@
     gap: 2px;
     padding: 4px;
     border-radius: 8px;
-    border-width: 2px;
     border-color: transparent;
     border-style: solid;
     cursor: pointer;
@@ -44,9 +43,30 @@
 
 
 .selected {
-    border-color: var(--selected-color);
-    border-width: 2px;
+    background-color: var(--item-selected-background);
     border-style: solid;
+}
+
+.checkmark {
+  color: #bbbbbb;
+  transform-origin: center center;
+  border-width: 0;
+  padding: 0;
+  margin-right: 5px;
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 500,
+  'GRAD' 0,
+  'opsz' 48;
+}
+
+div.selected > .checkmark {
+  color: var(--selected-color);
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 700,
+  'GRAD' 0,
+  'opsz' 48;
 }
 
 .disabled {

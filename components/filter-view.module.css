@@ -1,5 +1,6 @@
 .container {
-  width: auto;
+  width: calc(100% - 20px);  /* Set to padding x 2 */
+  position: relative;
   background-color: var(--background-alt);
   border-radius: 20px;
   display: flex;

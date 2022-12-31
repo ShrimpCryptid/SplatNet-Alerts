@@ -37,8 +37,6 @@ function renderGear(gear: Gear, onSelection: CallableFunction) {
               unknownIcon
             )}
             layout={"fill"}
-            height={"50px"}
-            width={"50px"}
           />
         </div>
       </div>

@@ -128,6 +128,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	useWildcard,
 	onChanged,
 	selectionOverride,
+  disabledItems
 }) => {
 	// check if items includes wildcard. if not, insert into our list of items and map of what
 	// items are selected.
@@ -185,7 +186,9 @@ const Selector: FunctionComponent<SelectorProps> = ({
 						// Disable every other item if wildcard is active and selected.
 						isSelected = false;
 						disabled = true;
-					}
+					} else if (disabledItems?.has(item)) {
+            disabled = true;
+          }
 
 					let image = null;
 					if (itemImages) {

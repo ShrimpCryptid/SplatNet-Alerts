@@ -21,11 +21,12 @@ import {
 	API_FILTER_JSON,
 	API_PREVIOUS_FILTER_JSON,
 	FE_UNKNOWN_MSG,
+  TYPE_EXCLUSIVE_ABILITIES,
 } from "../constants";
 import Filter from "../lib/filter";
 import { Gear } from "../lib/gear";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
-import { sleep } from "../lib/shared_utils";
+import { mapGetWithDefault, sleep } from "../lib/shared_utils";
 
 import { abilityIcons } from "../public/icons/abilities";
 import { brandIcons } from "../public/icons/brands";
@@ -117,6 +118,21 @@ async function tryUpdateFilter(
 	return response.status;
 }
 
+/** Returns a list of exclusive main abilities that should be disabled, based
+ * on the currently unselected gear types.
+ */
+function getDisabledAbilities(currFilter: Filter): string[] {
+  let disabledAbilities: string[] = [];
+  let allGearTypes = TYPE_EXCLUSIVE_ABILITIES.keys();
+
+  for (let gearType of allGearTypes) {
+    if (currFilter.gearTypes.indexOf(gearType) === -1 && (currFilter.gearTypes.length !== 0)) {
+      disabledAbilities = [...disabledAbilities, ...mapGetWithDefault(TYPE_EXCLUSIVE_ABILITIES, gearType, [])];
+    }
+  }
+  return disabledAbilities;
+}
+
 // ============
 // Page Content
 // ============
@@ -176,19 +192,19 @@ export default function FilterPage({
 		let newTypes = selectedTypes;
 
 		// either ability, brand, or gear types.
-		if (category == GEAR_PROPERTY.ABILITY) {
+		if (category === GEAR_PROPERTY.ABILITY) {
 			setSelectedAbilities(newValue);
 			newAbilities = newValue;
-		} else if (category == GEAR_PROPERTY.BRAND) {
+		} else if (category === GEAR_PROPERTY.BRAND) {
 			setSelectedBrands(newValue);
 			newBrands = newValue;
-		} else if (category == GEAR_PROPERTY.TYPE) {
+		} else if (category === GEAR_PROPERTY.TYPE) {
 			setSelectedTypes(newValue);
 			newTypes = newValue;
-		} else if (category == GEAR_PROPERTY.NAME) {
+		} else if (category === GEAR_PROPERTY.NAME) {
 			setSelectedGearName(newValue);
 			newGearName = newValue;
-		} else if (category == GEAR_PROPERTY.RARITY) {
+		} else if (category === GEAR_PROPERTY.RARITY) {
 			setSelectedRarity(newValue);
 			newRarity = newValue;
 		}
@@ -200,6 +216,11 @@ export default function FilterPage({
 			selectedMapToList(newBrands),
 			selectedMapToList(newAbilities)
 		);
+    newFilter.gearAbilities = selectedMapToList(newAbilities);
+    // Remove exclusive abilities if they aren't currently selected.
+    let disabledAbilities = getDisabledAbilities(newFilter);
+    newFilter.gearAbilities = newFilter.gearAbilities.filter((ability) => !disabledAbilities.includes(ability));
+
 		setCurrFilter(newFilter);
 
 		// Update whether filter can be saved
@@ -332,12 +353,14 @@ export default function FilterPage({
 		window.addEventListener("resize", handleResize, false);
 	});
 
+  // Memoize the selection callback to prevent unnecessary rerenders.
   const onGearSelection = useMemo(() => {
     return (selectedGear: Gear) => {
       updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
       setShowGearSelection(false);
     };
   }, []);
+
 
 	return (
 		<div className={styles.main}>
@@ -413,6 +436,7 @@ export default function FilterPage({
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.ABILITY, newSelected);
 						}}
+            disabledItems={new Set<string>(getDisabledAbilities(currFilter))}
 					/>
 				</div>
 			</div>

@@ -42,6 +42,9 @@
   background-color: var(--item-background);
 }
 
+.itemContainer.selected.disabled {
+  background-color: var(--item-background);
+}
 
 .selected {
     background-color: var(--item-selected-background);

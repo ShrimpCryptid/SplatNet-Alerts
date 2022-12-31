@@ -3,6 +3,7 @@
   margin: 0 5px;
   position: relative;
   height: 100%;
+  cursor: pointer;
 }
 
 .header {
@@ -11,6 +12,7 @@
   padding: 10px;
   flex-wrap: wrap;
   gap: 10px;
+  background-color: black;
 }
 
 .headerMainText {
@@ -24,4 +26,10 @@
   padding-top: 10px;
   margin-bottom: 0;
   font-size: 16px;
+}
+
+.footer {
+  padding: 8px 5px 5px 5px;
+  background: black;
+  justify-content: center;
 }

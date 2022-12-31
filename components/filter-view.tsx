@@ -24,9 +24,9 @@ function getStringSelectionCount(selections: string[], sourceOptions: string[], 
   } else {
     ret += "0"
   }
-  return <a className={styles.categoryCountLabel}>
+  return <span className={styles.categoryCountLabel}>
     {ret + "/" + sourceOptions.length + ")"}
-  </a>
+  </span>
 }
 
 type Props = {

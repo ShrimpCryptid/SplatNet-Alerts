@@ -17,7 +17,7 @@ export default function Layout({ children }: LayoutProps) {
 			<Head>
         <title>SplatNet Alerts</title>
         <meta name="description" content="A notification service for Splatoon gear!"/>
-        <meta name="keywords" content="Splatoon 3, SplatNet, gear, notification, alert, clothing"/>
+        <meta name="keywords" content="Splatoon 3, SplatNet, gear, notification, alert, clothing, Nintendo, Splatoon"/>
         <meta name="author" content="@ShrimpCryptid"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 				<link
@@ -31,9 +31,15 @@ export default function Layout({ children }: LayoutProps) {
 			</Head>
       <div className={styles.header}>
         <div className="hdiv">
-          <div className={styles.mainIcon}>
-            <Image src={mainLogo} layout={"fill"}/>
-          </div>
+          <Link href="/">
+            <div className={styles.mainIcon}>
+              <Image
+                src={mainLogo}
+                layout={"fill"}
+                alt={"Website logo: an orange autobomb wearing the 18k aviators."}
+                />
+            </div>
+          </Link>
           <div>
             <Link href="/">
               <h1 className={styles.headerMainText}>SplatNet Alerts</h1>
@@ -53,11 +59,14 @@ export default function Layout({ children }: LayoutProps) {
 					position={toast.POSITION.BOTTOM_CENTER}
 					transition={Zoom}
 					theme={"dark"}
+          limit={2}
+          pauseOnFocusLoss={false}
+          autoClose={2500}
 				/>
 			</div>
       <br/>
 
-      <div className="hdiv" style={{justifyContent:"center", padding: "5px"}}>
+      <div className={styles.footer + " hdiv"}>
 
         <p
         style={{

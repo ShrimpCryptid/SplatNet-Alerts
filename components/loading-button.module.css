@@ -3,6 +3,10 @@
   position: relative;
 }
 
+.container {
+  align-items: center;
+}
+
 .buttonIcon {
   padding: 5px;
   height: fit-content;

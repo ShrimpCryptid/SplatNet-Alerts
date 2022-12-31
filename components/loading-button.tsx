@@ -40,7 +40,9 @@ export default function LoadingButton({
 				}}
 				style={style}
 			>
-				<div className={loading ? styles.hidden : ""}>{children}</div>
+				<div className={"hdiv gap " + (loading ? styles.hidden : "")} style={{alignItems: "center"}}>
+          {children}
+        </div>
 				{loading ? (
 					<div
 						className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}

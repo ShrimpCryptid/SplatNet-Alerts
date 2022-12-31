@@ -70,15 +70,36 @@ const SelectorItem: FunctionComponent<SelectorItemProps> = ({
 
 type SelectorProps = {
 	title?: string;
+  /** Determines the formatting style of the item icons. Valid values are
+   * {@link GEAR_PROPERTY.ABILITY}, {@link GEAR_PROPERTY.ABILITY}
+   */
 	category: GEAR_PROPERTY;
 	items: string[];
+  /** A map of boolean values for whether each item should be selected or not.
+   * Is overridden by wilcard selections or by {@link selectionOverride}.
+   */
 	selected: Map<string, boolean>;
 	itemImages?: Map<string, StaticImageData | string | undefined>;
-	wildcard?: boolean;
-	search?: boolean;
-	onChanged?: CallableFunction;
-	/** Locks the input to one of the items, disabling all options until cleared.*/
-	lockTo?: string | null;
+  /** Flag that determines whether to show a wildcard (Any) option at the top
+   * of the selector list. If selected, all other options will be disabled.
+   */
+	useWildcard?: boolean;
+  /** Callback function, called whenever changes are made to the current
+   * selections.
+  */
+	onChanged: (newSelected: Map<string, boolean>) => void;
+
+  /** A set of all items that are currently disabled. Behavior is overriden
+   * if {@link selectionOverride} is set or if {@link useWildcard} is true and the
+   * wildcard item (Any) is selected.
+  */
+  disabledItems?: Set<string>;
+
+	/** 
+   * If set, locks the input to one of the items, selecting it and disabling all
+   * other options. Undefined by default.
+   * */
+	selectionOverride?: string | undefined;
 };
 
 function countSelected(selections: Map<string, boolean>): number {
@@ -104,14 +125,13 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	items,
 	selected,
 	itemImages,
-	wildcard,
-	search,
+	useWildcard,
 	onChanged,
-	lockTo,
+	selectionOverride,
 }) => {
 	// check if items includes wildcard. if not, insert into our list of items and map of what
 	// items are selected.
-	if (wildcard && items.indexOf(FE_WILDCARD) !== 0) {
+	if (useWildcard && items.indexOf(FE_WILDCARD) !== 0) {
 		items = [FE_WILDCARD].concat(items);
 		if (!selected.has(FE_WILDCARD)) {
 			let newSelected = new Map(selected);
@@ -136,7 +156,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 
 	// Count number of selected values
 	let selectedCount = 0;
-	let itemTotal = items.length - (wildcard ? 1 : 0); // ignore wildcard
+	let itemTotal = items.length - (useWildcard ? 1 : 0); // ignore wildcard
 	for (let value in selected.values()) {
 		selectedCount += value ? 1 : 0;
 	}
@@ -144,24 +164,24 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	return (
 		<div>
 			<h2 className={styles.categoryLabel}>
-				{title} ({countSelected(selected)}/{itemTotal})
+				{title} ({selectionOverride === undefined ? countSelected(selected) : 1}/{itemTotal})
 			</h2>
 			<div className={styles.itemDisplay}>
 				{items.map((item, index) => {
 					// Wildcard formatting
 					let itemCategory = category;
-					if (wildcard && index == 0) {
+					if (useWildcard && index == 0) {
 						itemCategory = GEAR_PROPERTY.ABILITY;
 					}
 
 					let isSelected = selected.get(item);
 					let disabled = false;
 
-					if (lockTo) {
-						// Show the locked item as selected and disable all selections.
+					if (selectionOverride) {
+						// Show the item as selected and disable all selections.
 						disabled = true;
-						isSelected = item === lockTo;
-					} else if (wildcard && selected.get(FE_WILDCARD) && index !== 0) {
+						isSelected = item === selectionOverride;
+					} else if (useWildcard && selected.get(FE_WILDCARD) && index !== 0) {
 						// Disable every other item if wildcard is active and selected.
 						isSelected = false;
 						disabled = true;

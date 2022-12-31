@@ -381,11 +381,11 @@ export default function FilterPage({
 						items={Array.from(selectedTypes.keys())}
 						selected={selectedTypes}
 						itemImages={typeIcons}
-						wildcard={true}
+						useWildcard={true}
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.TYPE, newSelected);
 						}}
-						lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
+						selectionOverride={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>
@@ -394,12 +394,12 @@ export default function FilterPage({
 						category={GEAR_PROPERTY.BRAND}
 						items={Array.from(selectedBrands.keys())}
 						selected={selectedBrands}
-						wildcard={true}
+						useWildcard={true}
 						itemImages={brandIcons}
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.BRAND, newSelected);
 						}}
-						lockTo={GEAR_NAME_TO_DATA.get(selectedGearName)?.brand}
+						selectionOverride={GEAR_NAME_TO_DATA.get(selectedGearName)?.brand}
 					/>
 				</div>
 				<div className={styles.selectorContainer}>
@@ -408,7 +408,7 @@ export default function FilterPage({
 						category={GEAR_PROPERTY.ABILITY}
 						items={Array.from(selectedAbilities.keys())}
 						selected={selectedAbilities}
-						wildcard={true}
+						useWildcard={true}
 						itemImages={abilityIcons}
 						onChanged={(newSelected: Map<string, boolean>) => {
 							updateFilter(GEAR_PROPERTY.ABILITY, newSelected);

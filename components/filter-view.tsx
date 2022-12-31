@@ -13,11 +13,21 @@ import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 import { GEAR_NAME_TO_IMAGE } from "../lib/geardata";
 import LoadingButton, { ButtonStyle } from "./loading-button";
+import { GEAR_ABILITIES, GEAR_BRANDS } from "../constants";
 
-const ABILITY_ICON_WIDTH = 49;
-const BRAND_ICON_LIST_WIDTH = 49;
-const BRAND_ICON_WIDTH = 40;
-const GEAR_TYPE_WIDTH = 150;
+function getStringSelectionCount(selections: string[], sourceOptions: string[], isSelected: boolean): JSX.Element {
+  let ret = "(";
+  if (selections.length === 0 && isSelected) {
+    ret += sourceOptions.length;
+  } else if (isSelected) {
+    ret += selections.length;
+  } else {
+    ret += "0"
+  }
+  return <a className={styles.categoryCountLabel}>
+    {ret + "/" + sourceOptions.length + ")"}
+  </a>
+}
 
 type Props = {
 	filter: Filter;
@@ -63,7 +73,7 @@ const FilterView: FunctionComponent<Props> = ({
 			<h3 className={styles.gearNameLabel}>{filter.gearName}</h3>
 		);
 	} else {
-		// Filter is by gear TYPE, not a specific item.
+		// Filter is by gear TYPE, not a specific item. Render 1, 2, or any icons.
 		if (filter.gearTypes.length == 0 || filter.gearTypes.length == 3) {
 			iconURL = GEAR_TYPE_ANY_ICON;
 		} else if (filter.gearTypes.length == 1) {
@@ -82,7 +92,9 @@ const FilterView: FunctionComponent<Props> = ({
 		}
 		// Put brands name inside of the gear name elements for formatting (matches
 		// up nicely with the edit/delete buttons)
-		gearNameElements = <h3 className={styles.categoryLabel}>Brands</h3>;
+		gearNameElements = <h3 className={styles.categoryLabel}>Brands {
+      getStringSelectionCount(filter.gearBrands, GEAR_BRANDS, brandsSelected)
+    }</h3>;
 
 		// Override icon if no type is defined
 		if (!typesSelected) {
@@ -207,7 +219,7 @@ const FilterView: FunctionComponent<Props> = ({
 				</div>
 				{brandElements}
 
-				<h3 className={styles.categoryLabel}>Abilities</h3>
+				<h3 className={styles.categoryLabel}>Abilities {getStringSelectionCount(filter.gearAbilities, GEAR_ABILITIES, abilitiesSelected)}</h3>
 				<div className={styles.abilityIconContainer}>{abilityElements}</div>
 			</div>
 		</div>

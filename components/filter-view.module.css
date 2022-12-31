@@ -80,6 +80,11 @@
     margin-bottom: 2px;
 }
 
+.categoryCountLabel {
+  opacity: 0.7;
+  font-size: 16px;
+}
+
 .brandIcon {
     background-color: white;
     border-radius: 10%;

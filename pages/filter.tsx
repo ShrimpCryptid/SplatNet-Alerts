@@ -3,7 +3,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import LabeledAlertbox from "../components/alertbox";
@@ -144,43 +144,38 @@ export default function FilterPage({
   setIsUserNew,
 	setUserFilters,
 }: DefaultPageProps) {
-	let initAbilities, initBrands, initTypes;
-	let initCanSaveFilter;
-	let initFilter = new Filter();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  if (editingFilterIndex !== null && userFilters) {
-    initFilter = userFilters[editingFilterIndex];
-  }
+	const [selectedGearName, setSelectedGearName] = useState("");
+	const [selectedRarity, setSelectedRarity] = useState(0);
+	const [selectedAbilities, setSelectedAbilities] = useState(makeSelectedMap(GEAR_ABILITIES));
+	const [selectedBrands, setSelectedBrands] = useState(makeSelectedMap(GEAR_BRANDS));
+	const [selectedTypes, setSelectedTypes] = useState(makeSelectedMap(GEAR_TYPES));
+	const [currFilter, setCurrFilter] = useState(() => {return new Filter()});
 
-	// Load current filter properties
-  if (userFilters && editingFilterIndex !== null) {
-		// Have existing filter, populate values in page state.
-		initAbilities = selectedListToMap(GEAR_ABILITIES, initFilter.gearAbilities);
-		initBrands = selectedListToMap(GEAR_BRANDS, initFilter.gearBrands);
-		initTypes = selectedListToMap(GEAR_TYPES, initFilter.gearTypes);
-		initCanSaveFilter = true;
-	} else {
-		// Making a new filter from scratch, so use defaults for abilities, etc.
-		// We use the GEAR_ABILITIES, etc. constants as keys in the map.
-		initAbilities = makeSelectedMap(GEAR_ABILITIES);
-		initBrands = makeSelectedMap(GEAR_BRANDS);
-		initTypes = makeSelectedMap(GEAR_TYPES);
-		initCanSaveFilter = false;
-	}
-
-	// Initialize page states, using existing filter values if present.
-	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
-	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
-	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
-	const [selectedBrands, setSelectedBrands] = useState(initBrands);
-	const [selectedTypes, setSelectedTypes] = useState(initTypes);
-	const [currFilter, setCurrFilter] = useState(initFilter);
-
-	const [canSaveFilter, setCanSaveFilter] = useState(initCanSaveFilter);
+	const [canSaveFilter, setCanSaveFilter] = useState(false);
 	const [pageSwitchReady, setPageSwitchReady] = useState(false);
 
 	const [showGearSelection, setShowGearSelection] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    // Load in filter values (either default or otherwise)
+    if (isInitialLoad) {
+      if (editingFilterIndex !== null && userFilters) {
+        // Load existing filter because we're editing one
+        let loadedFilter = userFilters[editingFilterIndex];
+        // Have existing filter, populate values in page state.
+        setSelectedGearName(loadedFilter.gearName);
+        setSelectedAbilities(selectedListToMap(GEAR_ABILITIES, loadedFilter.gearAbilities));
+        setSelectedBrands(selectedListToMap(GEAR_BRANDS, loadedFilter.gearBrands));
+        setSelectedTypes(selectedListToMap(GEAR_TYPES, loadedFilter.gearTypes));
+        setCanSaveFilter(true);
+        setCurrFilter(loadedFilter);
+      }
+      setIsInitialLoad(false);
+    }
+  })
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.
@@ -202,12 +197,14 @@ export default function FilterPage({
 			setSelectedTypes(newValue);
 			newTypes = newValue;
 		} else if (category === GEAR_PROPERTY.NAME) {
+      console.log("New name wow!!!");
 			setSelectedGearName(newValue);
 			newGearName = newValue;
 		} else if (category === GEAR_PROPERTY.RARITY) {
 			setSelectedRarity(newValue);
 			newRarity = newValue;
 		}
+    console.log(newAbilities);
 
 		let newFilter = new Filter(
 			newGearName,
@@ -354,12 +351,15 @@ export default function FilterPage({
 	});
 
   // Memoize the selection callback to prevent unnecessary rerenders.
+  const updateFilterRef = useRef(updateFilter);
+  updateFilterRef.current = updateFilter;
+
   const onGearSelection = useMemo(() => {
     return (selectedGear: Gear) => {
-      updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
+      updateFilterRef.current(GEAR_PROPERTY.NAME, selectedGear.name);
       setShowGearSelection(false);
     };
-  }, []);
+  }, [setShowGearSelection]);
 
 
 	return (

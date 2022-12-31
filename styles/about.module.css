@@ -1,0 +1,22 @@
+.h2 {
+  font-family: var(--font-family-ui);
+  font-weight: 700;
+  width: 100%;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.h3 {
+  margin-top: 20px;
+  margin-bottom: 0px;
+  font-family: var(--font-family-ui);
+  font-weight: 500;
+  color: var(--selected-color);
+}
+
+.splashImage {
+  position: relative;
+  width: 40vmin;
+  height: 40vmin;
+  margin: 0 auto;
+}

@@ -27,8 +27,6 @@ function renderGear(gear: Gear, onSelection: CallableFunction) {
           <Image
             src={gear.image !== "" ? gear.image : unknownIcon}
             layout={"fill"}
-            height={"100px"}
-            width={"100px"}
           />
         </div>
         <div className={styles.listItemBrandIcon}>

@@ -281,6 +281,13 @@ export default function Home({
   })
 
   let [tempUserNickname, setTempUserNickname] = useState(userNickname);
+  useEffect(() => {
+    if (userNickname === null || userNickname === undefined) {
+      setTempUserNickname(userNickname);
+    } else if (tempUserNickname === null || tempUserNickname === undefined) {
+      setTempUserNickname(sanitizeNickname(userNickname));
+    }
+  })
 
   const onChangedNickname = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setTempUserNickname(sanitizeNickname(event.currentTarget.value));
@@ -362,6 +369,7 @@ export default function Home({
             setUserCode(null);
             updateLocalUserData(null, false, true);  // force cleaning user data
             setShowLogoutPrompt(false);
+            setTempUserNickname(null);
           }}
           secondaryButton="Cancel"
           secondaryButtonOnClick={() => setShowLogoutPrompt(false)}
@@ -374,158 +382,170 @@ export default function Home({
         <></>
       }
 
-      <h1
-        style={{marginTop: "10px"}}
-      >
-        Welcome back, <a className="highlight">{userNickname}</a>
-      </h1>
-
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "row",
-          verticalAlign: "bottom",
-					justifyContent: "space-between",
-          margin: "10px 0"
-				}}
-			>
-				<h2 style={{marginTop: "auto"}}>Your Filters</h2>
-				<LoadingButton
-					onClick={updateFilterViews}
-					loading={awaitingRefresh}
-					disabled={!userCode}
-				>
-					Refresh
-				</LoadingButton>
-			</div>
-			<div className={styles.filterListContainer}>
-				{userFilters && userFilters.length > 0 ? (
-					// User has filters, so we can show them the filter list!
-					userFilters.map((filter, index) => {
-						return (
-							<FilterView
-								onClickEdit={() => onClickEditFilter(index)}
-								onClickDelete={() => onClickDeleteFilter(index)}
-								awaitingEdit={index === awaitingEdit}
-								awaitingDelete={index === awaitingDelete}
-								filter={filter}
-								key={index}
-							/>
-						);
-					})
-				) : (
-					// Show loading animation and text
-					<div className={styles.emptyFilterList}>
-						<SuperJumpLoadAnimation filterText={loadingText} fillLevel={0.5} />
-					</div>
-				)}
-			</div>
-			<LoadingButton
-				onClick={() => {
-					setEditingFilterIndex(null); // clear any filters being edited
-					setAwaitingNewFilter(true); // set loading animation on new filter
-					setPageSwitchReady(true); // ready page to transition
-				}}
-				loading={awaitingNewFilter}
-				disabled={awaitingEdit !== -1}
-			>
-				New Filter
-			</LoadingButton>
-
-      <br/>
-			<h3>Get notified about gear from the SplatNet 3 app!</h3>
-			<p>
-				Splatnet Alerts lets you sign up for notifications about new gear items.
-				You can set <b>filters</b> to search for certain brand, ability, or gear
-				combinations, and sync notifications across devices. You'll be notified
-				within 30 minutes of new items arriving in the shop!
-				<br />
-				<br />
-				Splatnet Alerts is maintained by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>. You can contribute
-				directly to the project on <Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">GitHub</Link>!
-			</p>
-      
-      <br/>
-			<h2 style={{marginBottom: "10px"}}>Settings</h2>
-    
-      {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"))}
-			<p style={{marginBottom: "0"}}>
-				SplatNet Alerts sends push notifications via your browser. You can turn
-        off notifications at any time.</p>
-      <Switch 
-        state={notificationsToggle}
-        onToggled={toggleNotifications}
-        loading={notificationsLoading}
-        disabled={false  /** TODO: Check if push is supported by browser */}
-      />
-      <br/>
-      <br/>
-
-      {makeIconHeader("badge", "Nickname")}
-			<p style={{ marginTop: "0" }}>
-				Set a nickname to remember this account by. You can also generate a
-        random in-game title using the button.
-        <br/><i>(Limited to alphanumeric characters, dashes, and spaces!)</i>
-			</p>
-			<div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-				<textarea value={tempUserNickname ? tempUserNickname : ""} onChange={onChangedNickname} />
-				<LoadingButton
-					buttonStyle={ButtonStyle.ICON}
-					onClick={() => setTempUserNickname(getRandomTitle())}
-				>
-          {/** TODO: Add descriptive alt text to refresh button */}
-          {makeIcon("refresh")}
-				</LoadingButton>
-        <LoadingButton
-          onClick={() => {onClickUpdateNickname(tempUserNickname? tempUserNickname : "")}}
+      <div className={"panel"}>
+        
+        <h1
+          className={styles.centered}
+          style={{marginTop: "10px"}}
         >
-          Update
-        </LoadingButton>
-			</div>
-      <br/>
-      
-      {makeIconHeader("account_box", "User ID")}
-			<p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!<br/>
-				You can use it to make changes to your notifications if you clear your
-				cookies or use another browser.
-			</p>
-			<p style={{marginBottom: "2px"}}>
-				<b>Your user ID is:</b>
-        </p>
-      <div style={{display: "flex", flexDirection: "row", gap: "10px"}}>
-        <textarea value={userCode ? userCode : ""} readOnly={true} />
-        <LoadingButton buttonStyle={ButtonStyle.ICON}
-          onClick={() => {
-            navigator.clipboard.writeText(userCode ? userCode : "");
-            toast("Copied to clipboard!");
+          {typeof userNickname === "string" ?
+            <>
+              Welcome back, <span className="highlight">{userNickname}</span>!
+            </>
+            :
+            <>Welcome!</>}
+        </h1>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            verticalAlign: "bottom",
+            justifyContent: "space-between",
+            margin: "10px 0"
           }}
-          disabled={!userCode || userCode === ""}
+        >
+          <h2 style={{marginTop: "auto"}}>Your Filters</h2>
+          <LoadingButton
+            onClick={updateFilterViews}
+            loading={awaitingRefresh}
+            disabled={!userCode}
           >
-          {makeIcon("content_copy")}
-        </LoadingButton>
+            Refresh
+          </LoadingButton>
+        </div>
+        <div className={styles.filterListContainer}>
+          {userFilters && userFilters.length > 0 ? (
+            // User has filters, so we can show them the filter list!
+            userFilters.map((filter, index) => {
+              return (
+                <FilterView
+                  onClickEdit={() => onClickEditFilter(index)}
+                  onClickDelete={() => onClickDeleteFilter(index)}
+                  awaitingEdit={index === awaitingEdit}
+                  awaitingDelete={index === awaitingDelete}
+                  filter={filter}
+                  key={index}
+                />
+              );
+            })
+          ) : (
+            // Show loading animation and text
+            <div className={styles.emptyFilterList}>
+              <SuperJumpLoadAnimation filterText={loadingText} fillLevel={0.5} />
+            </div>
+          )}
+        </div>
         <LoadingButton
-          onClick={() => {setShowLogoutPrompt(true)}}
-          loading={showLogoutPrompt}
-          >
-          Log Out
+          onClick={() => {
+            setEditingFilterIndex(null); // clear any filters being edited
+            setAwaitingNewFilter(true); // set loading animation on new filter
+            setPageSwitchReady(true); // ready page to transition
+          }}
+          loading={awaitingNewFilter}
+          disabled={awaitingEdit !== -1}
+        >
+          New Filter
         </LoadingButton>
+      </div>
+
+      <div className={"panel"}>
+        <h3 className={styles.centered}>Get notified about gear from the SplatNet 3 app!</h3>
+        <p>
+          Splatnet Alerts lets you sign up for notifications about new gear items.
+          You can set <b>filters</b> to search for certain brand, ability, or gear
+          combinations, and sync notifications across devices. You'll be notified
+          within 30 minutes of new items arriving in the shop!
+          <br />
+          <br />
+          Splatnet Alerts is maintained by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>. You can contribute
+          directly to the project on <Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">GitHub</Link>!
+        </p>
       </div>
       
-      <br/>
-      {makeIconHeader("switch_account", "Change User")}
-			<p style={{marginTop: "0"}}>
-				Paste in your user ID to sync your notification settings across devices.
-			</p>
-      <div style={{display: "flex", flexDirection: "row", gap: "10px"}}>
-        <textarea value={loginUserCode} onChange={handleLoginChange} />
-        <LoadingButton
-          onClick={onClickLogin}
-          loading={awaitingLogin}
-          disabled={!isValidUserCode(loginUserCode.trim())}
-        > 
-          {makeIcon("login")} Login
-        </LoadingButton>
+      <div className={"panel"}>
+        <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36")}</h1>
+      
+        {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"), "highlight")}
+        <p style={{marginBottom: "0"}}>
+          SplatNet Alerts sends push notifications via your browser. You can turn
+          off notifications at any time.</p>
+        <Switch 
+          state={notificationsToggle}
+          onToggled={toggleNotifications}
+          loading={notificationsLoading}
+          disabled={false  /** TODO: Check if push is supported by browser */}
+        />
+        <br/>
+        <br/>
+
+        {makeIconHeader("badge", "Nickname", "highlight")}
+        <p style={{ marginTop: "0" }}>
+          Set a nickname to remember this account by. You can also generate a
+          random in-game title using the button.
+          <br/><i>(Limited to alphanumeric characters, dashes, and spaces!)</i>
+        </p>
+        <div className={styles.hdivWrap}>
+          <textarea value={tempUserNickname ? tempUserNickname : ""} onChange={onChangedNickname} />
+          <LoadingButton
+            buttonStyle={ButtonStyle.ICON}
+            onClick={() => setTempUserNickname(getRandomTitle())}
+          >
+            {/** TODO: Add descriptive alt text to refresh button */}
+            {makeIcon("refresh")}
+          </LoadingButton>
+          <LoadingButton
+            onClick={() => {onClickUpdateNickname(tempUserNickname? tempUserNickname : "")}}
+            disabled={userCode === null || userCode === undefined}
+          >
+            Update
+          </LoadingButton>
+        </div>
+        <br/>
+        
+        {makeIconHeader("account_box", "User ID", "highlight")}
+        <p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!<br/>
+          You can use it to make changes to your notifications if you clear your
+          cookies or use another browser.
+        </p>
+        <p style={{marginBottom: "2px"}}>
+          <b>Your user ID is:</b>
+        </p>
+        <div className={styles.hdivWrap}>
+          <textarea value={userCode ? userCode : ""} readOnly={true} />
+          <LoadingButton buttonStyle={ButtonStyle.ICON}
+            onClick={() => {
+              navigator.clipboard.writeText(userCode ? userCode : "");
+              toast("Copied to clipboard!");
+            }}
+            disabled={!userCode || userCode === ""}
+          >
+            {makeIcon("content_copy")}
+          </LoadingButton>
+          <LoadingButton
+            onClick={() => {setShowLogoutPrompt(true)}}
+            loading={showLogoutPrompt}
+          >
+            Log Out
+          </LoadingButton>
+        </div>
+        
+        <br/>
+        {makeIconHeader("switch_account", "Change User", "highlight")}
+        <p style={{marginTop: "0"}}>
+          Paste in your user ID to sync your notification settings across devices.
+        </p>
+        <div className={styles.hdivWrap}>
+          <textarea value={loginUserCode} onChange={handleLoginChange} />
+          <LoadingButton
+            onClick={onClickLogin}
+            loading={awaitingLogin}
+            disabled={!isValidUserCode(loginUserCode.trim())}
+          > 
+            {makeIcon("login")} Login
+          </LoadingButton>
+        </div>
       </div>
-		</div>
+    </div>
 	);
 }

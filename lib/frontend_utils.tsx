@@ -9,10 +9,10 @@ export function makeIcon(icon: string, className="") {
   );
 }
 
-export function makeIconHeader(icon: string, header: string) {
+export function makeIconHeader(icon: string, header: string, containerClassName="", iconClassName="") {
   return (
-    <div className="hdiv gap" style={{padding: "2px 0"}}>
-      {makeIcon(icon)}
+    <div className={"hdiv gap " + containerClassName} style={{padding: "2px 0", alignItems: "center"}}>
+      {makeIcon(icon, iconClassName)}
       <h3 style={{marginBottom: "0"}}>{header}</h3>
     </div>
   )

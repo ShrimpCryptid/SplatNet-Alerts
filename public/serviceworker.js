@@ -28,6 +28,7 @@ self.addEventListener('push', async (event) => {
       image: data.image,
       actions: actions,
       tag: data.tag,
+      icon: data.icon || "https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg",
       data: data  // Stores a whole copy of all data passed to the notification
     });
 });
@@ -107,3 +108,10 @@ self.addEventListener('notificationclick', (event) => {
 
 // TODO: Add pushsubscriptionchange listener
 // See https://blog.pushpad.xyz/2021/01/web-push-error-410-the-push-subscription-has-expired-or-the-user-has-unsubscribed/
+// https://medium.com/@madridserginho/how-to-handle-webpush-api-pushsubscriptionchange-event-in-modern-browsers-6e47840d756f
+/** self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    // Unsubscribe user
+    // Subscribe user with new push
+  )
+}) */

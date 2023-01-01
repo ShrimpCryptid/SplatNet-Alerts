@@ -13,19 +13,25 @@
 .listContainer {
   height: 60vh;
   width: 100%;
+  margin: 10px 0;
+  margin-bottom: 30px;
 }
 
 .list {
   display: grid;
   width: 100%;
   max-height: 100%;
-  height: fit-content;
+
   overflow-y: scroll;
   flex-wrap: wrap;
   margin: auto auto;
   justify-content: center;
   grid-gap: 5px;
   grid-template-columns: repeat(auto-fill, calc(8vmin + 55px));
+
+  padding: 10px 0;
+  background-color: var(--background);
+  border-radius: 10px;
 }
 
 .listItem {
@@ -40,6 +46,14 @@
 
 .listItem:hover {
   background-color: var(--item-hover);
+}
+
+.listItem.disabled {
+  cursor: default;
+}
+
+.listItem.disabled:hover {
+  background-color: var(--background-alt);
 }
 
 .listItem:active {
@@ -58,9 +72,17 @@
   position: relative;
 }
 
+.listItemLabelContainer {
+  min-height: 40px;
+  height: fit-content;
+  vertical-align: center;
+  padding: 5px 0;
+}
+
 .listItemLabel {
   font-family: var(--font-family-ui);
   text-align: center;
+  margin: auto 0;
 }
 
 .listItemBrandIcon {

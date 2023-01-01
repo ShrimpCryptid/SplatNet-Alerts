@@ -8,42 +8,68 @@ import { brandIcons } from "../public/icons/brands";
 import { mapGetWithDefault } from "../lib/shared_utils";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
 
+type GearTileProps = {
+	/** Gear to render. If null or undefined, shows an unknown icon. */
+	gear: Gear | null | undefined;
+	/** Callback function when clicked. If none is provided, disables hover */
+	onSelection?: (selectedGear: Gear) => void;
+};
+
+export const GearTile: FunctionComponent<GearTileProps> = (
+	props: GearTileProps
+) => {
+	let imageSrc, gearName, gearBrand;
+	let onSelection = undefined;
+
+	// onSelection = undefined
+	if (props.gear !== null && props.gear !== undefined) {
+		imageSrc = props.gear.image !== "" ? props.gear.image : unknownIcon;
+		gearName = props.gear.name;
+		gearBrand = props.gear.brand;
+		if (props.onSelection !== undefined) {
+			onSelection = () =>
+				props.onSelection?.(props.gear || new Gear()) || undefined;
+		}
+	} else {
+		gearName = "None Selected";
+		imageSrc = unknownIcon;
+		gearBrand = "";
+	}
+
+	let disabled = onSelection === undefined;
+
+	return (
+		<div
+			className={styles.listItem + " " + (disabled ? styles.disabled : "")}
+			onClick={onSelection}
+			key={gearName}
+		>
+			<div className={styles.listItemImageContainer}>
+				<div className={styles.listItemGearIcon}>
+					<Image src={imageSrc} layout={"fill"} />
+				</div>
+
+				{gearBrand === "" ? (
+					<></>
+				) : (
+					<div className={styles.listItemBrandIcon}>
+						<Image
+							src={mapGetWithDefault(brandIcons, gearBrand, unknownIcon)}
+							layout={"fill"}
+						/>
+					</div>
+				)}
+			</div>
+			<div className={styles.listItemLabelContainer}>
+				<p className={styles.listItemLabel}>{gearName}</p>
+			</div>
+		</div>
+	);
+};
+
 type GearSelectorProps = {
 	onSelection: (selectedGear: Gear) => void;
 };
-
-/**
- * Returns a JSX Element with an image and title for the given gear item.
- */
-function renderGear(gear: Gear, onSelection: CallableFunction) { 
-  return (
-    <div
-      className={styles.listItem}
-      onClick={() => onSelection(gear)}
-      key={gear.name}
-    >
-      <div className={styles.listItemImageContainer}>
-        <div className={styles.listItemGearIcon}>
-          <Image
-            src={gear.image !== "" ? gear.image : unknownIcon}
-            layout={"fill"}
-          />
-        </div>
-        <div className={styles.listItemBrandIcon}>
-          <Image
-            src={mapGetWithDefault(
-              brandIcons,
-              gear.brand,
-              unknownIcon
-            )}
-            layout={"fill"}
-          />
-        </div>
-      </div>
-      <p className={styles.listItemLabel}>{gear.name}</p>
-    </div>
-  );
-}
 
 const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	onSelection,
@@ -51,17 +77,20 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	const gearArray = [...GEAR_NAME_TO_DATA.values()];
 	const [searchText, setSearchText] = useState("");
 
-  const [isRenderingGear, setIsRenderingGear] = useState(false);
-  const [renderedGearList, setRenderedGearList] = useState(<></>);
-  const [fullRenderedGearList, setFullRenderedGearList] = useState(
-    useMemo(() => {  // Optimization for the searchbar
-      return (
-        <>
-          {[...GEAR_NAME_TO_DATA.values()].map((gear) => renderGear(gear, onSelection))}
-        </>
-      )
-    }, [onSelection])
-  );
+	const [isRenderingGear, setIsRenderingGear] = useState(false);
+	const [renderedGearList, setRenderedGearList] = useState(<></>);
+	const [fullRenderedGearList, setFullRenderedGearList] = useState(
+		useMemo(() => {
+			// Optimization for the searchbar
+			return (
+				<>
+					{[...GEAR_NAME_TO_DATA.values()].map((gear) => {
+						return <GearTile gear={gear} onSelection={onSelection} />;
+					})}
+				</>
+			);
+		}, [onSelection])
+	);
 
 	// Set up fuzzy search
 	// TODO: Combine both name and brand in searches? https://stackoverflow.com/questions/47436817/search-in-two-properties-using-one-search-query
@@ -74,40 +103,45 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 
 	const handleSearchChanged = (newSearchText: string) => {
 		const updateFilteredGear = async () => {
-      // Get the new set of items we need to represent.
-      let filteredGear;
-      // Modify search text so it doesn't include spaces-- this can cause
-      // unexpected behavior because the fuse searcher will try to match with it
-      let searchTextNoSpace = newSearchText.replaceAll(" ", "");
-      let searchResults = fuzzySearcher.search(searchTextNoSpace);
-      filteredGear = searchResults.map((result) => { return result.item; });
+			// Get the new set of items we need to represent.
+			let filteredGear;
+			// Modify search text so it doesn't include spaces-- this can cause
+			// unexpected behavior because the fuse searcher will try to match with it
+			let searchTextNoSpace = newSearchText.replaceAll(" ", "");
+			let searchResults = fuzzySearcher.search(searchTextNoSpace);
+			filteredGear = searchResults.map((result) => {
+				return result.item;
+			});
 
-      // Render all of the gear as items in a displayable list.
-      setRenderedGearList(
-        <>
-          {filteredGear.map((gear) => renderGear(gear, onSelection))}
-        </>
-      );
-      setIsRenderingGear(false);
-    };
+			// Render all of the gear as items in a displayable list.
+			setRenderedGearList(
+				<>
+					{filteredGear.map((gear) => {
+						return <GearTile gear={gear} onSelection={onSelection} />;
+					})}
+				</>
+			);
+			setIsRenderingGear(false);
+		};
 
-    if (searchText === newSearchText) {  // Skip update if no changes made.
-      return;
-    } else if (newSearchText.replaceAll(" ", "") === "") {
-      // Exit early if the search text is blank
-      setSearchText(newSearchText);
-      return;
-    }
+		if (searchText === newSearchText) {
+			// Skip update if no changes made.
+			return;
+		} else if (newSearchText.replaceAll(" ", "") === "") {
+			// Exit early if the search text is blank
+			setSearchText(newSearchText);
+			return;
+		}
 
-    // Flag that we're currently rendering new gear, and update.
-    setIsRenderingGear(true);
-    setSearchText(newSearchText);
+		// Flag that we're currently rendering new gear, and update.
+		setIsRenderingGear(true);
+		setSearchText(newSearchText);
 
-    // Run the update asynchronously
-    updateFilteredGear();
+		// Run the update asynchronously
+		updateFilteredGear();
 	};
 
-  let showFullList = searchText.replaceAll(" ", "") === "";
+	let showFullList = searchText.replaceAll(" ", "") === "";
 
 	return (
 		<div className={styles.container}>
@@ -135,16 +169,21 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 					</span>
 				</div>
 			</div>
-      
+
 			<div className={styles.listContainer}>
-				<div className={styles.list} style={{display: showFullList ? "grid" : "none"}}>
-          {fullRenderedGearList}
+				<div
+					className={styles.list}
+					style={{ display: showFullList ? "grid" : "none" }}
+				>
+					{fullRenderedGearList}
 				</div>
-        <div className={styles.list} style={{display: showFullList ? "none" : "grid"}}>
-          {renderedGearList}
-        </div>
-    </div>
-      
+				<div
+					className={styles.list}
+					style={{ display: showFullList ? "none" : "grid" }}
+				>
+					{renderedGearList}
+				</div>
+			</div>
 		</div>
 	);
 };

@@ -12,10 +12,11 @@
   --cylinder-width: calc(55vmin);
   --face-count: 30;
   --face-deg: calc(360deg / var(--face-count));
-  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.025vmin);
+  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.07vmin);
   --face-shift: calc(var(--cylinder-width) / var(--pi) / 2);
   --pi: 3.14159265358979;
   --index: 0;
+  --filter: hue-rotate(140deg) brightness(200%);
   align-items: center;
   width: 100%;
   height: calc(100% - 20px);
@@ -43,6 +44,7 @@
   margin: auto;
   /* Translating 50% 50% means that position for top/left is center */
   transform: translate(-50%, -50%) scaleX(-1) scaleY(1) rotateY(calc(var(--face-deg) * var(--index))) translateZ(calc(var(--face-shift))) translate3d(0, 0, 0);
+  filter: var(--filter);
 }
 
 @keyframes spin {
@@ -60,6 +62,7 @@
   transform: translate(-50%, 0);
   left: 50%;
   bottom: calc(50% + 8vmin);
+  filter: var(--filter);
 }
 
 @keyframes bob {

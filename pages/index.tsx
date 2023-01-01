@@ -395,6 +395,7 @@ export default function Home({
             :
             <>Welcome!</>}
         </h1>
+        <br/>
 
         <div
           style={{
@@ -464,7 +465,7 @@ export default function Home({
       </div>
       
       <div className={"panel"}>
-        <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36")}</h1>
+        <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36 symbol-filled")}</h1>
       
         {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"), "highlight")}
         <p style={{marginBottom: "0"}}>

@@ -26,9 +26,9 @@ I'm currently targeting December 2022 for launch. 🤞
 - [x] Send notifications through the database
 - [x] Collect current gear from [Splatoon3.ink](https://splatoon3.ink)
 - [x] Detect changes to gear from local backup and send updates to relevant users
-- [ ] Custom images + text for push notifications
+- [ ] Custom images + text for push notifications (20%)
 - [x] Scrape data from the Splatoon 3 wiki for gear items
-- [ ] Gear item selection screen on filter page (80%)
+- [x] Gear item selection screen on filter page
 - [ ] Troubleshooting guide for push notifications
 - [x] Login flow for notifications
 - [ ] UI polish pass
@@ -44,7 +44,7 @@ I'm currently targeting December 2022 for launch. 🤞
 - [x] Configure server/database options, key security
 - [x] Web hosting setup
 - [ ] **WEBSITE GOES LIVE** 🎉
-- [ ] User testing
+- [ ] User testing (25%)
 - [ ] Contributor tutorial + documentation (💖)
 - [ ] Translation support
 

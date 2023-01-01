@@ -6,10 +6,13 @@
   --popout-background: black;
 
   --ability-background: black;
+  
+  --body-color: rgba(220, 220, 220);
+  --link-color: white;
+
   --selected-color: rgb(220, 255, 65);
   --selected-color: rgb(255, 163, 65);
 
-  --link-color: white;
 
   --highlight: var(--selected-color);
   
@@ -49,7 +52,7 @@ p {
   font-family: var(--font-family-ui);
   font-size: calc(12px + .4vmin);
   font-weight: 400;
-  color: rgba(220, 220, 220);
+  color: var(--body-color);
   margin-top: 2px;
   line-height: 130%;
 }
@@ -201,9 +204,9 @@ input:active {
 .symbol-filled {
   font-variation-settings:
   'FILL' 1,
-  'wght' 700,
+  'wght' 400,
   'GRAD' 0,
-  'opsz' 48;
+  'opsz' 36;
 }
 
 .hdiv {
@@ -217,6 +220,11 @@ input:active {
 
 .highlight {
   color: var(--highlight);
+}
+
+.centered {
+  width: 100%;
+  text-align: center;
 }
 
 textarea {
@@ -237,6 +245,7 @@ textarea {
 .panel {
   background-color: var(--popout-background);
   margin: 30px 0;
+  width: 100%;
   border-radius: 15px;
   padding: 15px;
 }

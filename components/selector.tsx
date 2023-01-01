@@ -164,9 +164,9 @@ const Selector: FunctionComponent<SelectorProps> = ({
 
 	return (
 		<div>
-			<h2 className={styles.categoryLabel}>
+			<h3 className={styles.categoryLabel}>
 				{title} ({selectionOverride === undefined ? countSelected(selected) : 1}/{itemTotal})
-			</h2>
+			</h3>
 			<div className={styles.itemDisplay}>
 				{items.map((item, index) => {
 					// Wildcard formatting

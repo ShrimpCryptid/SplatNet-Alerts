@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
-import GearSelector from "../components/gear_selector";
+import GearSelector, { GearTile } from "../components/gear_selector";
 import LoadingButton from "../components/loading-button";
 import Selector from "../components/selector";
 import {
@@ -24,6 +24,7 @@ import {
   TYPE_EXCLUSIVE_ABILITIES,
 } from "../constants";
 import Filter from "../lib/filter";
+import { makeIcon } from "../lib/frontend_utils";
 import { Gear } from "../lib/gear";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
 import { mapGetWithDefault, sleep } from "../lib/shared_utils";
@@ -197,14 +198,12 @@ export default function FilterPage({
 			setSelectedTypes(newValue);
 			newTypes = newValue;
 		} else if (category === GEAR_PROPERTY.NAME) {
-      console.log("New name wow!!!");
 			setSelectedGearName(newValue);
 			newGearName = newValue;
 		} else if (category === GEAR_PROPERTY.RARITY) {
 			setSelectedRarity(newValue);
 			newRarity = newValue;
 		}
-    console.log(newAbilities);
 
 		let newFilter = new Filter(
 			newGearName,
@@ -331,7 +330,8 @@ export default function FilterPage({
 			// Check the width of all the contained items. If they're too large,
 			// change the layout to a column.
 			let minDimension = Math.min(window.innerHeight, window.innerWidth);
-			let rowWidth = 3 * minDimension * 0.3 + 80;
+      // last term is the padding
+			let rowWidth = 0.9 * minDimension + 80;
 			if (rowWidth < window.innerWidth) {
 				// row
 				selectorGroup.classList.remove(styles.directionColumn);
@@ -365,23 +365,42 @@ export default function FilterPage({
 	return (
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
-			<h1>New Filter</h1>
-			<p>Select the gear properties you want to be alerted for.</p>
-      
-			<LoadingButton
-				onClick={() => {
-					setShowGearSelection(true);
-				}}
-        loading={showGearSelection}
-			>
-				Select Gear (optional)
-			</LoadingButton>
-      <LoadingButton onClick={
-        () => {updateFilter(GEAR_PROPERTY.NAME, "")}
-        }
-      >
-        Clear
-      </LoadingButton>
+      <div className={styles.panel + " panel"}>
+        <h1 className={""}>New Filter</h1>
+        <p>Select the gear properties you want to be alerted for!
+          <br/><br/>You can set an alert for a <span className={"highlight"}>specific gear item
+          </span> or any gear that matches a certain <span className={"highlight"}>type or brand.</span>
+        </p>
+
+
+        <h2 className={""}>Gear Item <span style={{opacity: "0.7"}}>(optional)</span></h2>
+        <p>Match a specific gear item. Selecting this will lock all properties other than abilities!</p>
+        <div className={"hdiv " + styles.gearItemContainer}>
+          <GearTile
+              gear={mapGetWithDefault(GEAR_NAME_TO_DATA, selectedGearName, null)}
+              />
+          <div className={styles.gearItemRightDiv}>
+            <LoadingButton
+              style={{width: "100%"}}
+              onClick={() => {
+                setShowGearSelection(true);
+              }}
+              loading={showGearSelection}
+              >
+              {makeIcon("search")} Select
+            </LoadingButton>
+            <LoadingButton 
+              style={{width: "100%"}}
+              onClick={
+                () => {updateFilter(GEAR_PROPERTY.NAME, "")}
+              }
+              disabled={selectedGearName === ""}
+            >
+              {makeIcon("close")} Clear
+            </LoadingButton>
+          </div>
+        </div>
+
       
       <LabeledAlertbox
         header="Select Gear"
@@ -396,6 +415,8 @@ export default function FilterPage({
         </>
       </LabeledAlertbox>
 
+      <br/>
+      <h2 className={""}>Gear Properties</h2>
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
 					<Selector
@@ -409,7 +430,7 @@ export default function FilterPage({
 							updateFilter(GEAR_PROPERTY.TYPE, newSelected);
 						}}
 						selectionOverride={GEAR_NAME_TO_DATA.get(selectedGearName)?.type}
-					/>
+            />
 				</div>
 				<div className={styles.selectorContainer}>
 					<Selector
@@ -441,7 +462,8 @@ export default function FilterPage({
 				</div>
 			</div>
 			<br />
-			<div
+
+      <div
 				style={{ minWidth: "fit-content", width: "80vmin", margin: "0 auto" }}
 			>
 				<div className={styles.filterViewContainer}>
@@ -455,14 +477,14 @@ export default function FilterPage({
 				<br />
 				<div
 					style={{
-						display: "flex",
+            display: "flex",
 						flexDirection: "row",
 						gap: "20px",
 						flexWrap: "wrap",
 						width: "100%",
 						justifyContent: "space-between",
 					}}
-				>
+          >
 					<Link href="/">
 						<button style={{ width: "fit-content" }}>
 							<div style={{ width: "25vmin" }}>Cancel</div>
@@ -472,10 +494,11 @@ export default function FilterPage({
 						onClick={onClickSave}
 						disabled={!canSaveFilter}
 						loading={isSaving}
-					>
+            >
 						<div style={{ width: "25vmin" }}>Save</div>
 					</LoadingButton>
 				</div>
+        </div>
 			</div>
 		</div>
 	);

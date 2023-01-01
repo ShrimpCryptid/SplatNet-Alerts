@@ -84,6 +84,7 @@ div.selected > .checkmark {
     position: relative;
     height: 35px;
     width: 35px;
+    min-width: 35px;
     user-select: none;
     background-color: white;
     border-radius: 10%;
@@ -106,7 +107,7 @@ div.selected > .checkmark {
 .itemLabelText {
     font-style: normal;
     font-size: 18px;
-    text-align: center;
+    text-align: left;
     line-height: 20px;
     margin: 0;
     opacity: 1;

@@ -29,7 +29,11 @@
 }
 
 .footer {
-  padding: 8px 5px 5px 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  text-align: center;
+  padding-top: 8px;
   background: black;
   justify-content: center;
+  width: auto;
 }

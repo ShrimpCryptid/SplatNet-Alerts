@@ -66,8 +66,7 @@ export default function Layout({ children }: LayoutProps) {
 			</div>
       <br/>
 
-      <div className={styles.footer + " hdiv"}>
-
+      <div className={"hdiv " + styles.footer}>
         <p
         style={{
           opacity: "70%",

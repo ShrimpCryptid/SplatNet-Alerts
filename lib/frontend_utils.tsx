@@ -1,7 +1,8 @@
 export function makeIcon(icon: string, className="") {
+  // TODO: make symbol-filled a separate option, or specify it explicitly.
   return (
     <span
-      className={"material-symbols-rounded " + className}
+      className={"material-symbols-rounded symbol-filled " + className}
       style={{display: "inline-block"}}
     >
       {icon}

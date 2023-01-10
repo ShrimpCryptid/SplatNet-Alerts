@@ -467,10 +467,29 @@ export default function Home({
       <div className={"panel"}>
         <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36 symbol-filled")}</h1>
       
+        {makeIconHeader("switch_account", "Log In / Change User", "highlight")}
+        <p style={{marginTop: "0"}}>
+          Paste in your user ID to sync your notification settings across devices.
+        </p>
+        <div className={styles.hdivWrap}>
+          <textarea value={loginUserCode} onChange={handleLoginChange} />
+          <LoadingButton
+            onClick={onClickLogin}
+            loading={awaitingLogin}
+            disabled={!isValidUserCode(loginUserCode.trim())}
+          > 
+            {makeIcon("login")} Log In
+          </LoadingButton>
+        </div>
+        <br/>
+
         {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"), "highlight")}
         <p style={{marginBottom: "0"}}>
-          SplatNet Alerts sends push notifications via your browser. You can turn
-          off notifications at any time.</p>
+          SplatNet Alerts sends push notifications via your browser to alert you about new gear!
+        {notificationsToggle ?
+          <><br/><i>(Turning off notifications will disable ALL notifications from any account on this device.)</i></>
+          : <><br/><i>(If it's an option, set 'Remember my decision' to <span className={"highlight"}>'forever'</span> or notifications may not work correctly.)</i></>}
+        </p>
         <Switch 
           state={notificationsToggle}
           onToggled={toggleNotifications}
@@ -529,23 +548,7 @@ export default function Home({
           >
             Log Out
           </LoadingButton>
-        </div>
-        
-        <br/>
-        {makeIconHeader("switch_account", "Change User", "highlight")}
-        <p style={{marginTop: "0"}}>
-          Paste in your user ID to sync your notification settings across devices.
-        </p>
-        <div className={styles.hdivWrap}>
-          <textarea value={loginUserCode} onChange={handleLoginChange} />
-          <LoadingButton
-            onClick={onClickLogin}
-            loading={awaitingLogin}
-            disabled={!isValidUserCode(loginUserCode.trim())}
-          > 
-            {makeIcon("login")} Login
-          </LoadingButton>
-        </div>
+        </div>        
       </div>
     </div>
 	);

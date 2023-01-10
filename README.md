@@ -29,7 +29,7 @@ I'm currently targeting December 2022 for launch. 🤞
 - [ ] Custom images + text for push notifications (20%)
 - [x] Scrape data from the Splatoon 3 wiki for gear items
 - [x] Gear item selection screen on filter page
-- [ ] Troubleshooting guide for push notifications
+- [x] Troubleshooting guide for push notifications
 - [x] Login flow for notifications
 - [ ] UI polish pass
   - [ ] Show favored/unfavored abilities for brands

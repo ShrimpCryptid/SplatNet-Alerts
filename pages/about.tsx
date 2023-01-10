@@ -23,7 +23,7 @@ export default function About({}: DefaultPageProps) {
         web service that lets you set up notifications for gear items in the
         Splatnet app.
         <br/><br/>It uses push notifications to send notifications directly to your
-        device whenever new items arrive in the shop!
+        device whenever items you're interested in arrive in the shop!
       </p>
 
       <br/>
@@ -37,9 +37,10 @@ export default function About({}: DefaultPageProps) {
       <h2 className={styles.h2}>Frequently Asked Questions (FAQ):</h2>
 
       <h3 className={styles.h3}>What data does this website store?</h3>
-      <p>Some login information is stored locally in the browser, which is used to retrieve your data from the server.
+      <p>Some login information (your user ID) is stored locally in the browser
+        as cookies so you don't have to log in every time you visit.
         <br/><br/>        
-        The server assigns you a user ID when you make your first filter-- I have a lot of security concerns with storing passwords, so no personal login information is collected.
+        The server assigns you a random user ID when you make your first filter. (I have a lot of security concerns with storing passwords, so no personal login information is collected.)
         <br/><br/>
         Currently, the server ties the following information to your user ID:
         <br/>- Filters you've set
@@ -50,6 +51,9 @@ export default function About({}: DefaultPageProps) {
         Push configuration generally does not include any identifying information about your device, and is wiped when you turn off notifications.<br/>
         <br/>
         <Link href="https://felixgerschau.com/web-push-notifications-tutorial/#what-are-web-push-notifications">Click here to read more about how push notifications work.</Link>
+        <br/><br/><p>I will also be adding Google Analytics in the near future to
+          keep track of how many people use this website and how I might improve it.
+        </p> 
       </p>
 
       <h3 className={styles.h3}>How fast does SplatNet Alerts update?</h3>
@@ -57,15 +61,24 @@ export default function About({}: DefaultPageProps) {
         the notifications. These actions are submitted as requests, so sometimes
         GitHub may choose to ignore or skip them, resulting in a slight delay.
         <br/><br/> Notifications will generally be sent out within 30 minutes of
-        when a new gear item first appears. You'll have around 23-24 hours to
-        claim it from SplatNet when it does.
+        when a new gear item first appears. You'll have up to 23 hours to
+        claim it from SplatNet!
       </p>
 
       <h3 className={styles.h3}>Help! I've lost my user ID!</h3>
       <p>
-        If you turned on notifications, clicking the notification link the next
-        time you're alerted about a new item will automatically sign you back in.
-        <br/>If notifications weren't turned on, you can make a new account instead.
+        If you turned on notifications, expanding the notification and clicking
+        'User Settings' the next time you're alerted will automatically sign you
+        back in.
+        <br/>If notifications weren't turned on, you can make a new account
+        instead.
+      </p>
+
+      <h3 className={styles.h3}>Will old accounts ever be deleted?</h3>
+      <p>
+        Probably! I may clean out accounts that haven't been accessed in 6-12
+        months and don't have notifications enabled, as the database service I
+        use has a usage quota.
       </p>
 
       <h3 className={styles.h3}>I have a feature I'd like to request or a bug to report!</h3>

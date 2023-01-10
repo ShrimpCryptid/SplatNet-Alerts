@@ -245,7 +245,15 @@ export default function Home({
 
 	/** Updates the login field as the user types. */
 	const handleLoginChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setLoginUserCode(event.currentTarget.value);
+    // Insert dashes.
+    let loginCode = event.currentTarget.value;
+    if (loginCode.length >= 5 && loginCode.at(4) != '-') {
+      loginCode = loginCode.substring(0, 4) + '-' + loginCode.substring(4); 
+    }
+    if (loginCode.length >= 10 && loginCode.at(9) != '-') {
+      loginCode = loginCode.substring(0, 9) + '-' + loginCode.substring(9); 
+    }
+		setLoginUserCode(loginCode);
 	};
 
 	const onClickLogin = () => {

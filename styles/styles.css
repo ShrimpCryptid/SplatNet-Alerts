@@ -245,7 +245,8 @@ textarea {
 .panel {
   background-color: var(--popout-background);
   margin: 30px 0;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   border-radius: 15px;
   padding: 15px;
 }

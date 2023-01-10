@@ -1,7 +1,7 @@
 .main {
   width: calc(90vmin - 30px);
-  justify-self: center;
   margin: 0 auto;
+  position: relative;
 }
 
 .filterListContainer {

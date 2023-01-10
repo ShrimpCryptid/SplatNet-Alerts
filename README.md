@@ -1,14 +1,16 @@
-# SplatNet Shop Alerts 📣
+# SplatNet Alerts 📣
 Set notifications for the SplatNet 3 Shop!
 
-![image](https://user-images.githubusercontent.com/30200665/201589511-bc220ada-caa7-4ad8-9154-0967867b4e6c.png)
+![image](https://user-images.githubusercontent.com/30200665/211480563-06dc60c1-4063-48cb-b006-248705ac5adf.png)
 
 ## What's this?
-This is an unofficial web app for the game Splatoon 3 that alerts you about relevant SplatNet gear. It's currently work-in-progress, but you can view updates on my [Twitter (@ShrimpCryptid)](https://twitter.com/shrimpcryptid) and via the roadmap below, which I'll update as I make progress.
+Splatoon 3 comes with a companion app, SplatNet 3, which has its own shop and a daily rotating inventory. These items have unique ability combinations that you can't normally buy, but checking the app daily is a bit of a pain.
+
+This is an unofficial web app for the game Splatoon 3 that alerts you about SplatNet gear you're interested in! It's currently work-in-progress, but you can view updates on my [Twitter (@ShrimpCryptid)](https://twitter.com/shrimpcryptid) and via the roadmap below, which I'll update as I make progress.
 
 It's made using NEXT.js, which is a framework for React and Node.js, and the database is built on PostgresSQL.
 
-I'm currently targeting December 2022 for launch. 🤞
+~~I'm currently targeting December 2022 for launch.~~ 😶 *shhh*
 
 ## Features
 - Filter by gear type (hats, clothing, shoes), ability, rarity, and brand
@@ -26,7 +28,7 @@ I'm currently targeting December 2022 for launch. 🤞
 - [x] Send notifications through the database
 - [x] Collect current gear from [Splatoon3.ink](https://splatoon3.ink)
 - [x] Detect changes to gear from local backup and send updates to relevant users
-- [ ] Custom images + text for push notifications (20%)
+- [ ] Custom images + text for push notifications (25%)
 - [x] Scrape data from the Splatoon 3 wiki for gear items
 - [x] Gear item selection screen on filter page
 - [x] Troubleshooting guide for push notifications
@@ -50,6 +52,3 @@ I'm currently targeting December 2022 for launch. 🤞
 
 ## License
 This project is not associated with Nintendo, and is an unofficial, fan-made website. Licensed under MIT.
-
-![loading2](https://user-images.githubusercontent.com/30200665/201589377-e51c9cda-f713-402d-8a3c-5759536da264.gif)
-

@@ -62,10 +62,9 @@ async function getUsersToNotify(client: Pool, newGear: Gear[]) {
  * generates the TTL (time to life) parameter so that the notification expires
  * if any gear items also expire.
  */
-function generateNotificationOptions(gearList: Gear[]): any {
+function generateNotificationOptions(gear: Gear): any {
   // Calculate timeout-- should be from now until gear's expiration date.
-  let lastGear = gearList.sort(Gear.expirationComparator)[gearList.length - 1];
-  let timeDiffMilliseconds = lastGear.expiration - Date.now();
+  let timeDiffMilliseconds = gear.expiration - Date.now();
   let timeDiffSeconds = Math.floor(timeDiffMilliseconds / MILLISECONDS_PER_SECOND);
 
   return {
@@ -73,42 +72,31 @@ function generateNotificationOptions(gearList: Gear[]): any {
   }
 }
 
-function generateNotificationPayload(userCode: string, gearList: Gear[]): any {
+function generateNotificationPayload(userCode: string, gear: Gear): any {
 	let title,
 		body = "",
 		image = "";
   
   let loginURL = `${BASE_WEBSITE_URL}/login?${FE_USER_CODE_URL}=${userCode}`;
-  /** Stored gearID. If more than one item was matched, is empty. */
-  let gearID = gearList[0].id;
-
-	if (gearList.length == 1) {
-		title = "A new item is available on SplatNet!";
-		body = gearList[0].name + "(" + gearList[0].ability + ")";
-		image = gearList[0].image;
-
-	} else if (gearList.length > 1) {
-		title = "New items on SplatNet!";
-		for (let gear of gearList) {
-			body += gear.name + " (" + gear.ability + ") / ";
-		}
-    // Override gearID because there are multiple items
-    gearID = "";
-	}
+  let gearID = gear.id;
+  title = "Now on SplatNet!";
+  body = gear.name + " (" + gear.ability + ")";
+  image = gear.image;
 
   // When updating this, remember to make changes in serviceworker.js!
 	return {
 		title: title,
 		body: body,
 		image: image,
-    iconURL: null,  // TODO: Generate icon for notifications
+    // Use gear image as the icon.
+    iconURL: gear.image,  // TODO: Generate icon for notifications
     loginURL: loginURL,  // used to log in to the website
     siteURL: BASE_WEBSITE_URL,
     shopURL: BASE_SPLATNET_URL,
     gearID: gearID,
     userCode: userCode,
-    tag: gearList[0].id,  // tag for this notification, to prevent duplicates
-    expiration: gearList[0].expiration
+    tag: gear.id,  // tag for this notification, to prevent duplicates
+    expiration: gear.expiration
 	};
 }
 
@@ -188,9 +176,16 @@ export default async function handler(
 		let promises = [];
 		for (let [userID, userCode] of allUserMap) {
 			// Set up the notification *this* user should receive.
-			let userGear = getUserGear(gearToUserMap, userID);
-			let notification = JSON.stringify(generateNotificationPayload(userCode, userGear));
-      let options = generateNotificationOptions(userGear);
+      let notifications: [notification: string, options: any][] = [];
+      let userGear = getUserGear(gearToUserMap, userID);
+
+      for (let gear of userGear) {  // generate a unique notification per item
+        let notification = JSON.stringify(generateNotificationPayload(userCode, gear));
+        let options = generateNotificationOptions(gear);
+        notifications.push([notification, options]);
+      }
+      // Assumption: usually all items have the same expiration because they are
+      // uploaded to the shop at the same time.
 			let latestExpiration = userGear[userGear.length - 1].expiration;
 
 			// Check that we haven't already notified this user
@@ -213,15 +208,18 @@ export default async function handler(
 
 			for (let subscription of userSubscriptions) {
 				devicesNotified++;
-				notificationPromises.push(
-					trySendNotification(client, subscription, notification, options).then(
-						(result) => {
-							if (!result) {
-								devicesFailed++;
-							}
-						}
-					)
-				);
+        // Send one notification for every item to this subscription endpoint
+        for (let [notification, options] of notifications) {
+          notificationPromises.push(
+            trySendNotification(client, subscription, notification, options).then(
+              (result) => {
+                if (!result) {
+                  devicesFailed++;
+                }
+              }
+            )
+          );
+        }
 			}
 			// TODO: Skip if user was not actually notified?
 			promises.push(

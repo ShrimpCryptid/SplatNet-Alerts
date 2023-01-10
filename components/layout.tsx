@@ -44,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
             <Link href="/">
               <h1 className={styles.headerMainText}>SplatNet Alerts</h1>
             </Link>
-            <p className={styles.headerSubText}>A Splatoon gear alerts service by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>!</p>
+            <p className={styles.headerSubText}>A Splatoon gear alerts service!</p>
           </div>
         </div>
         <div className="hdiv" style={{gap: "15px", marginLeft: "auto"}}>

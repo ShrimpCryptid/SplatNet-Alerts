@@ -91,8 +91,8 @@ function generateNotificationPayload(userCode: string, gear: Gear): any {
   let loginURL = `${BASE_WEBSITE_URL}/login?${FE_USER_CODE_URL}=${userCode}`;
   let gearID = gear.id;
   title = "Now on SplatNet!";
-  body = gear.name + " (" + gear.ability + ")";
-  image = gear.image;
+  body = gear.name + ": " + gear.ability;
+  // image = gear.image;
 
   // When updating this, remember to make changes in serviceworker.js!
 	return {

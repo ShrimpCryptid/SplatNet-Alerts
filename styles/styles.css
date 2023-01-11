@@ -1,7 +1,7 @@
 @import url('./fonts.css');
 
 :root {
-  --background: #111111;
+  --background: rgb(33, 33, 33);
 
   --popout-background: black;
 

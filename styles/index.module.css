@@ -1,5 +1,5 @@
 .main {
-  width: calc(90vmin - 30px);
+  width: calc(90vmin);
   margin: 0 auto;
   position: relative;
 }

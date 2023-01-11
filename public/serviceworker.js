@@ -20,7 +20,6 @@ self.addEventListener('push', async (event) => {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Notification/data
-
   self.registration.showNotification(
     data.title,
     {
@@ -28,7 +27,7 @@ self.addEventListener('push', async (event) => {
       image: data.image,
       actions: actions,
       tag: data.tag,
-      icon: data.icon || "https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg",
+      icon: data.iconURL || "https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg",
       data: data  // Stores a whole copy of all data passed to the notification
     });
 });

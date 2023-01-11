@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import mainLogo from "../public/images/main_logo.svg";
@@ -29,6 +30,21 @@ export default function Layout({ children }: LayoutProps) {
           href="https://fonts.googleapis.com/css2?family=Inter"
         />
 			</Head>
+
+      {/* Google tag (gtag.js) for analytics*/}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-CFY5MMETJF"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-CFY5MMETJF');
+        `}
+      </Script>
+
       <div className={styles.header}>
         <div className="hdiv">
           <Link href="/">

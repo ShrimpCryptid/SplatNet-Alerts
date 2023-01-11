@@ -47,10 +47,21 @@ function aggregateUsers(gearToUserMap: Map<Gear, Map<number, string>>) {
 async function getUsersToNotify(client: Pool, newGear: Gear[]) {
   let promises: Promise<any>[] = [];
   let gearToUserMap = new Map<Gear, Map<number, string>>();
+
   // Parallelize requests for user data due to network
   for (let gear of newGear) {
-    promises.push(getUsersToBeNotified(client, gear).then((value: Map<number, string>) => {
-      gearToUserMap.set(gear, value);
+    promises.push(new Promise<void>((resolve, reject) => {
+      try {
+        return getUsersToBeNotified(client, gear).then((value: Map<number, string>) => {
+          gearToUserMap.set(gear, value);
+          resolve();
+        });
+        
+      } catch (e) {
+        console.error("The following error occurred while trying to get users for gear '" + gear.name + "'. Skipping...")
+        console.error(e);
+        reject();
+      }
     }));
   }
   await Promise.all(promises);

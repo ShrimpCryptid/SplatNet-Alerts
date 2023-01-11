@@ -366,7 +366,7 @@ export default function FilterPage({
 		<div className={styles.main}>
 			<Head>Splatnet Shop Alerts</Head>
       <div className={styles.panel + " panel"}>
-        <h1 className={""}>New Filter</h1>
+        <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
         <p>Select the gear properties you want to be alerted for!
           <br/><br/>You can set an alert for a <span className={"highlight"}>specific gear item
           </span> or any gear that matches a certain <span className={"highlight"}>type or brand.</span>

@@ -51,6 +51,7 @@ export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 export const GEAR_BRANDS = [
 	"Annaki",
 	"Barazushi",
+  "Cuttlegear",
 	"Emberz",
 	"Enperry",
 	"Firefin",
@@ -67,7 +68,7 @@ export const GEAR_BRANDS = [
 	"Zekko",
 	"Zink",
 ];
-export const IGNORED_GEAR_BRANDS = ["Grizzco", "Cuttlegear", "amiibo"];
+export const IGNORED_GEAR_BRANDS = ["Grizzco", "amiibo"];
 export const GEAR_RARITY_MAX = 2;
 export const GEAR_RARITY_MIN = 0;
 

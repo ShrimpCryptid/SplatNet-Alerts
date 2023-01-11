@@ -57,8 +57,9 @@ async function parseRowToGear(
 	// Parse column data
 	name = $(children[1]).text().trim();
 	brand = $(children[2]).text().trim();
-	// TODO: Fix incorrect prices in geardata?
 	cost = $(children[3]).text().trim(); // note, can be amiibo and not num
+  cost = cost.replaceAll(',', '');
+
 	ability = $(children[4]).text().trim();
 
 	// Calculate rarity by counting the number of full stars
@@ -68,11 +69,13 @@ async function parseRowToGear(
 			rarity++;
 		}
 	});
-
-	// Check if this is an item we should ignore based on ability or brand.
+  
+	// Check if this is an item we should ignore based on ability or brand, or if
+  // it can't be purchased with coins (ex: amiibo or singleplayer)
 	if (
 		IGNORED_GEAR_BRANDS.includes(brand) ||
-		IGNORED_GEAR_ABILITIES.includes(ability)
+		IGNORED_GEAR_ABILITIES.includes(ability) ||
+    !(/^[0-9]*$/).test(cost)
 	) {
 		return null;
 	}
@@ -167,6 +170,8 @@ async function scrapeGearDataFromWikiPage(
 		await Promise.all(promises);
 		progressBar.update(gearCount);
 		progressBar.stop();
+
+    gear.sort(Gear.gearNameComparator); // Sort by name
 		return gear;
 	} catch (error) {
 		throw error;

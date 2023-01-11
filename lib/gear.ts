@@ -85,6 +85,13 @@ export class Gear {
 	};
 
   /**
+   * Sorts gear in ascending order of name.
+   */
+  static gearNameComparator = (a: Gear, b: Gear) => {
+    return a.name.localeCompare(b.name);
+  }
+
+  /**
    * Creates a new object with shortened keys and type/brand/ability values,
    * useful for reducing file sizes. Removes the name, price, expiration, and id
    * fields. Also reduces size of image links from the Splatoon wiki.

@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps) {
         <meta name="description" content="A fan-made push notification service for Splatoon gear"/>
         <meta name="keywords" content="Splatoon 3, SplatNet, gear, notification, alert, clothing, Nintendo, Splatoon"/>
         <meta name="author" content="@ShrimpCryptid"/>
-        <meta name="image" content="https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg"/>
+        <meta name="image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/sign/splatnet-alerts-public/main_logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzcGxhdG5ldC1hbGVydHMtcHVibGljL21haW5fbG9nby5wbmciLCJ0cmFuc2Zvcm1hdGlvbnMiOiIiLCJpYXQiOjE2NzM0MTg1NDAsImV4cCI6MTk4ODc3ODU0MH0.l7LvnCpu2ncL4R-OqiJHUcotO3StE-qzCjnLTJB6hCs"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 				<link
 					rel="stylesheet"

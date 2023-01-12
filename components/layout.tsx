@@ -42,14 +42,18 @@ export default function Layout({ children }: LayoutProps) {
         src={"https://www.googletagmanager.com/gtag/js?id=" + getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}
         strategy="afterInteractive"
       />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}');
-        `}
-      </Script>
+        `
+          }}
+      />
 
       <div className={styles.header}>
         <div className="hdiv">

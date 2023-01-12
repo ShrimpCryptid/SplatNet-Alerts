@@ -17,6 +17,8 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isValidUserCode, sleep } from "../lib/shared_utils";
+import * as gtag from '../lib/analytics';
+import router from "next/router";
 
 const GET_USER_DATA_DEFAULT_ATTEMPTS = 3;
 
@@ -170,6 +172,24 @@ export default function App({ Component, pageProps }: AppProps) {
 			updateLocalUserData(userCode, false, true);
 		}
 	});
+
+  // Track pageview change events
+  // Adapted from https://andrew-simpson-ross.medium.com/strongly-typed-google-analytics-v4-with-next-js-aad6c6a5e383
+  useEffect(() => {
+    const handleRouteChange = (url: URL) => {
+      gtag.pageview(url);
+    };
+    router.events.on(
+      'routeChangeComplete',
+      handleRouteChange
+    );
+    return () => {
+      router.events.off(
+        'routeChangeComplete',
+        handleRouteChange
+      )
+    }
+  }, [router.events])
 
   /**
    * Fetches most recent user data from the backend and stores it locally,

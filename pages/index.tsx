@@ -468,7 +468,7 @@ export default function Home({
           <br />
           <br />
           Splatnet Alerts is maintained by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>. You can contribute
-          directly to the project on <Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">GitHub</Link>!
+          directly to the project on <Link href="https://github.com/ShrimpCryptid/SplatNet-Alerts">GitHub</Link>!
         </p>
       </div>
       

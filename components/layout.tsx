@@ -68,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
         <div className="hdiv" style={{gap: "15px", marginLeft: "auto"}}>
-          <p><Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">Source</Link></p>
+          <p><Link href="https://github.com/ShrimpCryptid/SplatNet-Alerts">Source</Link></p>
           <p><Link href="/about">About</Link></p>
         </div>
       </div>

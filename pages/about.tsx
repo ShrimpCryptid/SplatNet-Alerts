@@ -83,7 +83,7 @@ export default function About({}: DefaultPageProps) {
 
       <h3 className={styles.h3}>I have a feature I'd like to request or a bug to report!</h3>
       <p>
-        Great! You can suggest features and report bugs on the <Link href="https://github.com/ShrimpCryptid/splatnet-shop-alerts">GitHub repository for this project</Link>.
+        Great! You can suggest features and report bugs on the <Link href="https://github.com/ShrimpCryptid/SplatNet-Alerts">GitHub repository for this project</Link>.
         <br/><br/>I'm also open to contributors, so if you're interested in
         development please read the setup guide that will be added in the near future.
       </p>

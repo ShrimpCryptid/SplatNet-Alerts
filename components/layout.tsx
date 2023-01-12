@@ -63,6 +63,7 @@ export default function Layout({ children }: LayoutProps) {
                 src={mainLogo}
                 layout={"fill"}
                 alt={"Website logo: an orange autobomb wearing the 18k aviators."}
+                priority={true}
                 />
             </div>
           </Link>

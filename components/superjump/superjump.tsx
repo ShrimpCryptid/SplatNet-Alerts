@@ -39,7 +39,7 @@ const SuperJumpLoadAnimation = ({
 		//@ts-ignore
 		<div className={styles.holder} style={{ "--face-count": totalFaces }}>
 			<div className={styles.bigIconHolder}>
-				<Image src={superjumpMarker} layout={"fill"} />
+				<Image src={superjumpMarker} layout={"fill"} priority={true} />
 			</div>
 
 			<div className={styles.cylinder}>
@@ -52,7 +52,7 @@ const SuperJumpLoadAnimation = ({
 								style={{ "--index": index }}
 								key={index}
 							>
-								<Image src={value} layout={"fill"} />
+								<Image src={value} layout={"fill"} priority={true} />
 							</div>
 						);
 					}

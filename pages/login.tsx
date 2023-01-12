@@ -109,7 +109,7 @@ export default function Login({ userCode, setUserCode }: DefaultPageProps) {
 				</LabeledAlertbox>
 			) : (
 				<div className={styles.loadingSpinner}>
-					<Image src={loadingIcon} layout="fill" />
+					<Image src={loadingIcon} layout="fill" priority={true} />
 				</div>
 			)}
 		</div>

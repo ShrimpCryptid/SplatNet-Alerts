@@ -48,7 +48,7 @@ export default function LoadingButton({
 						className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
 					>
 						<div className={styles.loadingFiller}></div>
-						<Image src={loadingIcon} layout="fill" />
+						<Image src={loadingIcon} layout="fill" priority={true}/>
 					</div>
 				) : (
 					<> </>

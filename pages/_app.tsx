@@ -134,6 +134,19 @@ export type DefaultPageProps = {
 		printErrors: boolean,
     forceUpdate?: boolean
 	) => Promise<[boolean, {nickname: string | null, filters: Filter[] | null}]>;
+
+  /**
+ * Fetches and returns the user data for the given user from the backend.
+ *
+ * @param userCode The string user code to query data for.
+ * @returns
+ * - An ordered array of data values if the operation was successful (200).
+ *    Currently, returns the filter list and the user nickname in order.
+ * - null if the usercode is invalid or if the backend returned any error codes
+ */
+  getUserData: (
+    userCode: string | null,
+  ) => Promise<[Filter[], string] | null>;
 };
 
 
@@ -266,6 +279,7 @@ export default function App({ Component, pageProps }: AppProps) {
           setIsUserNew={setIsUserNew}
 
 					updateLocalUserData={updateLocalUserData}
+          getUserData={getUserData}
 				/>
 			</>
 		</Layout>

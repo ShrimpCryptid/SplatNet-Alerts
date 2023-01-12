@@ -4,6 +4,8 @@ import Link from "next/link";
 import Script from "next/script";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ENV_KEY_GOOGLE_ANALYTICS } from "../constants/env";
+import { getEnvWithDefault } from "../lib/shared_utils";
 import mainLogo from "../public/images/main_logo.svg";
 import styles from "./layout.module.css";
 
@@ -37,7 +39,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Google tag (gtag.js) for analytics*/}
       <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-CFY5MMETJF"
+        src={"https://www.googletagmanager.com/gtag/js?id=" + getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}
         strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
@@ -45,7 +47,7 @@ export default function Layout({ children }: LayoutProps) {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-CFY5MMETJF');
+          gtag('config', '${getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}');
         `}
       </Script>
 

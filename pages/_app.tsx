@@ -17,8 +17,8 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isValidUserCode, sleep } from "../lib/shared_utils";
-import * as gtag from '../lib/analytics';
 import router from "next/router";
+import { logEvent, logPageview } from "../lib/analytics";
 
 const GET_USER_DATA_DEFAULT_ATTEMPTS = 3;
 
@@ -169,7 +169,11 @@ export default function App({ Component, pageProps }: AppProps) {
 		if (userCode !== undefined && userCode !== null && !hasDoneInitialLoad) {
 			// We've loaded the user code, so update our local user data using it.
 			setHasDoneInitialLoad(true);
-			updateLocalUserData(userCode, false, true);
+			updateLocalUserData(userCode, false, true).then((result) => {
+        if (result[0]) {
+          logEvent('login');  // TODO: Fix event logging
+        }
+      });
 		}
 	});
 
@@ -177,7 +181,7 @@ export default function App({ Component, pageProps }: AppProps) {
   // Adapted from https://andrew-simpson-ross.medium.com/strongly-typed-google-analytics-v4-with-next-js-aad6c6a5e383
   useEffect(() => {
     const handleRouteChange = (url: URL) => {
-      gtag.pageview(url);
+      logPageview(url);
     };
     router.events.on(
       'routeChangeComplete',

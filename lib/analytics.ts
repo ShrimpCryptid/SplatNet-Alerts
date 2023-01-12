@@ -9,13 +9,26 @@ export function getGoogleAnalyticsID(): string {
   return getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "");
 }
 
-export const pageview = (url: URL) => {
+export function logPageview (url: URL) {
   window.gtag('config', getGoogleAnalyticsID(), {page_path: url});
 }
 
-export const event = (
-  action: Gtag.EventNames,
-  {event_category, event_label, value}: Gtag.EventParams
-) => {
-  window.gtag('event', action, {event_category, event_label, value});
+export function logEvent (
+  action: Gtag.EventNames | AnalyticsAction,
+  params?: Gtag.EventParams | Gtag.CustomParams
+) {
+  window.gtag('event', action, params);
+}
+
+export enum AnalyticsCategory {
+  Filters = "Filters",
+  Users = "Users",
+}
+
+export enum AnalyticsAction {
+  NewFilter = "new_filter",
+  EditFilter = "edit_filter",
+}
+
+export enum AnalyticsLabel {
 }

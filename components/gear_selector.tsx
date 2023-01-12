@@ -85,7 +85,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 			return (
 				<>
 					{[...GEAR_NAME_TO_DATA.values()].map((gear) => {
-						return <GearTile gear={gear} onSelection={onSelection} />;
+						return <GearTile gear={gear} onSelection={onSelection} key={gear.name}/>;
 					})}
 				</>
 			);

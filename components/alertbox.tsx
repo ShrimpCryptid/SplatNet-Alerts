@@ -95,7 +95,7 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 			</p>
 
 			<div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-				<textarea value={props.usercode ? props.usercode : ""} />
+				<textarea value={props.usercode ? props.usercode : ""} readOnly={true} />
 				<LoadingButton
 					buttonStyle={ButtonStyle.ICON}
 					onClick={() => {

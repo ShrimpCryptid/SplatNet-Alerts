@@ -12,7 +12,7 @@ import {
 	trySendNotification,
 } from "../../lib/database_utils";
 import { Subscription } from "../../lib/notifications";
-import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
+import { BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
 
 /**
  * Updates the user's notification subscription.

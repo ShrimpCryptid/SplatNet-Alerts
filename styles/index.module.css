@@ -2,11 +2,14 @@
   width: calc(90vmin);
   margin: 0 auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .filterListContainer {
   width: 100%;
-  min-width: calc(90vmin - 60px);
+  min-width: calc(90vmin - 30px);
   max-height: 100vh;
   overflow-y: auto;
   display: flex;

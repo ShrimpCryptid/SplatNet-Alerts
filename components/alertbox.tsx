@@ -5,6 +5,7 @@ import styles from "./alertbox.module.css";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 import notificationImage from "../public/images/notifications-forever.jpg";
 import Image from "next/image";
+import { makeLink } from "../lib/frontend_utils";
 
 type AlertboxProps = {
   children?: React.ReactNode;
@@ -14,11 +15,13 @@ type AlertboxProps = {
 export function Alertbox(props: AlertboxProps) {
   let visible = props.visible === undefined ? true : props.visible;
 	return (
-		<div className={styles.background}
-      style={{visibility: visible ? "visible" : "hidden"}}
-    >
-			<div className={styles.alertbox}>{props.children}</div>
-		</div>
+    <>
+      <div className={styles.alertbox}>{props.children}</div>
+      <div className={styles.background}
+        style={{visibility: visible ? "visible" : "hidden"}}
+        >
+      </div>
+    </>
 	);
 }
 
@@ -196,6 +199,32 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
           </div>
         </LoadingButton>
       </div>
+    </LabeledAlertbox>
+  )
+}
+
+export function IOSAlertbox(props: {onClickClose: MouseEventHandler}) {
+  return (
+    <LabeledAlertbox
+      header="iOS Device Detected"
+      onClickClose={props.onClickClose}
+      primaryButton="R.I.P."
+      primaryButtonOnClick={props.onClickClose}
+    >
+      <p>
+        Thanks for your interest in SplatNet Alerts!<br/>You're welcome to use the
+        site, but please know that <span className="highlight">push notifications will not work on your device.</span>
+        <br/><br/>
+        Apple doesn't support the push notification standard yet on iOS browsers.
+        This should change sometime in 2023, but until then
+        you may want to <span className="highlight">use another device</span> to receive notifications.
+        (All your content will still sync, though!)
+        <br/><br/>
+        You can read more about this on
+        this {makeLink("project's GitHub page", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}.
+
+      </p>
+
     </LabeledAlertbox>
   )
 }

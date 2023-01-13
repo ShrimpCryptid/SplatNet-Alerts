@@ -13,6 +13,7 @@ import {
 	API_SUBSCRIPTION,
 	API_USER_CODE,
 	FE_ERROR_INVALID_USERCODE,
+	FE_HAS_SHOWN_IOS_WARNING,
 	FE_LOCAL_SUBSCRIPTION_INFO,
 	FE_UNKNOWN_MSG,
 } from "../constants";
@@ -25,9 +26,9 @@ import {
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { fetchWithAttempts, getRandomTitle, isValidNickname, isValidUserCode, printStandardErrorMessage, sanitizeNickname, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
-import LabeledAlertbox, { NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
+import LabeledAlertbox, { IOSAlertbox, NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
-import { makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
+import { isIOS, makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
 
 enum NEW_USER_FLOW {
   NONE=0,
@@ -67,7 +68,8 @@ export default function Home({
   let [notificationsLoading, setNotificationsLoading] = useState(false);
 
   let [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
-  
+  let [showIOSPrompt, setShowIOSPrompt] = useState(false);
+
 	let [loginUserCode, setLoginUserCode] = useState("");
 
 	// Retrieve the user's filters from the database.
@@ -351,8 +353,26 @@ export default function Home({
   }
 	// Otherwise, filter list will be shown instead.
 
+  // Check if we should show the iOS Alert box
+  useEffect(() => {
+    if (isIOS() && window.localStorage.getItem(FE_HAS_SHOWN_IOS_WARNING) === null) {
+      setShowIOSPrompt(true);
+    }
+  })
+
+  const onClickCloseIOSPrompt = () => {
+    if (window) {
+      window.localStorage.setItem(FE_HAS_SHOWN_IOS_WARNING, "");
+      setShowIOSPrompt(false);
+    }
+  }
+
 	return (
 		<div className={styles.main}>
+      {showIOSPrompt
+        ? <IOSAlertbox onClickClose={onClickCloseIOSPrompt} />
+        : <></>
+      }
 
       {visiblePrompt === NEW_USER_FLOW.NICKNAME_PROMPT ?
         <WelcomeAlertbox

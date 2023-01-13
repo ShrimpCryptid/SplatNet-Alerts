@@ -36,6 +36,8 @@ export const FE_ERROR_INVALID_USERCODE =
 export const FE_UNKNOWN_MSG =
 	"Sorry, something went wrong. Please try again in a few seconds.";
 
+export const FE_HAS_SHOWN_IOS_WARNING = "has_shown_ios_warning";
+
 export enum GEAR_PROPERTY {
 	TYPE = "type",
 	ABILITY = "ability",

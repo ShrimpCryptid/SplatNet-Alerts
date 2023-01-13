@@ -45,3 +45,19 @@ export function makeHomeLink() {
     </Link>
   )
 }
+
+export function isIOS() {
+  // See https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
+  // TODO: Replace navigator.platform because it may be deprecated?
+  return [
+    'iPad Simulator',
+    'iPhone Simulator',
+    'iPod Simulator',
+    'iPad',
+    'iPhone',
+    'iPod'
+  ].includes(navigator.platform)
+  // iPad on iOS 13 detection -- check if there's a touch object to distinguish
+  // from a Mac, since they look the same
+  || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+}

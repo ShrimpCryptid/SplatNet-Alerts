@@ -9,14 +9,14 @@
   transform-origin: center;
   text-align: center;
   position: relative;
-  --cylinder-width: calc(55vmin);
+  --cylinder-width: calc(40vmin + 150px);
   --face-count: 30;
   --face-deg: calc(360deg / var(--face-count));
-  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.07vmin);
+  --face-width: calc(var(--cylinder-width) / var(--face-count) + 0.2vmin);
   --face-shift: calc(var(--cylinder-width) / var(--pi) / 2);
   --pi: 3.14159265358979;
   --index: 0;
-  --filter: hue-rotate(140deg) brightness(200%);
+  --filter: hue-rotate(139deg) brightness(180%) opacity(100%);
   align-items: center;
   width: 100%;
   height: calc(100% - 20px);
@@ -36,7 +36,7 @@
 
 .face {
   position: absolute;
-  opacity: 0.7;
+  opacity: 100%;
   height: 90px;
   width: var(--face-width);
   top: 50%;
@@ -55,13 +55,12 @@
 
 .bigIconHolder {
   position: absolute;
-  opacity: 70%;
   width: 100%;
-  height: 13vmin;
+  height: calc(11vmin + 40px);
   animation: bob 1.25s infinite ease-in-out alternate-reverse;
   transform: translate(-50%, 0);
   left: 50%;
-  bottom: calc(50% + 8vmin);
+  bottom: calc(50% + 8vmin + 10px);
   filter: var(--filter);
 }
 
@@ -74,7 +73,7 @@
 .label {
   position: absolute;
   text-align: center;
-  top: calc(50% + 5vmin);
+  top: calc(50% + 5vmin + 20px);
   width: 50%;
   padding: 0 25%;
 }

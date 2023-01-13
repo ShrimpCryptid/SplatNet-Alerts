@@ -20,14 +20,6 @@ export function logPageview (url: URL) {
   window.gtag('config', getGoogleAnalyticsID(), {page_path: url});
 }
 
-export function logEvent (
-  action: Gtag.EventNames | AnalyticsAction,
-  params?: Gtag.EventParams | Gtag.CustomParams
-) {
-  if (typeof window === 'undefined' || window.gtag === undefined) { return; }
-  window.gtag('event', action, params);
-}
-
 export enum AnalyticsCategory {
   Filters = "Filters",
   Users = "Users",

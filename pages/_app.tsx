@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isValidUserCode, sleep } from "../lib/shared_utils";
 import router from "next/router";
-import { logEvent, logPageview } from "../lib/analytics";
+import { logPageview } from "../lib/analytics";
 
 const GET_USER_DATA_DEFAULT_ATTEMPTS = 3;
 
@@ -184,7 +184,7 @@ export default function App({ Component, pageProps }: AppProps) {
 			setHasDoneInitialLoad(true);
 			updateLocalUserData(userCode, true, true).then((result) => {
         if (result[0]) {
-          logEvent('login');  // TODO: Fix event logging
+          // logEvent('login');  // TODO: Fix event logging
         }
       });
 		}

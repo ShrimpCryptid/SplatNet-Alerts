@@ -137,7 +137,8 @@ export default function Home({
       navigator.serviceWorker.getRegistration().then((registration) => {
         setNotificationsToggle(
           window && window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO) !== null
-          && registration !== undefined && Notification.permission === "granted");
+          && registration !== undefined && Notification.permission === "granted"
+          && userCode !== undefined && userCode !== null);
       });
     }
   })
@@ -341,7 +342,7 @@ export default function Home({
 	} else if (userFilters && userFilters.length === 0) {
 		// User was loaded but has no filters.
 		loadingText = "There's nothing here yet.";
-	} else {
+	} else if (userFilters === null) {
     // Attempted fetch of user data but the user does not exist.
     loadingText = [
       "Sorry, something went wrong when fetching your data."
@@ -515,7 +516,7 @@ export default function Home({
           state={notificationsToggle}
           onToggled={toggleNotifications}
           loading={notificationsLoading}
-          disabled={false  /** TODO: Check if push is supported by browser */}
+          disabled={userCode === null || userCode === undefined  /** TODO: Check if push is supported by browser */}
         />
         <br/>
         <br/>

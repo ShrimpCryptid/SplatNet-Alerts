@@ -61,7 +61,7 @@ export default function Home({
 
   let [visiblePrompt, setVisiblePrompt] = useState(NEW_USER_FLOW.NONE);
 
-	let [pageSwitchReady, setPageSwitchReady] = useState(false);
+	let [switchingPages, setSwitchingPages] = useState(false);
 
 	let [notificationsToggle, setNotificationsToggle] = useState(false);
   let [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -88,22 +88,18 @@ export default function Home({
 	/** Edit an existing filter */
 	const onClickEditFilter = (filterIndex: number) => {
 		// Switch page contexts, save the editing filter to the state.
-		if (userFilters && !pageSwitchReady) {
+		if (userFilters && !switchingPages) {
 			setEditingFilterIndex(filterIndex);
 			setAwaitingEdit(filterIndex);
-			setPageSwitchReady(true);
+      setSwitchingPages(true);
+      Router.push("/filter");
 		}
 	};
 
-	// Switches page to the filter edit/creation, but only when state has finished
-	// changing.
 	useEffect(() => {
 		// Manually prefetch the filters page (since we're not using a Next.js Link
 		// which normally handles this for us!).
-		Router.prefetch("filter");
-		if (pageSwitchReady) {
-			Router.push("filter");
-		}
+		Router.prefetch("/filter");
 	});
 
 	/** Attempts to delete the filter given by the index from the server. */
@@ -465,7 +461,8 @@ export default function Home({
           onClick={() => {
             setEditingFilterIndex(null); // clear any filters being edited
             setAwaitingNewFilter(true); // set loading animation on new filter
-            setPageSwitchReady(true); // ready page to transition
+            setSwitchingPages(true);
+            Router.push("/filter");
           }}
           loading={awaitingNewFilter}
           disabled={awaitingEdit !== -1}

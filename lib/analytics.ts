@@ -10,7 +10,7 @@ export function getGoogleAnalyticsID(): string {
 }
 
 export function logPageview (url: URL) {
-  if (typeof window === 'undefined') { return; }
+  if (typeof window === 'undefined' || window.gtag === undefined) { return; }
   window.gtag('config', getGoogleAnalyticsID(), {page_path: url});
 }
 
@@ -18,7 +18,7 @@ export function logEvent (
   action: Gtag.EventNames | AnalyticsAction,
   params?: Gtag.EventParams | Gtag.CustomParams
 ) {
-  if (typeof window === 'undefined') { return; }
+  if (typeof window === 'undefined' || window.gtag === undefined) { return; }
   window.gtag('event', action, params);
 }
 

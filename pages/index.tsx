@@ -27,7 +27,7 @@ import { fetchWithAttempts, getRandomTitle, isValidNickname, isValidUserCode, pr
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
 import LabeledAlertbox, { NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
-import { makeIcon, makeIconHeader } from "../lib/frontend_utils";
+import { makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
 
 enum NEW_USER_FLOW {
   NONE=0,
@@ -174,7 +174,14 @@ export default function Home({
           return null;
         } else if (Notification.permission !== "granted") {
           // User denied notifications
-          toast.error("Notifications have been disabled. Check the webpage settings in your browser to reenable them.");
+          toast.error(
+            <div>
+              <p>
+              Notifications have been disabled. Check the webpage settings in your browser to reenable them.
+              </p>
+              {makeLink("See the Help Guide", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/3")}
+            </div>
+            , {autoClose: 5000});
           return false;
         }
 
@@ -476,8 +483,8 @@ export default function Home({
           within 30 minutes of new items arriving in the shop!
           <br />
           <br />
-          Splatnet Alerts is maintained by <Link href="https://twitter.com/ShrimpCryptid">@ShrimpCryptid</Link>. You can contribute
-          directly to the project on <Link href="https://github.com/ShrimpCryptid/SplatNet-Alerts">GitHub</Link>!
+          Splatnet Alerts was built by {makeLink("@ShrimpCryptid", "https://twitter.com/ShrimpCryptid")}. You can contribute
+          directly to the project on {makeLink("GitHub", "https://github.com/ShrimpCryptid/SplatNet-Alerts")}!
         </p>
       </div>
       

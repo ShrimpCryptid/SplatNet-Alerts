@@ -18,3 +18,15 @@ export function makeIconHeader(icon: string, header: string, containerClassName=
     </div>
   )
 }
+
+export function makeLink(text: string, url: string, newTab: boolean = true) {
+  if (newTab) {
+    return (
+      <a target="_blank" href={url} rel="noopener noreferrer">{text}</a>
+    );
+  } else {
+    return (
+      <a href={url} rel="noopener noreferrer">{text}</a>
+    );
+  }
+}

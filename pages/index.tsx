@@ -492,7 +492,7 @@ export default function Home({
         </LoadingButton>
       </div>
 
-      <div className={"panel"}>
+      <div className={"panel " + styles.panel}>
         <h3 className={styles.centered}>Get notified about gear from the SplatNet 3 app!</h3>
         <p>
           Splatnet Alerts lets you sign up for notifications about new gear items.
@@ -506,7 +506,7 @@ export default function Home({
         </p>
       </div>
       
-      <div className={"panel"}>
+      <div className={"panel " + styles.panel}>
         <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36 symbol-filled")}</h1>
       
         {makeIconHeader("switch_account", "Log In / Change User", "highlight")}

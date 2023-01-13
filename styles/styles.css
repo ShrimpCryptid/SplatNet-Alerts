@@ -50,7 +50,7 @@ body {
 
 p {
   font-family: var(--font-family-ui);
-  font-size: calc(12px + .4vmin);
+  font-size: calc(14px + .2vmin);
   font-weight: 400;
   color: var(--body-color);
   margin-top: 2px;

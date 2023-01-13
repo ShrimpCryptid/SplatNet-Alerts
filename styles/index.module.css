@@ -1,5 +1,5 @@
 .main {
-  width: calc(90vmin);
+  width: calc(100% - 10px);
   margin: 0 auto;
   position: relative;
   display: flex;
@@ -7,9 +7,14 @@
   align-items: center;
 }
 
+.panel {
+  width: 60vh;
+  max-width: 70vw;
+}
+
 .filterListContainer {
-  width: 100%;
-  min-width: calc(90vmin - 30px);
+  width: calc(60vw);
+  min-width: calc(90vmin - 10px);
   max-height: 100vh;
   overflow-y: auto;
   display: flex;

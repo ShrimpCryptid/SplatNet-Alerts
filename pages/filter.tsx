@@ -364,8 +364,16 @@ export default function FilterPage({
 
 	return (
 		<div className={styles.main}>
-			<Head>Splatnet Shop Alerts</Head>
       <div className={styles.panel + " panel"}>
+        <p><b>
+            <Link href="/">
+              <div className="hdiv" style={{alignItems: "center", cursor: "pointer"}}>
+                {makeIcon("arrow_back", "md-18")}
+                <u>Back to Home</u>
+              </div>
+            </Link>
+        </b></p>
+
         <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
         <p>Select the gear properties you want to be alerted for!
           <br/><br/>You can set an alert for a <span className={"highlight"}>specific gear item

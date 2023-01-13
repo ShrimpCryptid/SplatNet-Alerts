@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function makeIcon(icon: string, className="") {
   // TODO: make symbol-filled a separate option, or specify it explicitly.
   return (
@@ -29,4 +31,17 @@ export function makeLink(text: string, url: string, newTab: boolean = true) {
       <a href={url} rel="noopener noreferrer">{text}</a>
     );
   }
+}
+
+export function makeHomeLink() {
+  return (
+    <Link href="/">
+      <div className="hdiv" style={{alignItems: "center", cursor: "pointer"}}>
+          {makeIcon("arrow_back", "md-18")}
+        <p style={{margin: "0"}}>
+          <b><u>Back to Home</u></b>
+        </p>
+      </div>
+    </Link>
+  )
 }

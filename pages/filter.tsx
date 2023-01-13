@@ -24,7 +24,7 @@ import {
   TYPE_EXCLUSIVE_ABILITIES,
 } from "../constants";
 import Filter from "../lib/filter";
-import { makeIcon } from "../lib/frontend_utils";
+import { makeHomeLink, makeIcon } from "../lib/frontend_utils";
 import { Gear } from "../lib/gear";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
 import { mapGetWithDefault, sleep } from "../lib/shared_utils";
@@ -365,14 +365,7 @@ export default function FilterPage({
 	return (
 		<div className={styles.main}>
       <div className={styles.panel + " panel"}>
-        <p><b>
-            <Link href="/">
-              <div className="hdiv" style={{alignItems: "center", cursor: "pointer"}}>
-                {makeIcon("arrow_back", "md-18")}
-                <u>Back to Home</u>
-              </div>
-            </Link>
-        </b></p>
+        {makeHomeLink()}
 
         <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
         <p>Select the gear properties you want to be alerted for!

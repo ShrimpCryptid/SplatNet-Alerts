@@ -3,19 +3,14 @@ import { DefaultPageProps } from "./_app";
 import styles from "../styles/about.module.css";
 import mainLogo from "../public/images/main_logo.svg";
 import Image from "next/image";
-import { makeIcon, makeLink } from "../lib/frontend_utils";
+import { makeHomeLink, makeIcon, makeLink } from "../lib/frontend_utils";
 
 export default function About({}: DefaultPageProps) {
   return (
     <div style={{width: "calc(90vmin - 30px)", justifySelf: "center", margin: "0 auto"}}>
       <br/>
       
-      <p><b><Link href="/">
-        <div className="hdiv" style={{alignItems: "center", cursor: "pointer"}}>
-          {makeIcon("arrow_back", "md-18")}
-          <u>Back to Home</u>
-        </div>
-      </Link></b></p>
+      {makeHomeLink()}
 
       <div className={styles.splashImage}>
         <Image 
@@ -63,9 +58,8 @@ export default function About({}: DefaultPageProps) {
         turn off notifications.<br/>
         <br/>
         {makeLink("Click here to read more about how push notifications work.", "https://felixgerschau.com/web-push-notifications-tutorial/#what-are-web-push-notifications")}
-        <br/><br/><p>I use Google Analytics to keep track of how many
+        <br/><br/>I use Google Analytics to keep track of how many
           people use this website. (Also, I like watching numbers go up.)
-        </p> 
       </p>
 
       <h3 className={styles.h3}>How fast will SplatNet Alerts update me?</h3>
@@ -117,14 +111,7 @@ export default function About({}: DefaultPageProps) {
       <p>You can contact me via Twitter at {makeLink("@ShrimpCryptid", "https://twitter.com/ShrimpCryptid")}!</p>
       <br/>
 
-      <p><b>
-          <Link href="/">
-            <div className="hdiv" style={{alignItems: "center", cursor: "pointer"}}>
-              {makeIcon("arrow_back", "md-18")}
-              <u>Back to Home</u>
-            </div>
-          </Link>
-      </b></p>
+      {makeHomeLink()}
     </div>
   )
 }

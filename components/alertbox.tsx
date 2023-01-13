@@ -16,10 +16,16 @@ export function Alertbox(props: AlertboxProps) {
   let visible = props.visible === undefined ? true : props.visible;
 	return (
     <>
-      <div className={styles.alertbox}>{props.children}</div>
-      <div className={styles.background}
+      <div
+        className={styles.alertbox}
         style={{visibility: visible ? "visible" : "hidden"}}
-        >
+      >
+          {props.children}
+      </div>
+      <div
+        className={styles.background}
+        style={{visibility: visible ? "visible" : "hidden"}}
+      >
       </div>
     </>
 	);

@@ -19,8 +19,9 @@
   background-color: var(--background);
   padding: 15px;
   position: absolute;
-  transform: translateY(-100%);
-  top: 50vh;
+  transform: translateY(-50%) translateX(-50%);
+  top: calc(50vh - 40px);
+  left: 50%;
   z-index: 2;
 }
 

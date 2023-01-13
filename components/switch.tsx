@@ -32,7 +32,7 @@ const Switch: FunctionComponent<Props> = (props) => {
       >
         <div style={{width: "100%", height: "100%", position: "relative"}}>
           <div className={styles.loadingIcon} />
-          <span className={"material-symbols-rounded " + styles.disabledIcon}>error</span>
+          <span className={"material-symbols-rounded " + styles.disabledIcon}>close</span>
         </div>
 
       </div>

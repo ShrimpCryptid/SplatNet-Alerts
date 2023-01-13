@@ -328,14 +328,23 @@ export default function Home({
   }
 
 	// Set different text prompts for the filter loading screen
-	let loadingText = "Loading...";
+	let loadingText: string | string[] = "Loading...";
 	if (userCode === null) {
 		// No user filters could be loaded because the user does not exist yet.
-		loadingText = "There's nothing here yet. Make a new filter or log in to get started!";
+		loadingText = [
+      "There's nothing here yet.",
+      "New here? Click 'New Filter' below to get started!"  
+    ];
 	} else if (userFilters && userFilters.length === 0) {
 		// User was loaded but has no filters.
 		loadingText = "There's nothing here yet.";
-	}
+	} else {
+    // Attempted fetch of user data but the user does not exist.
+    loadingText = [
+      "Sorry, something went wrong when fetching your data."
+      ,"Try refreshing! If this keeps happening, please check your user ID or log out and make a new account."
+    ];
+  }
 	// Otherwise, filter list will be shown instead.
 
 	return (

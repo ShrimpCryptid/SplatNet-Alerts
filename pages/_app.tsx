@@ -182,7 +182,7 @@ export default function App({ Component, pageProps }: AppProps) {
 		if (userCode !== undefined && userCode !== null && !hasDoneInitialLoad) {
 			// We've loaded the user code, so update our local user data using it.
 			setHasDoneInitialLoad(true);
-			updateLocalUserData(userCode, false, true).then((result) => {
+			updateLocalUserData(userCode, true, true).then((result) => {
         if (result[0]) {
           logEvent('login');  // TODO: Fix event logging
         }

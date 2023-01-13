@@ -20,7 +20,6 @@
   align-items: center;
   width: 100%;
   height: calc(100% - 20px);
-  user-select: none;
 }
 
 .cylinder {
@@ -32,6 +31,7 @@
   transform-origin: center;
   animation: spin 5s infinite linear;
   transform: translateY(-50%) rotateY(0deg);
+  user-select: none;
 }
 
 .face {
@@ -45,6 +45,7 @@
   /* Translating 50% 50% means that position for top/left is center */
   transform: translate(-50%, -50%) scaleX(-1) scaleY(1) rotateY(calc(var(--face-deg) * var(--index))) translateZ(calc(var(--face-shift))) translate3d(0, 0, 0);
   filter: var(--filter);
+  user-select: none;
 }
 
 @keyframes spin {

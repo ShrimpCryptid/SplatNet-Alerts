@@ -11,7 +11,7 @@ const totalFaces = 20;
 const gap = 1;
 
 export type SuperJumpLoadAnimationProps = {
-	filterText: string;
+	filterText: string | string[];
 	fillLevel?: number;
 };
 
@@ -59,7 +59,13 @@ const SuperJumpLoadAnimation = ({
 				})}
 			</div>
 			<div className={styles.label}>
-				<h3>{filterText}</h3>
+        {Array.isArray(filterText)
+          ? <>
+            <h3>{filterText[0]}</h3>
+            <p>{filterText[1]}</p>
+          </>
+          : <h3>{filterText}</h3>
+        }
 			</div>
 		</div>
 	);

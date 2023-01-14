@@ -107,6 +107,9 @@ export default function About({}: DefaultPageProps) {
         using NodeJS.
       </p>
 
+      <h3 className={styles.h3}>I want to give you all my money.</h3>
+      <p>You want to give me all your money. {makeLink("(shrimpcryptid on ko-fi)", "https://ko-fi.com/shrimpcryptid")}</p>
+
       <h3 className={styles.h3}>How can I reach you?</h3>
       <p>You can contact me via Twitter at {makeLink("@ShrimpCryptid", "https://twitter.com/ShrimpCryptid")}!</p>
       <br/>

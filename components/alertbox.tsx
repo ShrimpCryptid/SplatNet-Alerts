@@ -6,6 +6,7 @@ import LoadingButton, { ButtonStyle } from "./loading-button";
 import notificationImage from "../public/images/notifications-forever.jpg";
 import Image from "next/image";
 import { makeLink } from "../lib/frontend_utils";
+import { UserIDField } from "./user_id_field";
 
 type AlertboxProps = {
   children?: React.ReactNode;
@@ -103,18 +104,8 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 				your account without it.
 			</p>
 
-			<div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-				<textarea value={props.usercode ? props.usercode : ""} readOnly={true} />
-				<LoadingButton
-					buttonStyle={ButtonStyle.ICON}
-					onClick={() => {
-						navigator.clipboard.writeText(props.usercode);
-						toast("User ID copied!");
-					}}
-				>
-					<span className="material-symbols-rounded">content_copy</span>
-				</LoadingButton>
-			</div>
+      <UserIDField userCode={props.usercode}/>
+      <br/>
 
 			<h3 style={{ marginBottom: "0" }}>Nickname</h3>
 			<p style={{ marginTop: "0" }}>

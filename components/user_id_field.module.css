@@ -1,0 +1,21 @@
+.userIDTextContainer {
+  border-radius: 10px;
+  border-width: 2px;
+  border-color: gray;
+  border-style: solid;
+  padding: 5px;
+  margin: 0;
+  height: 100%;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+}
+
+.userIDText {
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  vertical-align: middle;
+  margin-left: 5px;
+}

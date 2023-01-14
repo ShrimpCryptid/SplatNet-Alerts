@@ -29,6 +29,7 @@ import LoadingButton, { ButtonStyle } from "../components/loading-button";
 import LabeledAlertbox, { IOSAlertbox, NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
 import { isIOS, makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
+import { UserIDField } from "../components/user_id_field";
 
 enum NEW_USER_FLOW {
   NONE=0,
@@ -176,7 +177,7 @@ export default function Home({
           toast.error(
             <div>
               <p>
-              Notifications have been disabled. Check the webpage settings in your browser to reenable them.
+                Notifications are currently disabled by your browser. Check the webpage settings to reenable them.
               </p>
               {makeLink("See the Help Guide", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/3")}
             </div>
@@ -509,88 +510,97 @@ export default function Home({
       <div className={"panel " + styles.panel}>
         <h1 style={{marginBottom: "10px"}}>{makeIconHeader("settings_suggest", "Settings", styles.centeredDiv, "md-36 symbol-filled")}</h1>
       
-        {makeIconHeader("switch_account", "Log In / Change User", "highlight")}
-        <p style={{marginTop: "0"}}>
-          Paste in your user ID to sync your notification settings across devices.
-        </p>
-        <div className={styles.hdivWrap}>
-          <textarea value={loginUserCode} onChange={handleLoginChange} />
-          <LoadingButton
-            onClick={onClickLogin}
-            loading={awaitingLogin}
-            disabled={!isValidUserCode(loginUserCode.trim())}
-          > 
-            {makeIcon("login")} Log In
-          </LoadingButton>
-        </div>
-        <br/>
+        {/** Hide login prompt if there's no user code */}
+        { userCode === null || userCode === undefined
+          ? 
+            <>
+              {makeIconHeader("switch_account", "Log In", "highlight")}
+              <p style={{marginTop: "0"}}>
+                Have an account already? Copy in your user ID to sync your filters
+                and notification settings across devices.
+              </p>
+              <div className={styles.hdivWrap}>
+                <textarea value={loginUserCode} onChange={handleLoginChange} />
+                <LoadingButton
+                  onClick={onClickLogin}
+                  loading={awaitingLogin}
+                  disabled={!isValidUserCode(loginUserCode.trim())}
+                > 
+                  {makeIcon("login")} Log In
+                </LoadingButton>
+              </div>
+            </>
+          : <></>
+        }
 
-        {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"), "highlight")}
-        <p style={{marginBottom: "0"}}>
-          SplatNet Alerts sends push notifications via your browser to alert you about new gear!
-        {notificationsToggle ?
-          <><br/><i>(Turning off notifications will disable ALL notifications from any account on this device.)</i></>
-          : <><br/><i>(If it's an option, set 'Remember my decision' to <span className={"highlight"}>'forever'</span> or notifications may not work correctly.)</i></>}
-        </p>
-        <Switch 
-          state={notificationsToggle}
-          onToggled={toggleNotifications}
-          loading={notificationsLoading}
-          disabled={userCode === null || userCode === undefined  /** TODO: Check if push is supported by browser */}
-        />
-        <br/>
-        <br/>
+        {/** Show user ID, nickname, and notifications when user logged in*/}
+        { userCode !== null && userCode !== undefined 
+          ?
+            <>
+              {makeIconHeader("account_box", "User ID", "highlight")}
+              <p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!<br/>
+                You can use it to make changes to your notifications if you clear your
+                cookies or use another browser.
+              </p>
 
-        {makeIconHeader("badge", "Nickname", "highlight")}
-        <p style={{ marginTop: "0" }}>
-          Set a nickname to remember this account by. You can also generate a
-          random in-game title using the button.
-          <br/><i>(Limited to alphanumeric characters, dashes, and spaces!)</i>
-        </p>
-        <div className={styles.hdivWrap}>
-          <textarea value={tempUserNickname ? tempUserNickname : ""} onChange={onChangedNickname} />
-          <LoadingButton
-            buttonStyle={ButtonStyle.ICON}
-            onClick={() => setTempUserNickname(getRandomTitle())}
-          >
-            {/** TODO: Add descriptive alt text to refresh button */}
-            {makeIcon("refresh")}
-          </LoadingButton>
-          <LoadingButton
-            onClick={() => {onClickUpdateNickname(tempUserNickname? tempUserNickname : "")}}
-            disabled={userCode === null || userCode === undefined}
-          >
-            Update
-          </LoadingButton>
-        </div>
-        <br/>
-        
-        {makeIconHeader("account_box", "User ID", "highlight")}
-        <p style={{marginTop: "0"}}>This is your unique user ID. Save and copy this somewhere secure!<br/>
-          You can use it to make changes to your notifications if you clear your
-          cookies or use another browser.
-        </p>
-        <p style={{marginBottom: "2px"}}>
-          <b>Your user ID is:</b>
-        </p>
-        <div className={styles.hdivWrap}>
-          <textarea value={userCode ? userCode : ""} readOnly={true} />
-          <LoadingButton buttonStyle={ButtonStyle.ICON}
-            onClick={() => {
-              navigator.clipboard.writeText(userCode ? userCode : "");
-              toast("Copied to clipboard!");
-            }}
-            disabled={!userCode || userCode === ""}
-          >
-            {makeIcon("content_copy")}
-          </LoadingButton>
-          <LoadingButton
-            onClick={() => {setShowLogoutPrompt(true)}}
-            loading={showLogoutPrompt}
-          >
-            Log Out
-          </LoadingButton>
-        </div>        
+              <p style={{marginBottom: "2px"}}>
+                <b>Your user ID is:</b>
+              </p>
+              <div className={styles.hdivWrap} style={{alignItems: "center"}}>
+                <UserIDField userCode={userCode}/>
+              </div>  
+              <br/>  
+
+              {makeIconHeader("notifications", "Notifications: " + (notificationsToggle ? "ON" : "OFF"), "highlight")}
+              <p style={{marginBottom: "0"}}>
+                SplatNet Alerts sends push notifications via your browser to alert you about new gear!
+              {notificationsToggle ?
+                <><br/><i>(Turning off notifications will disable ALL notifications from any account on this device.)</i></>
+                : <><br/><i>(If it's an option, set 'Remember my decision' to <span className={"highlight"}>'forever'</span> or notifications may not work correctly.)</i></>}
+              </p>
+              <Switch 
+                state={notificationsToggle}
+                onToggled={toggleNotifications}
+                loading={notificationsLoading}
+              />
+              <br/><br/>
+
+              {makeIconHeader("badge", "Nickname", "highlight")}
+              <p style={{ marginTop: "0" }}>
+                Set a nickname to remember this account by. You can also generate a
+                random in-game title using the button.
+                <br/><i>(Limited to alphanumeric characters, dashes, and spaces!)</i>
+              </p>
+              <div className={styles.hdivWrap}>
+                <textarea value={tempUserNickname ? tempUserNickname : ""} onChange={onChangedNickname} />
+                <LoadingButton
+                  buttonStyle={ButtonStyle.ICON}
+                  onClick={() => setTempUserNickname(getRandomTitle())}
+                >
+                  {/** TODO: Add descriptive alt text to refresh button */}
+                  {makeIcon("refresh")}
+                </LoadingButton>
+                <LoadingButton
+                  onClick={() => {onClickUpdateNickname(tempUserNickname? tempUserNickname : "")}}
+                >
+                  Update
+                </LoadingButton>
+              </div>
+              <br/>
+              <br/>
+              <div className={"centered"}>
+              <LoadingButton
+                  onClick={() => {setShowLogoutPrompt(true); window.scrollTo({top: 0, behavior:'smooth'})}}
+                  loading={showLogoutPrompt}
+                >
+                  {makeIcon("logout")} Log Out
+              </LoadingButton>
+              </div>
+
+            </>
+          : <></>
+        }
+
       </div>
     </div>
 	);

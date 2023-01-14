@@ -28,6 +28,28 @@
   font-size: 16px;
 }
 
+.aboutIcon {
+  margin-right: 4px;
+}
+
+.aboutLink > .aboutIcon {
+  text-decoration: none;
+}
+
+.aboutLink {
+  font-family: var(--font-family-ui);
+  text-decoration: none;
+  font-size: 18px;
+  vertical-align: center;
+  display: flex;
+  align-items: center;
+  margin: 0 10px;
+}
+
+.aboutLink:hover {
+  text-decoration: underline;
+}
+
 .footer {
   padding-left: 5px;
   padding-right: 5px;
@@ -36,4 +58,28 @@
   background: black;
   justify-content: center;
   width: auto;
+}
+
+.footerLinkContainer {
+  margin: 0 auto;
+  width: 100%;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+}
+
+.link {
+  font-family: var(--font-family-ui);
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.kofiBanner {
+  position: relative;
+  height: 24px;
+  width: calc(24px * 6.4);
 }

@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { DefaultPageProps } from "./_app";
 import styles from "../styles/about.module.css";
 import mainLogo from "../public/images/main_logo.svg";
 import Image from "next/image";
-import { makeHomeLink, makeIcon, makeLink } from "../lib/frontend_utils";
+import { LinkWithChildren, makeHomeLink, makeLink } from "../lib/frontend_utils";
+import kofiButton from "../public/images/ko-fi_button.png";
 
 export default function About({}: DefaultPageProps) {
   return (
@@ -11,6 +11,7 @@ export default function About({}: DefaultPageProps) {
       <br/>
       
       {makeHomeLink()}
+      <br/>
 
       <div className={styles.splashImage}>
         <Image 
@@ -108,7 +109,17 @@ export default function About({}: DefaultPageProps) {
       </p>
 
       <h3 className={styles.h3}>I want to give you all my money.</h3>
-      <p>You want to give me all your money. {makeLink("(shrimpcryptid on ko-fi)", "https://ko-fi.com/shrimpcryptid")}</p>
+      <p>You want to give me all your money.</p>
+      
+      <LinkWithChildren url={"https://ko-fi.com/shrimpcryptid"}>
+        <div className={styles.kofiButton}>
+          <Image
+            src={kofiButton}
+            layout={"fill"}
+            alt={"Ko-fi coffee cup logo (text: Support me on Ko-fi)"}
+          />
+        </div>
+      </LinkWithChildren>
 
       <h3 className={styles.h3}>How can I reach you?</h3>
       <p>You can contact me via Twitter at {makeLink("@ShrimpCryptid", "https://twitter.com/ShrimpCryptid")}!</p>

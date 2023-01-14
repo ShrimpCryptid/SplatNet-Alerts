@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ReactNode } from "react";
 
 export function makeIcon(icon: string, className="") {
   // TODO: make symbol-filled a separate option, or specify it explicitly.
@@ -21,16 +22,24 @@ export function makeIconHeader(icon: string, header: string, containerClassName=
   )
 }
 
-export function makeLink(text: string, url: string, newTab: boolean = true) {
+export function makeLink(text: string, url: string, className?: string, newTab: boolean = true) {
   if (newTab) {
     return (
-      <a target="_blank" href={url} rel="noopener noreferrer">{text}</a>
+      <a target="_blank" href={url} rel="noopener noreferrer" className={className}>{text}</a>
     );
   } else {
     return (
-      <a href={url} rel="noopener noreferrer">{text}</a>
+      <a href={url} rel="noopener noreferrer" className={className}>{text}</a>
     );
   }
+}
+
+export function LinkWithChildren(props: {url: string, className?: string, children?: ReactNode}) {
+  return (
+    <a href={props.url} rel="noopener noreferrer" target="_blank" className={props.className} style={{display: "flex", width: "min-content"}}>
+      {props.children}
+    </a>
+  )
 }
 
 export function makeHomeLink() {

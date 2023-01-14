@@ -1,13 +1,12 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import Script from "next/script";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ENV_KEY_GOOGLE_ANALYTICS } from "../constants/env";
-import { getEnvWithDefault } from "../lib/shared_utils";
 import mainLogo from "../public/images/main_logo.svg";
+import kofiBanner from "../public/images/ko-fi_banner.png";
 import styles from "./layout.module.css";
+import { LinkWithChildren, makeIcon, makeLink } from "../lib/frontend_utils";
 
 type LayoutProps = {
 	children: JSX.Element;
@@ -47,9 +46,12 @@ export default function Layout({ children }: LayoutProps) {
             <p className={styles.headerSubText}>A Splatoon gear alerts service!</p>
           </div>
         </div>
-        <div className="hdiv" style={{gap: "15px", marginLeft: "auto"}}>
-          <p><Link href="https://github.com/ShrimpCryptid/SplatNet-Alerts">Source</Link></p>
-          <p><Link href="/about">About</Link></p>
+        <div className="hdiv" style={{gap: "10px", marginLeft: "auto"}}>
+          <Link href="/about">
+            <a className={styles.aboutLink}>
+              {makeIcon("help", styles.aboutIcon)}About
+            </a>
+          </Link>
         </div>
       </div>
 
@@ -66,7 +68,24 @@ export default function Layout({ children }: LayoutProps) {
 			</div>
       <br/>
 
-      <div className={"hdiv " + styles.footer}>
+      <div className={styles.footer}>
+        <div
+          className={"hdiv " + styles.footerLinkContainer}
+        >
+          <Link href="/about"><a className={styles.link}>About</a></Link>
+          <p>|</p>
+          {makeLink("GitHub", "https://github.com/ShrimpCryptid/SplatNet-Alerts", styles.link)}
+          <p>|</p>
+          <LinkWithChildren url={"https://ko-fi.com/shrimpcryptid"}>
+            <div className={styles.kofiBanner}>
+              <Image
+                src={kofiBanner}
+                layout={"responsive"}
+                alt={"Ko-fi coffee cup logo (text: Support me on Ko-fi)"}
+              />
+            </div>
+          </LinkWithChildren>
+        </div>
         <p
         style={{
           opacity: "70%",
@@ -75,6 +94,7 @@ export default function Layout({ children }: LayoutProps) {
         >
           This website is not affiliated with Nintendo. Logos and artwork are property of their respective owners.
         </p>
+        
       </div>
 
 		</>

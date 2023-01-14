@@ -20,3 +20,11 @@
   height: 40vmin;
   margin: 0 auto;
 }
+
+.kofiButton {
+  position: relative;
+  --height: 70px;
+  height: var(--height);
+  width: calc(var(--height) * 3.65);
+  margin-right: 0;
+}

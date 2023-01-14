@@ -28,11 +28,11 @@ export const FE_LOCAL_SUBSCRIPTION_INFO = "subscription_info";
 export const FE_USER_CODE_URL = "user";
 
 export const FE_ERROR_404_MSG =
-	"The server could not find your user ID. Please check your ID or make a new account.";
+	"The server could not find that user ID. Please check your ID or make a new account.";
 export const FE_ERROR_500_MSG =
-	"The server returned an error (500). Please report if you keep seeing this message.";
+	"The server returned an error (500). Please report this if you keep seeing this message.";
 export const FE_ERROR_INVALID_USERCODE =
-	"Sorry, that usercode doesn't quite look right. Please check it and try again.";
+	"Sorry, that usercode doesn't look right. Please check it and try again.";
 export const FE_UNKNOWN_MSG =
 	"Sorry, something went wrong. Please try again in a few seconds.";
 

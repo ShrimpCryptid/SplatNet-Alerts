@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from "react";
+import React, { FunctionComponent, RefObject, useMemo, useState } from "react";
 import { Gear } from "../lib/gear";
 import styles from "./gear_selector.module.css";
 import Fuse from "fuse.js";
@@ -38,6 +38,7 @@ export const GearTile: FunctionComponent<GearTileProps> = (
 
 	let disabled = onSelection === undefined;
 
+  // TODO: Replace gear selector divs with buttons for keyboard accessibility
 	return (
 		<div
 			className={styles.listItem + " " + (disabled ? styles.disabled : "")}
@@ -69,10 +70,13 @@ export const GearTile: FunctionComponent<GearTileProps> = (
 
 type GearSelectorProps = {
 	onSelection: (selectedGear: Gear) => void;
+  /** A reference to be assigned to the searchbar, so the parent can access it. */
+  searchbarReference?: RefObject<HTMLInputElement>;
 };
 
 const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	onSelection,
+  searchbarReference
 }) => {
 	const gearArray = [...GEAR_NAME_TO_DATA.values()];
 	const [searchText, setSearchText] = useState("");
@@ -148,6 +152,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 			<div className={`inputContainer ${styles.searchbar}`}>
 				<span className="material-symbols-rounded">search</span>
 				<input
+          ref={searchbarReference}
 					value={searchText}
 					onChange={(event) => {
 						handleSearchChanged(event.currentTarget.value);

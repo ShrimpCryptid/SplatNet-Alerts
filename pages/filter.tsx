@@ -154,6 +154,8 @@ export default function FilterPage({
 	const [selectedTypes, setSelectedTypes] = useState(makeSelectedMap(GEAR_TYPES));
 	const [currFilter, setCurrFilter] = useState(() => {return new Filter()});
 
+  const [gearSelectorSearchbarRef, setGearSelectorSearchbarRef] = useState(React.createRef<HTMLInputElement>());
+
 	const [canSaveFilter, setCanSaveFilter] = useState(false);
 	const [pageSwitchReady, setPageSwitchReady] = useState(false);
 
@@ -366,7 +368,7 @@ export default function FilterPage({
 		<div className={styles.main}>
       <div className={styles.panel + " panel"}>
         {makeHomeLink()}
-
+        <br/>
         <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
         <p>Select the gear properties you want to be alerted for!
           <br/><br/>You can set an alert for a <span className={"highlight"}>specific gear item
@@ -385,6 +387,7 @@ export default function FilterPage({
               style={{width: "100%"}}
               onClick={() => {
                 setShowGearSelection(true);
+                sleep(0).then(() => { gearSelectorSearchbarRef.current?.focus(); });
               }}
               loading={showGearSelection}
               >
@@ -411,6 +414,7 @@ export default function FilterPage({
         <>
           <GearSelector
             onSelection={onGearSelection}
+            searchbarReference={gearSelectorSearchbarRef}
           />
           <button onClick={() => setShowGearSelection(false)}>Cancel</button>
         </>

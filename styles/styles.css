@@ -250,6 +250,14 @@ textarea {
   padding: 15px;
 }
 
+input {
+  font-size: 16px;
+}
+
+textarea:focus, select:focus, input:focus {
+  outline: none;
+}
+
 /** Styling rules from: 
  * https://stackoverflow.com/questions/36562597/change-the-icon-size-of-angularjs-material-icons
  */

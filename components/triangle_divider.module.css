@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+  justify-content: space-evenly;
+  gap: 5px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.triangle {
+  height: 5px;
+  width: 0px;
+  --width: 10px;
+  --height: 16px;
+  opacity: 30%;
+}
+
+.triangle.down {
+  border-bottom: var(--height) solid var(--body-color);
+  border-left: var(--width) solid transparent;
+  border-right: var(--width) solid transparent;
+}
+
+
+.triangle.up {
+  border-top: var(--height) solid var(--body-color);
+  border-left: var(--width) solid transparent;
+  border-right: var(--width) solid transparent;
+}

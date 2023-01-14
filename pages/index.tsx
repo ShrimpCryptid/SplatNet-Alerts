@@ -30,6 +30,7 @@ import LabeledAlertbox, { IOSAlertbox, NotificationAlertbox, WelcomeAlertbox } f
 import Switch from "../components/switch";
 import { isIOS, makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
 import { UserIDField } from "../components/user_id_field";
+import { TriangleDivider } from "../components/triangle_divider";
 
 enum NEW_USER_FLOW {
   NONE=0,
@@ -587,6 +588,7 @@ export default function Home({
                 </LoadingButton>
               </div>
               <br/>
+              <TriangleDivider repeats={31}/>
               <br/>
               <div className={"centered"}>
               <LoadingButton

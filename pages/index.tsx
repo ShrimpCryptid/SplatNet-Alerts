@@ -428,8 +428,8 @@ export default function Home({
           secondaryButtonOnClick={() => setShowLogoutPrompt(false)}
         >
           <p>Are you sure you want to log out?</p>
-          <p><b className="highlight">Please make sure you've saved your user ID
-            somewhere safe as your account cannot be recovered without it!</b>
+          <p className="highlight">Please make sure you've saved your user ID
+            somewhere safe as your account cannot be recovered without it!
           </p>
         </LabeledAlertbox> :
         <></>
@@ -566,7 +566,7 @@ export default function Home({
               <p style={{marginBottom: "0"}}>
                 SplatNet Alerts sends push notifications via your browser to alert you about new gear!
               {notificationsToggle ?
-                <><br/><i>(Turning off notifications will disable ALL notifications from any account on this device.)</i></>
+                <><br/><i>(Turning off notifications will disable ALL notifications on this device, regardless of account.)</i></>
                 : <><br/><i>(If it's an option, set 'Remember my decision' to <span className={"highlight"}>'forever'</span> or notifications may not work correctly.)</i></>}
               </p>
               <Switch 

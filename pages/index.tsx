@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import FilterView from "../components/filter-view";
@@ -134,6 +134,15 @@ export default function Home({
 		deleteFilter(filterIndex);
 	};
 
+  // Update the serviceworker only once when the page loads
+  const updateServiceWorker = useMemo(() => {
+    if (typeof navigator !== "undefined" && navigator.serviceWorker) {
+      navigator.serviceWorker.getRegistration().then((registration) => {
+        registration?.update();
+      });
+    }
+  }, []);  // no dependencies so this will run exactly one time
+
   // Notification initial state is defined by whether we local subscription info
   // stored, AND there's a service worker currently running.
   useEffect(() => {
@@ -142,10 +151,11 @@ export default function Home({
         setNotificationsToggle(
           window && window.localStorage.getItem(FE_LOCAL_SUBSCRIPTION_INFO) !== null
           && registration !== undefined && Notification.permission === "granted"
-          && userCode !== undefined && userCode !== null);
+          && userCode !== undefined && userCode !== null
+        );
       });
     }
-  })
+  });
 
   /** 
    * Toggles notification state on/off, logging the subscriber information with

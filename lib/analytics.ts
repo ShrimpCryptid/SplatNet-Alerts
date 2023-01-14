@@ -5,18 +5,12 @@ import { getEnvWithDefault } from "./shared_utils"
 * Adapted from https://andrew-simpson-ross.medium.com/strongly-typed-google-analytics-v4-with-next-js-aad6c6a5e383
 */
 
-declare global {
-  interface Window {
-    gtag: any;
-  }
-}
-
 export function getGoogleAnalyticsID(): string {
   return getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "");
 }
 
 export function logPageview (url: URL) {
-  if (typeof window === 'undefined' || window.gtag === undefined) { return; }
+  if (typeof window === 'undefined') { return; }
   window.gtag('config', getGoogleAnalyticsID(), {page_path: url});
 }
 

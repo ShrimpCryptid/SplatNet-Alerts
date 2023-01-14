@@ -19,12 +19,15 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "typeRoots": ["./types", "./node_modules/@types"],
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "**/*.d.ts",
     "**/*.tsx",
+    "**/*.js",
     "pages/_app.tsx",
     "public/serviceworker.js"
   ],

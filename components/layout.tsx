@@ -17,8 +17,7 @@ export default function Layout({ children }: LayoutProps) {
 	// TODO: Custom animation for toasts
 	return (
 		<>
-			<Head>
-        <title>SplatNet Alerts</title>
+      <Head>
         <meta name="description" content="A fan-made push notification service for Splatoon gear"/>
         <meta property="og:description" content="A fan-made push notification service for Splatoon gear"/>
         <meta name="keywords" content="Splatoon 3, SplatNet, gear, notification, alert, clothing, Nintendo, Splatoon"/>
@@ -27,36 +26,8 @@ export default function Layout({ children }: LayoutProps) {
         <meta name="image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/sign/splatnet-alerts-public/main_logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzcGxhdG5ldC1hbGVydHMtcHVibGljL21haW5fbG9nby5wbmciLCJ0cmFuc2Zvcm1hdGlvbnMiOiIiLCJpYXQiOjE2NzM0MTg1NDAsImV4cCI6MTk4ODc3ODU0MH0.l7LvnCpu2ncL4R-OqiJHUcotO3StE-qzCjnLTJB6hCs"/>
         <meta property="og:image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/sign/splatnet-alerts-public/main_logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzcGxhdG5ldC1hbGVydHMtcHVibGljL21haW5fbG9nby5wbmciLCJ0cmFuc2Zvcm1hdGlvbnMiOiIiLCJpYXQiOjE2NzM0MTg1NDAsImV4cCI6MTk4ODc3ODU0MH0.l7LvnCpu2ncL4R-OqiJHUcotO3StE-qzCjnLTJB6hCs"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-				<link
-					rel="stylesheet"
-					href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-				/>
-        <link 
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter"
-        />
-			</Head>
-
-      {/* Google tag (gtag.js) for analytics*/}
-      <Script
-        src={"https://www.googletagmanager.com/gtag/js?id=" + getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}
-        strategy="afterInteractive"
-      />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-          if (typeof window !== 'undefined') {
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${getEnvWithDefault(ENV_KEY_GOOGLE_ANALYTICS, "")}');
-          }
-        `
-          }}
-      />
-
+        <title>SplatNet Alerts</title>
+      </Head>
       <div className={styles.header}>
         <div className="hdiv">
           <Link href="/">

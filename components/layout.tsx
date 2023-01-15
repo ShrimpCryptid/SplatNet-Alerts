@@ -26,6 +26,7 @@ export default function Layout({ children }: LayoutProps) {
         <meta name="image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/sign/splatnet-alerts-public/main_logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzcGxhdG5ldC1hbGVydHMtcHVibGljL21haW5fbG9nby5wbmciLCJ0cmFuc2Zvcm1hdGlvbnMiOiIiLCJpYXQiOjE2NzM0MTg1NDAsImV4cCI6MTk4ODc3ODU0MH0.l7LvnCpu2ncL4R-OqiJHUcotO3StE-qzCjnLTJB6hCs"/>
         <meta property="og:image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/sign/splatnet-alerts-public/main_logo.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJzcGxhdG5ldC1hbGVydHMtcHVibGljL21haW5fbG9nby5wbmciLCJ0cmFuc2Zvcm1hdGlvbnMiOiIiLCJpYXQiOjE2NzM0MTg1NDAsImV4cCI6MTk4ODc3ODU0MH0.l7LvnCpu2ncL4R-OqiJHUcotO3StE-qzCjnLTJB6hCs"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="theme-color" content="#000000"/>
         <title>SplatNet Alerts</title>
       </Head>
       <div className={styles.header}>

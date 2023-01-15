@@ -11,6 +11,7 @@
   --link-color: white;
 
   --selected-color: rgb(255, 163, 65);
+  --mouse-selection-color: rgb(234, 234, 234);
 
   --highlight: var(--selected-color);
 
@@ -29,6 +30,20 @@
   --item-selected-background-hover: rgb(98, 86, 79);
 
 }
+
+::selection {
+  background-color: var(--mouse-selection-color);
+  color: black;
+}
+::-moz-selection {
+  background-color: var(--selected-color);
+  color: black;
+}
+::-webkit-selection {
+  background-color: var(--selected-color);
+  color: black;
+}
+
 
 body {
   color: white;

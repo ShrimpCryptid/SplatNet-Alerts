@@ -22,7 +22,7 @@ export const API_MAX_SUBSCRIPTIONS = 5;
 /** The maximum number of filters allowed per user. */
 export const API_MAX_FILTERS = 100;
 
-export const FE_WILDCARD = "Any";
+export const FE_WILDCARD = "All";
 export const FE_LOCAL_USER_CODE = DB_USER_ID;
 export const FE_LOCAL_SUBSCRIPTION_INFO = "subscription_info";
 export const FE_USER_CODE_URL = "user";

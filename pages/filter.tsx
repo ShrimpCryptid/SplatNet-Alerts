@@ -371,8 +371,9 @@ export default function FilterPage({
         {makeHomeLink()}
         <br/>
         <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
-        <p>Select the gear properties you want to be alerted for!
-          <br/><br/>You can set an alert for a specific <span className={"highlight"}>gear item
+        <p>
+          Select the gear properties you want to be alerted for!
+          You can set a filter for a specific <span className={"highlight"}>gear item
           </span> or any gear that matches a certain <span className={"highlight"}>type</span> or <span className={"highlight"}>brand</span>.
         </p>
 
@@ -414,7 +415,7 @@ export default function FilterPage({
           <div className={styles.tipContainer}>
             <h3>Not sure what to pick?</h3>
             <p>
-              Select <span className="highlight">Any for the gear type,
+              Select <span className="highlight">'All' for the gear type,
               brand, and ability options</span> to get notified about all new items in
               the SplatNet shop. You can always remove this later.
               <br/><br/>If there are certain items or brands you like, try

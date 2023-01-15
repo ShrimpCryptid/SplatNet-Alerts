@@ -49,8 +49,31 @@
   margin: 0 auto;
 }
 
+.combinedGearAndTipUIContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap-reverse;
+  gap: 10px;
+}
+
+.gearSelectUIContainer {
+  min-width: 60vmin;
+  width: auto;
+}
+
+.tipContainer {
+  width: 40%;
+  min-width: calc(70vmin - 20px);
+  margin: auto auto;
+  border-style: dashed;
+  padding: 10px;
+  border-color: gray;
+  border-radius: 10px;
+}
+
 .gearItemContainer {
   height: fit-content;
+  width: fit-content;
   gap: 10px;
   position: relative;
 }

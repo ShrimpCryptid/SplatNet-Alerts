@@ -10,16 +10,9 @@
   --body-color: rgba(220, 220, 220);
   --link-color: white;
 
-  --selected-color: rgb(220, 255, 65);
   --selected-color: rgb(255, 163, 65);
 
-
   --highlight: var(--selected-color);
-  
-  --button-background: rgb(55, 35, 143);
-  --button-hover: rgb(88, 72, 158);
-  --button-active: rgb(41, 25, 110);
-  --button-disabled-filter: brightness(50%);
 
   --button-background: rgb(210, 82, 32);
   --button-hover: rgb(222, 102, 66);
@@ -31,9 +24,10 @@
   --item-hover: rgb(90, 90, 90);
   --item-active: rgb(35, 35, 35);
   --item-disabled-filter: brightness(50%);
-  /* --item-selected-background: rgb(69, 71, 54); */
-  --item-selected-background: rgb(70, 70, 70);
+  --item-selected-disabled: rgb(68, 44, 19);
   --item-selected-background: rgb(69, 55, 47);
+  --item-selected-background-hover: rgb(98, 86, 79);
+
 }
 
 body {
@@ -183,7 +177,7 @@ input:active {
   display: flex;
   align-items: center;
   justify-content: center;
-
+  font-display: block;
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;

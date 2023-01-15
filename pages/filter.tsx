@@ -11,6 +11,7 @@ import FilterView from "../components/filter-view";
 import GearSelector, { GearTile } from "../components/gear_selector";
 import LoadingButton from "../components/loading-button";
 import Selector from "../components/selector";
+import { TriangleDivider } from "../components/triangle_divider";
 import {
 	FE_WILDCARD,
 	GEAR_ABILITIES,
@@ -371,41 +372,59 @@ export default function FilterPage({
         <br/>
         <h1 className={""}>{editingFilterIndex === null ? "New" : "Edit"} Filter</h1>
         <p>Select the gear properties you want to be alerted for!
-          <br/><br/>You can set an alert for a <span className={"highlight"}>specific gear item
-          </span> or any gear that matches a certain <span className={"highlight"}>type or brand.</span>
+          <br/><br/>You can set an alert for a specific <span className={"highlight"}>gear item
+          </span> or any gear that matches a certain <span className={"highlight"}>type</span> or <span className={"highlight"}>brand</span>.
         </p>
 
+        <TriangleDivider repeats={101}/>
+        <div style={{marginBottom: "15px"}}/>
 
-        <h2 className={""}>Gear Item <span style={{opacity: "0.7"}}>(optional)</span></h2>
-        <p>Match a specific gear item. Selecting this will lock all properties other than abilities!</p>
-        <div className={"hdiv " + styles.gearItemContainer}>
-          <GearTile
-              gear={mapGetWithDefault(GEAR_NAME_TO_DATA, selectedGearName, null)}
-              />
-          <div className={styles.gearItemRightDiv}>
-            <LoadingButton
-              style={{width: "100%"}}
-              onClick={() => {
-                setShowGearSelection(true);
-                sleep(0).then(() => { gearSelectorSearchbarRef.current?.focus(); });
-              }}
-              loading={showGearSelection}
-              >
-              {makeIcon("search")} Select
-            </LoadingButton>
-            <LoadingButton 
-              style={{width: "100%"}}
-              onClick={
-                () => {updateFilter(GEAR_PROPERTY.NAME, "")}
-              }
-              disabled={selectedGearName === ""}
-            >
-              {makeIcon("close")} Clear
-            </LoadingButton>
+        <div className={styles.combinedGearAndTipUIContainer}>
+          <div className={styles.gearSelectUIContainer}>
+            <h2 className={""}>Gear Item <span style={{opacity: "0.7"}}>(optional)</span></h2>
+            <p>Match a specific gear item. Selecting this will lock the type and brand.</p>
+            <div className={"hdiv " + styles.gearItemContainer}>
+              <GearTile
+                  gear={mapGetWithDefault(GEAR_NAME_TO_DATA, selectedGearName, null)}
+                  />
+              <div className={styles.gearItemRightDiv}>
+                <LoadingButton
+                  style={{width: "100%"}}
+                  onClick={() => {
+                    setShowGearSelection(true);
+                    sleep(0).then(() => { gearSelectorSearchbarRef.current?.focus(); });
+                  }}
+                  loading={showGearSelection}
+                  >
+                  {makeIcon("search")} Select
+                </LoadingButton>
+                <LoadingButton 
+                  style={{width: "100%"}}
+                  onClick={
+                    () => {updateFilter(GEAR_PROPERTY.NAME, "")}
+                  }
+                  disabled={selectedGearName === ""}
+                >
+                  {makeIcon("close")} Clear
+                </LoadingButton>
+              </div>
+            </div>
           </div>
-        </div>
 
-      
+          <div className={styles.tipContainer}>
+            <h3>Not sure what to pick?</h3>
+            <p>
+              Select <span className="highlight">Any for the gear type,
+              brand, and ability options</span> to get notified about all new items in
+              the SplatNet shop. You can always remove this later.
+              <br/><br/>If there are certain items or brands you like, try
+              building filters by pairing them with abilities you use often.
+              Alternatively, if an item comes with default abilities you dislike, you can set
+              a filter to wait for something better!
+            </p>
+          </div>
+      </div>
+
       <LabeledAlertbox
         header="Select Gear"
         onClickClose={() => setShowGearSelection(false)}

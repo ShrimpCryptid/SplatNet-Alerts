@@ -527,8 +527,8 @@ export default function Home({
             <>
               {makeIconHeader("switch_account", "Log In", "highlight")}
               <p style={{marginTop: "0"}}>
-                Have an account already? Copy in your user ID to sync your filters
-                and notification settings across devices.
+                Have an account already? Copy in your user ID to sync your data
+                across devices.
               </p>
               <div className={styles.hdivWrap}>
                 <textarea value={loginUserCode} onChange={handleLoginChange} />

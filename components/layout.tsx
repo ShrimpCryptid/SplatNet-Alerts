@@ -5,6 +5,7 @@ import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import mainLogo from "../public/images/main_logo.svg";
 import kofiBanner from "../public/images/ko-fi_banner.png";
+import splashBackground from "../public/images/splash_background.svg";
 import styles from "./layout.module.css";
 import { LinkWithChildren, makeIcon, makeLink } from "../lib/frontend_utils";
 
@@ -15,7 +16,7 @@ type LayoutProps = {
 export default function Layout({ children }: LayoutProps) {
 	// TODO: Custom animation for toasts
 	return (
-		<>
+		<div className={styles.background} style={{backgroundImage: `url(${splashBackground.src})`}}>
       <Head>
         <meta name="description" content="A fan-made push notification service for Splatoon gear"/>
         <meta property="og:description" content="A fan-made push notification service for Splatoon gear"/>
@@ -97,6 +98,6 @@ export default function Layout({ children }: LayoutProps) {
         
       </div>
 
-		</>
+		</div>
 	);
 }

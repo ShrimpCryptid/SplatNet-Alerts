@@ -11,32 +11,35 @@ export default function About({}: DefaultPageProps) {
       <br/>
       
       {makeHomeLink()}
-      <br/>
+      <div className="panel">
+        <br/>
+        <div className={styles.splashImage}>
+          <Image 
+            src={mainLogo}
+            layout={"fill"}
+            alt={"Website logo: an orange autobomb wearing the 18k aviators."}
+          />
+        </div>
 
-      <div className={styles.splashImage}>
-        <Image 
-          src={mainLogo}
-          layout={"fill"}
-          alt={"Website logo: an orange autobomb wearing the 18k aviators."}
-        />
+        <h2 className={styles.h2}>What's this website do?</h2>
+        <p>SplatNet Alerts is an unofficial, fan-made 
+          web service that lets you set up notifications for gear items in the
+          Splatnet app.
+          <br/><br/>It uses push notifications to send notifications directly to your
+          device whenever items you're interested in arrive in the shop!
+        </p>
       </div>
 
-      <h2 className={styles.h2}>What's this website do?</h2>
-      <p>SplatNet Alerts is an unofficial, fan-made 
-        web service that lets you set up notifications for gear items in the
-        Splatnet app.
-        <br/><br/>It uses push notifications to send notifications directly to your
-        device whenever items you're interested in arrive in the shop!
-      </p>
+      <div className="panel">
+        <h2 className={styles.h2}>💖Acknowledgements:</h2>
+        <p>Gear images and icons were sourced from {makeLink("Inkipedia", "https://splatoonwiki.org/")}, the Splatoon wiki.
+        Gear rotation data is fetched from the {makeLink("Splatoon3.ink API", "https://splatoon3.ink/")}, built by Matt Isenhower.</p>
+        <p>Splatoon and the SplatNet app belong to Nintendo.</p>
+        <p>Special thanks to the {makeLink("Nintendo APIs/nxapi Discord server", "https://discord.com/invite/4D82rFkXRv")} for their help and advice!</p>
+      </div>
 
-      <br/>
-      <h2 className={styles.h2}>💖Acknowledgements:</h2>
-      <p>Gear images and icons were sourced from {makeLink("Inkipedia", "https://splatoonwiki.org/")}, the Splatoon wiki.
-      Gear rotation data is fetched from the {makeLink("Splatoon3.ink API", "https://splatoon3.ink/")}, built by Matt Isenhower.</p>
-      <p>Splatoon and the SplatNet app belong to Nintendo.</p>
-      <p>Special thanks to the {makeLink("Nintendo APIs/nxapi Discord server", "https://discord.com/invite/4D82rFkXRv")} for their help and advice!</p>
+      <div className="panel">
 
-      <br/>
       <h2 className={styles.h2}>Frequently Asked Questions (FAQ):</h2>
 
       <h3 className={styles.h3}>What data does this website store?</h3>
@@ -123,7 +126,7 @@ export default function About({}: DefaultPageProps) {
 
       <h3 className={styles.h3}>How can I reach you?</h3>
       <p>You can contact me via Twitter at {makeLink("@ShrimpCryptid", "https://twitter.com/ShrimpCryptid")}!</p>
-      <br/>
+      </div>
 
       {makeHomeLink()}
     </div>

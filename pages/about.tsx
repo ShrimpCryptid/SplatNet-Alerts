@@ -31,7 +31,7 @@ export default function About({}: DefaultPageProps) {
       </div>
 
       <div className="panel">
-        <h2 className={styles.h2}>💖Acknowledgements:</h2>
+        <h2 className={styles.h2}>❤️Acknowledgements:</h2>
         <p>Gear images and icons were sourced from {makeLink("Inkipedia", "https://splatoonwiki.org/")}, the Splatoon wiki.
         Gear rotation data is fetched from the {makeLink("Splatoon3.ink API", "https://splatoon3.ink/")}, built by Matt Isenhower.</p>
         <p>Splatoon and the SplatNet app belong to Nintendo.</p>

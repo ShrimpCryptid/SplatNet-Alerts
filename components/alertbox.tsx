@@ -144,15 +144,14 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
   const [cancelClicked, setCancelClicked] = useState(false);
 
   return (
-    <LabeledAlertbox header="Enable Notifications!">
+    <LabeledAlertbox header="Enable Notifications">
       <p>
         SplatNet Alerts needs notifications enabled to work
         properly! When enabled, a push notification will be sent to this device
         whenever matching gear appears in the SplatNet shop.
       </p>
       <p>
-        Notifications can be switched on/off at any time, and will
-        never be used for advertising or spam.
+        Notifications can be switched on or off at any time.
       </p>
       <div className="gap" style={{alignContent: "center"}}>
         <div style={{width: "calc(200px + 10vmin)", position: "relative", margin: "0 auto"}}>

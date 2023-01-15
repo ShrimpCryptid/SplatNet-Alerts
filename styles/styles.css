@@ -11,7 +11,7 @@
   --link-color: white;
 
   --selected-color: rgb(255, 163, 65);
-  --mouse-selection-color: rgb(234, 234, 234);
+  --mouse-selection-color: var(--selected-color);
 
   --highlight: var(--selected-color);
 

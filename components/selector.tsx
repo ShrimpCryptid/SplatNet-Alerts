@@ -161,11 +161,13 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	for (let value in selected.values()) {
 		selectedCount += value ? 1 : 0;
 	}
+  let count = selectionOverride === undefined ? countSelected(selected) : 1;
+  let countClassName = (count === 0) ? " highlight" : "";
 
 	return (
 		<div>
 			<h3 className={styles.categoryLabel}>
-				{title} ({selectionOverride === undefined ? countSelected(selected) : 1}/{itemTotal})
+				{title} <span className={countClassName}>({count}/{itemTotal})</span>
 			</h3>
 			<div className={styles.itemDisplay}>
 				{items.map((item, index) => {
@@ -184,7 +186,7 @@ const Selector: FunctionComponent<SelectorProps> = ({
 						isSelected = item === selectionOverride;
 					} else if (useWildcard && selected.get(FE_WILDCARD) && index !== 0) {
 						// Disable every other item if wildcard is active and selected.
-						isSelected = false;
+						isSelected = true;
 						disabled = true;
 					} else if (disabledItems?.has(item)) {
             disabled = true;

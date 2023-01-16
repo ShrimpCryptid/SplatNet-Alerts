@@ -194,11 +194,10 @@ function getTimestamp(): string {
 /**
  * @effects Initial setup the database and its tables.
  */
-export function setupDatabaseTables() {
+export async function setupDatabaseTables(client: Pool | PoolClient) {
 	// Create data cache table
 	// Note-- Gear JSON usually around 10-12k characters, so limit is 16000 chars.
 	let promises = [];
-	let client = getDBClient();
 
 	promises.push(
 		queryAndLog(
@@ -227,26 +226,6 @@ export function setupDatabaseTables() {
 		)
 	);
 
-	// Create user subscriptions table.
-	promises.push(
-		queryAndLog(
-			client,
-			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
-          ${DB_SUBSCRIPTION_ID} SERIAL UNIQUE,
-          ${DB_USER_ID} int4,
-          ${DB_ENDPOINT} varchar(400),
-          ${DB_EXPIRATION} varchar(255),
-          ${DB_AUTH_KEY} varchar(255),
-          ${DB_P256DH_KEY} varchar(255),
-          ${DB_LAST_MODIFIED} varchar(30),
-          PRIMARY KEY (${DB_SUBSCRIPTION_ID}),
-          CONSTRAINT fk_userid
-            FOREIGN KEY (${DB_USER_ID})
-              REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID})
-    );`
-		)
-	);
-
 	// Auto-generate filter table.
 	// Auto-generates boolean columns for gear types, abilities, and brands.
 	let joinedFilterColumnNames =
@@ -267,6 +246,32 @@ export function setupDatabaseTables() {
         ${DB_GEAR_BRAND_WILDCARD} BOOL,
         ${DB_GEAR_ABILITY_WILDCARD} BOOL,
         ${filterColumnQuery}
+    );`
+		)
+	);
+
+  // Wait for the users and filters tables to finish being created before
+  // creating the subscriptions and userstofilters tables, which have
+  // dependencies on them due to constraints.
+  await Promise.all(promises);
+  promises = [];  // clear promises
+
+  // Create user subscriptions table.
+	promises.push(
+		queryAndLog(
+			client,
+			`CREATE TABLE IF NOT EXISTS ${DB_TABLE_SUBSCRIPTIONS} (
+          ${DB_SUBSCRIPTION_ID} SERIAL UNIQUE,
+          ${DB_USER_ID} int4,
+          ${DB_ENDPOINT} varchar(400),
+          ${DB_EXPIRATION} varchar(255),
+          ${DB_AUTH_KEY} varchar(255),
+          ${DB_P256DH_KEY} varchar(255),
+          ${DB_LAST_MODIFIED} varchar(30),
+          PRIMARY KEY (${DB_SUBSCRIPTION_ID}),
+          CONSTRAINT fk_userid
+            FOREIGN KEY (${DB_USER_ID})
+              REFERENCES ${DB_TABLE_USERS}(${DB_USER_ID})
     );`
 		)
 	);
@@ -982,3 +987,11 @@ export function getDBClient(): Pool {
 		});
 	}
 }
+
+/** 
+ * // Uncomment this and run this lib file to set up your database for the first
+ * // time.
+ * setupDatabaseTables(new Pool(
+ *  {connectionString: "YOUR_CONNECTION_STRING_HERE"
+ * }));
+ */

@@ -16,10 +16,11 @@ import {
 } from "../../lib/gear_loader";
 import { Gear } from "../../lib/gear";
 import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
-import { getEnvWithDefault } from "../../lib/shared_utils";
+import { getEnvWithDefault, mapGetWithDefault } from "../../lib/shared_utils";
 import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
-import { FE_USER_CODE_URL } from "../../constants";
+import { FE_USER_CODE_URL, GEAR_ABILITIES } from "../../constants";
 import { Pool } from "pg";
+import { GEAR_NAMES, GEAR_NAME_TO_DATA, GEAR_NAME_TO_IMAGE } from "../../lib/geardata";
 
 const MILLISECONDS_PER_SECOND = 1000.0;
 
@@ -34,6 +35,42 @@ function getUserGear(
 		}
 	}
 	return gearList;
+}
+
+function isValidGear(gear: Gear) {
+  // Check that gear name is included in scraped wiki data.
+  if (GEAR_NAMES.includes(gear.name)) {
+    let gearData = mapGetWithDefault(GEAR_NAME_TO_DATA, gear.name, new Gear());
+    // Check that the brand and gear type match the expected values for the item
+    return gearData.brand === gear.brand && gear.type === gear.type && GEAR_ABILITIES.includes(gear.ability);
+  }
+  return false;
+}
+
+/**
+ * Returns a list of gear items where invalid gear is removed, and image URLs
+ * are replaced with links to scraped wiki images.
+ */
+function sanitizeGearInput(gearItems: Gear[]): Gear[] {
+  let retGear: Gear[] = [];
+
+  for (let gear of gearItems) {  // Check that this is valid
+    if (isValidGear(gear)) {
+      // Replace URL from Splatoon3.ink with internal URL scraped from the wiki
+      // for data safety/sanitization reasons!
+      gear.image = mapGetWithDefault(GEAR_NAME_TO_IMAGE, gear.name, null);
+      if (!gear.image) {
+        console.warn(`Could not find internal image URL for '${gear.name}'. No image will be shown.`);
+      }
+      retGear.push(gear);
+    } else {  // Gear is unrecognized.
+      console.error(`Gear item '${gear.name}' is not recognized. `
+      + `Notifications for it will be skipped. `
+      + `(Ability: ${gear.ability}, Brand: ${gear.brand}, Type: ${gear.type}, Image: ${gear.image})`);
+      // TODO: Send a notification about the error to developer email?
+    }
+  }
+  return retGear;
 }
 
 function aggregateUsers(gearToUserMap: Map<Gear, Map<number, string>>) {
@@ -150,7 +187,7 @@ export default async function handler(
 			// store a default value in case no cache
 			cachedGear = [];
 		} else {
-			cachedGear = rawGearDataToGearList(cachedRawGearData);
+			cachedGear = sanitizeGearInput(rawGearDataToGearList(cachedRawGearData));
 		}
 
 		// Check if gear has expired (or if we have no stored gear data)
@@ -162,7 +199,7 @@ export default async function handler(
 
 		// Retrieve the new gear data from the API.
 		let fetchedRawGearData = await fetchAPIRawGearData();
-		let fetchedGear = rawGearDataToGearList(fetchedRawGearData);
+		let fetchedGear = sanitizeGearInput(rawGearDataToGearList(fetchedRawGearData));
 
 		// 2. Get list of new gear items.
 		let newGear = getNewGearItems(cachedGear, fetchedGear);

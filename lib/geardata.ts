@@ -15,8 +15,9 @@ export const GEAR_NAME_TO_DATA: Map<string, Gear> = gearNameToParsedData;
 export const GEAR_NAMES_SET = new Set(GEAR_NAME_TO_DATA.keys());
 export const GEAR_NAMES = [...GEAR_NAME_TO_DATA.keys()];
 
-export const GEAR_NAME_TO_IMAGE: Map<string, string | undefined> = new Map(
+export const GEAR_NAME_TO_IMAGE: Map<string, string> = new Map(
 	GEAR_NAMES.map((name) => {
-		return [name, GEAR_NAME_TO_DATA.get(name)?.image];
+    let image = GEAR_NAME_TO_DATA.get(name)?.image;
+    return [name, image !== undefined ? image : ""];
 	})
 );

@@ -41,13 +41,13 @@ self.addEventListener('push', async (event) => {
  * @param {boolean} matchExactly If true, client URL must match exactly with the
  * given url. Otherwise, matches if the client URL begins with the baseURL.
  * (true by default)
- * @param {boolean} forceNewWindow If true, will always create a new window instead of
- * search for and focusing existing clients. (false by default)
  * 
  * @returns A Promise that resolves to a client with the matching URL.
  */
-function openAndFocusClient(searchURL, openURL, matchExactly=true, forceNewWindow=false) {
+function openAndFocusClient(searchURL, openURL, matchExactly=true) {
   console.log("Searching for client windows that match URL '" + searchURL + "'.");
+  // Escape question marks in searchURL
+  searchURL = searchURL.replaceAll("?", "\\?");
   return clients.matchAll({type: 'window'})
     .then((clients) => {
       if (matchExactly) {
@@ -57,7 +57,7 @@ function openAndFocusClient(searchURL, openURL, matchExactly=true, forceNewWindo
       }
     })
     .then((matchingClients) => {
-      if (matchingClients[0] && !forceNewWindow) {
+      if (matchingClients[0]) {
         console.log("Found matching client with URL '" + matchingClients[0].url + "'.")
         return matchingClients[0].focus();
       } else {
@@ -77,7 +77,7 @@ self.addEventListener('notificationclick', (event) => {
     const openShop = async () => {
       let itemOrderURL = data.shopURL + data.gearID;
       // Don't match exactly, in case the shop URL is already open.
-      let client = await openAndFocusClient(data.shopURL, itemOrderURL, false, false);
+      let client = await openAndFocusClient(data.shopURL, itemOrderURL, false);
       if (client.url !== itemOrderURL) {
         // Redirect if client is an existing window.
         return client.navigate(itemOrderURL);
@@ -92,7 +92,7 @@ self.addEventListener('notificationclick', (event) => {
     // Note: This will only match the main landing page exactly, so it doesn't
     // interfere if a user is making a filter or editing the about page.
     const openSite = async () => {
-      let client = await openAndFocusClient(data.siteURL, data.loginURL, true, false);
+      let client = await openAndFocusClient(data.siteURL, data.loginURL, true);
       if (data.loginURL && client.url !== data.loginURL) {
         // If we focused an existing client, redirect it to the login URL.
         // TODO: Use messages instead of manual redirects?

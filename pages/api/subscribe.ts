@@ -10,9 +10,12 @@ import {
 	getUserIDFromCode,
 	addUserPushSubscription,
 	trySendNotification,
+  updateLastNotifiedExpiration,
 } from "../../lib/database_utils";
 import { Subscription } from "../../lib/notifications";
 import { BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
+
+const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
 
 /**
  * Updates the user's notification subscription.
@@ -77,6 +80,11 @@ export default async function handler(
 			configureWebPush();
 			await trySendNotification(client, subscription, JSON.stringify(notification));
 		}
+
+    // Update the next expiration time to be 24 hours from now. This is because
+    // gear items last for 24 hours, and only items that are introduced AFTER
+    // the user subscribes should be valid for sending messages.
+    await updateLastNotifiedExpiration(client, userID, Date.now() + MILLISECONDS_PER_DAY);
 
 		res.status(200);
 		return res.end();

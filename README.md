@@ -38,11 +38,11 @@ It's made using NEXT.js, which is a framework for React and Node.js, and the dat
   - [x] Replace some UI buttons with clickable icons
   - [x] Loading animations for database actions
   - [ ] Rarity selector for filter page
-  - [ ] Background image assets
+  - [x] Background image assets
   - [ ] Custom toast notification animations and styling
   - [x] Notification on/off slider, options for stopping all notifications
   - [x] User flow alerts (prompt for notifications, etc.)
-- [ ] Set up metrics collection and server logging
+- [x] Set up metrics collection and server logging
 - [x] Configure server/database options, key security
 - [x] Web hosting setup
 - [ ] **WEBSITE GOES LIVE** 🎉

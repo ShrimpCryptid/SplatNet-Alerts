@@ -181,12 +181,14 @@ const FilterView: FunctionComponent<Props> = ({
 						/>
 					</div>
 				</div>
-				<div className={styles.rarityMeter}>
+        {/*<div className={styles.rarityMeter}>
 					<RarityMeter
 						minRarity={filter.minimumRarity}
 						maxRarity={filter.minimumRarity}
 					/>
 				</div>
+      */}
+
 			</div>
 			<div className={styles.rcontainer}>
 				<div className={styles.gearNameContainer}>

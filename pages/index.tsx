@@ -308,10 +308,13 @@ export default function Home({
 
   let [tempUserNickname, setTempUserNickname] = useState(userNickname);
   useEffect(() => {
-    if (userNickname === null || userNickname === undefined) {
-      setTempUserNickname(userNickname);
-    } else if (tempUserNickname === null || tempUserNickname === undefined) {
-      setTempUserNickname(sanitizeNickname(userNickname));
+    // If tempUserNickname is undefined, set to the userNickname (which may also
+    // be undefined.)
+    if (tempUserNickname === null || tempUserNickname === undefined) {
+      if (userNickname !== null && userNickname !== undefined) {
+        // Only set once logged into an account.
+        setTempUserNickname(sanitizeNickname(userNickname));
+      }
     }
   })
 

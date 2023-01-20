@@ -94,7 +94,11 @@ export function isValidNickname(nickname: string): boolean {
  * Removes all disallowed characters from a nickname.
  * @param nickname
  */
-export function sanitizeNickname(nickname: string): string {
+export function sanitizeNickname(nickname: string|null|undefined): string {
+  if (nickname === null || nickname === undefined) {
+    return "";
+  }
+
   let retString = "";
   for (let i = 0; i < nickname.length; i++) {
     let char = nickname.charAt(i);

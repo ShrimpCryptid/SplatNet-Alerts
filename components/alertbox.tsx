@@ -93,9 +93,10 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 
 	return (
 		<LabeledAlertbox header="Welcome!">
+      <h3 className="highlight">(Notifications won't be enabled until the next step. Please don't leave yet!)</h3>
 			<p>
 				You've made your first filter! Your filters are saved to your account
-				and can be synced across devices using your <b>unique user ID</b>, shown
+				and can be synced across devices using your <span className="highlight">unique user ID</span>, shown
 				below.
 			</p>
 			<h3 style={{ marginBottom: "0" }}>User ID</h3>
@@ -122,13 +123,13 @@ export function WelcomeAlertbox(props: WelcomeAlertboxProps) {
 					<span className="material-symbols-rounded">refresh</span>
 				</LoadingButton>
 			</div>
-			<br />
+      <br/>
 			<LoadingButton
         disabled={nickname === ""}
         loading={props.loading}
         onClick={() => {props.onClickSubmit(nickname)}}
       >
-        Submit
+        Next
       </LoadingButton>
 		</LabeledAlertbox>
 	);

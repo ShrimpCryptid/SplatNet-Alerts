@@ -73,7 +73,7 @@ export default async function handler(
 		if (req.query[API_SEND_TEST_NOTIFICATION] !== undefined) {
 			let notification = {
 				title: "Hello!",
-				body: "Welcome to the Splatnet Shop Alerts service!",
+				body: "Welcome to SplatNet Alerts!",
         siteURL: BASE_WEBSITE_URL,
         loginURL: `${BASE_WEBSITE_URL}/login?${FE_USER_CODE_URL}=${userCode}`,
 			};

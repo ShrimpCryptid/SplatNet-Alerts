@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import FilterView from "../components/filter-view";
@@ -294,17 +294,31 @@ export default function Home({
 	};
 
   /** Handle page flow and nickname/notification prompts */
+  const beforeUnloadListener = useCallback((event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    let message = "Notifications aren't enabled yet! Are you sure you want to leave?"
+    event.returnValue = message;
+    return message;
+  }, []);
+
   useEffect(() => {
+    if (visiblePrompt === NEW_USER_FLOW.NONE) {
+      window.removeEventListener('beforeunload', beforeUnloadListener, {capture: true});
+    }
+
     // Advance to the first login prompt
     if (isUserNew && visiblePrompt === NEW_USER_FLOW.NONE) {
       setVisiblePrompt(NEW_USER_FLOW.NICKNAME_PROMPT);
       setIsUserNew(false);
+      
+      // Add an event listener to warn users if they try to exit at this point.
+      window.addEventListener('beforeunload', beforeUnloadListener, {capture: true});
     }
     // Advance to the notification prompt once a nickname is set
     if (visiblePrompt === NEW_USER_FLOW.NICKNAME_PROMPT && userNickname && isValidNickname(userNickname)) {
       setVisiblePrompt(NEW_USER_FLOW.NOTIFICATION_PROMPT);
     }
-  })
+  }, [visiblePrompt, userNickname, isUserNew]);
 
   let [tempUserNickname, setTempUserNickname] = useState(userNickname);
   useEffect(() => {
@@ -316,7 +330,7 @@ export default function Home({
         setTempUserNickname(sanitizeNickname(userNickname));
       }
     }
-  })
+  });
 
   const onChangedNickname = async (event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setTempUserNickname(sanitizeNickname(event.currentTarget.value));

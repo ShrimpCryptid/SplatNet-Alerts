@@ -205,7 +205,7 @@ export function IOSAlertbox(props: {onClickClose: MouseEventHandler}) {
     <LabeledAlertbox
       header="iOS Device Detected"
       onClickClose={props.onClickClose}
-      primaryButton="R.I.P."
+      primaryButton="Got It"
       primaryButtonOnClick={props.onClickClose}
     >
       <p>
@@ -213,13 +213,11 @@ export function IOSAlertbox(props: {onClickClose: MouseEventHandler}) {
         site, but please know that <span className="highlight">push notifications will not work on your device.</span>
         <br/><br/>
         Apple doesn't support the push notification standard yet on iOS browsers.
-        This should change sometime in 2023, but until then
-        you may want to <span className="highlight">use another device</span> to receive notifications.
-        (All your content will still sync, though!)
+        This should change in 2023, but until then <span className="highlight">use another device</span> to receive notifications.
+        (All your content will still sync!)
         <br/><br/>
         You can read more about this on
         this {makeLink("project's GitHub page", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}.
-
       </p>
 
     </LabeledAlertbox>

@@ -27,6 +27,7 @@ export default function Layout({ children }: LayoutProps) {
         <meta property="og:image" content="https://jgkwzmybepmajpfuqyjz.supabase.co/storage/v1/object/public/splatnet-alerts-public/main_logo.png"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <meta name="theme-color" content="#000000"/>
+        <link rel="manifest" href="manifest.json"/>
         <title>SplatNet Alerts</title>
       </Head>
       <div className={styles.header}>

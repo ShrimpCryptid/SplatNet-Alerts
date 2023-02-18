@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 import {
 	getDBClient,
 	getLastNotifiedExpiration,
@@ -6,21 +6,20 @@ import {
 	getUserSubscriptions,
 	trySendNotification,
 	updateLastNotifiedExpiration,
-} from "../../lib/database_utils";
+} from "../database_utils";
 import {
 	fetchAPIRawGearData,
 	fetchCachedRawGearData,
 	getNewGearItems,
 	rawGearDataToGearList,
 	updateCachedRawGearData,
-} from "../../lib/gear_loader";
-import { Gear } from "../../lib/gear";
-import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../../lib/backend_utils";
-import { getEnvWithDefault, mapGetWithDefault } from "../../lib/shared_utils";
-import { ENV_KEY_ACTION_SECRET } from "../../constants/env";
+} from "../gear_loader";
+import { Gear } from "../gear";
+import { BASE_SPLATNET_URL, BASE_WEBSITE_URL, configureWebPush } from "../backend_utils";
+import { mapGetWithDefault } from "../shared_utils";
 import { FE_USER_CODE_URL, GEAR_ABILITIES } from "../../constants";
 import { Pool } from "pg";
-import { GEAR_NAMES, GEAR_NAME_TO_DATA, GEAR_NAME_TO_IMAGE } from "../../lib/geardata";
+import { GEAR_NAMES, GEAR_NAME_TO_DATA, GEAR_NAME_TO_IMAGE } from "../geardata";
 
 const MILLISECONDS_PER_SECOND = 1000.0;
 
@@ -157,28 +156,13 @@ function generateNotificationPayload(userCode: string, gear: Gear): any {
  *  - 200 once all operations have completed.
  *  - 500 if any other errors encountered.
  */
-export default async function handler(
-	req: NextApiRequest,
-	res: NextApiResponse
-) {
+export const lambdaHandler = async (
+	event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
 	// Validate input
 
 	try {
 		let client = getDBClient();
-
-		// 0. Check authentication on the request-- must match stored API key.
-		// Note: providing an empty string for the secret key will skip checks.
-		let secretKey = getEnvWithDefault(ENV_KEY_ACTION_SECRET, null);
-		let providedKey = req.headers.authorization;
-		if (!secretKey) {
-			// Secret key is undefined-- assume that this is an error.
-			console.warn("Secret key 'ACTION_SECRET' is not defined. This is okay ONLY in testing environments.");
-		} else if (secretKey === providedKey) {
-			console.log("Secret key matches. Request authenticated.");
-		} else {
-			console.error("Unauthorized request: keys do not match.");
-			return res.status(401).end();
-		}
 
 		// 1. Check for new/expired gear items.
 		let cachedRawGearData = await fetchCachedRawGearData(client);
@@ -194,7 +178,10 @@ export default async function handler(
 		// Note that gear is sorted in order of expiration, ascending
 		if (cachedGear.length > 0 && Date.now() < cachedGear[0].expiration) {
 			// Cache has not expired, so do not notify users.
-			return res.status(425).end(); // 425 means 'Too Early'
+      return {
+        statusCode: 425,
+        body: "Too early"
+      };
 		}
 
 		// Retrieve the new gear data from the API.
@@ -263,6 +250,7 @@ export default async function handler(
               (result) => {
                 if (!result) {
                   devicesFailed++;
+                  console.log("Failed to send a notification to " + subscription.keys.auth.substring(0, 5) + " (" + devicesFailed + " failures): " + notification);
                 }
               }
             )
@@ -293,9 +281,15 @@ export default async function handler(
 		console.log(`Users notified: ${usersNotified} users (${numAlreadyNotified} already notified, ${numNoSubscriber} with no devices)`);
 		console.log(`Devices notified: ${devicesNotified - devicesFailed} devices (${devicesFailed} failures)`);
 
-		return res.status(200).end(); // ok
+		return {
+      statusCode: 200,
+      body: "ok"
+    }
 	} catch (err) {
 		console.log(err);
-		return res.status(500).end(); // internal server error
+    return {
+      statusCode: 500,
+      body: "Error"
+    }
 	}
 }

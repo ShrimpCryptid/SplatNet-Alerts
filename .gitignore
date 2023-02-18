@@ -12,3 +12,5 @@ package-lock.json
 next-env.d.ts
 
 .vscode/
+
+out/

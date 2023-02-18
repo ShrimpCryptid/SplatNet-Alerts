@@ -190,6 +190,12 @@ export const lambdaHandler = async (
 
 		// 2. Get list of new gear items.
 		let newGear = getNewGearItems(cachedGear, fetchedGear);
+    // Log new gear items to console
+    let newGearNames = [];
+    for (let gear of newGear) {
+      newGearNames.push(gear.name);
+    }
+    console.log(`Found ${newGear.length} new items: '${newGearNames.join("', '")}'`);
 
 		// 3. Get lists of users to notify.
 		let gearToUserMap = await getUsersToNotify(client, newGear);
@@ -206,7 +212,8 @@ export const lambdaHandler = async (
 		let numAlreadyNotified = 0;
 		let numNoSubscriber = 0;
 		let devicesNotified = 0;
-		let devicesFailed = 0;
+    let notificationsSucceeded = 0;
+    let notificationsFailed = 0;
 
 		let promises = [];
 		for (let [userID, userCode] of allUserMap) {
@@ -249,8 +256,10 @@ export const lambdaHandler = async (
             trySendNotification(client, subscription, notification, options).then(
               (result) => {
                 if (!result) {
-                  devicesFailed++;
-                  console.log("Failed to send a notification to " + subscription.keys.auth.substring(0, 5) + " (" + devicesFailed + " failures): " + notification);
+                  notificationsFailed++;
+                  console.log("Failed to send a notification to " + subscription.keys.auth.substring(0, 4) + " (" + notificationsFailed + " failures): " + notification);
+                } else {
+                  notificationsSucceeded++;
                 }
               }
             )
@@ -279,7 +288,7 @@ export const lambdaHandler = async (
 		console.log(`Notifications done. (Finished in ${timeElapsedSeconds.toFixed(2)} seconds)`);
 		let usersNotified = allUserMap.size - numAlreadyNotified - numNoSubscriber;
 		console.log(`Users notified: ${usersNotified} users (${numAlreadyNotified} already notified, ${numNoSubscriber} with no devices)`);
-		console.log(`Devices notified: ${devicesNotified - devicesFailed} devices (${devicesFailed} failures)`);
+		console.log(`Notifications attempted: ${devicesNotified} devices (${notificationsSucceeded} successful notifications, ${notificationsFailed} failures)`);
 
 		return {
       statusCode: 200,

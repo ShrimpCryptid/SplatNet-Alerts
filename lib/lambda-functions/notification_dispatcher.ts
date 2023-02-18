@@ -179,7 +179,7 @@ export const lambdaHandler = async (
 		if (cachedGear.length > 0 && Date.now() < cachedGear[0].expiration) {
 			// Cache has not expired, so do not notify users.
       return {
-        statusCode: 425,
+        statusCode: 200,
         body: "Too early"
       };
 		}

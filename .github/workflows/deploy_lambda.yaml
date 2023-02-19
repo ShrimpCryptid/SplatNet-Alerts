@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy-notification-dispatcher:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run compile-lambda
+
+      - name: Move node_modules to dist
+        run: mv node_modules out/node_modules
+
+      - name: Zip
+        run: (cd out && zip -r ../lambda-functions.zip .)
+
+      - name: Deploy to AWS
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: splatnet-alerts-notification-dispatcher
+          zip_file: lambda-functions.zip

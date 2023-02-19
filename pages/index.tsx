@@ -452,14 +452,12 @@ export default function Home({
         <></>
       }
 
+      {/*
       <div className={"panel " + styles.panel}>
-        <h3 className={styles.centered + " highlight"}>PSA: SplatNet Alerts down temporarily as of 2/15</h3>
-        <p>Scheduled gear rotation notifications have been taken offline due to
-          issues caused by the influx of new users (hello!). I apologize to any
-          affected users who may have received spammed notifications.</p>
-        <p>I'm working to get a fix out, and {makeLink("you can follow progress on GitHub.", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/6")}</p>
-        <p>-ShrimpCryptid</p>
+        <h3 className={styles.centered + " highlight"}>PSA:</h3>
+        <p>Comment</p>
       </div>
+      */}
 
       <div className={"panel"}>  
         <h1

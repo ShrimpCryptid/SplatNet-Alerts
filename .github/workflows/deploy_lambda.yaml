@@ -17,9 +17,6 @@ jobs:
       - name: Build
         run: npm run compile-lambda
 
-      - name: Move node_modules to dist
-        run: mv node_modules out/node_modules
-
       - name: Zip
         run: (cd out && zip -r ../lambda-functions.zip .)
 

@@ -67,11 +67,8 @@ export default function About({}: DefaultPageProps) {
       </p>
 
       <h3 className={styles.h3}>How fast will SplatNet Alerts update me?</h3>
-      <p>SplatNet Alerts currently uses a scheduled GitHub Action to trigger
-        the notifications. These actions are submitted as requests, so sometimes
-        GitHub may choose to ignore or skip them, resulting in a slight delay.
-        <br/><br/> Notifications will generally be sent out within 30 minutes of
-        when a new gear item first appears. You'll have up to 23 hours to
+      <p>Notifications will be sent out within 15 minutes of
+        when a new gear item first appears. You'll have up to 24 hours to
         claim it from SplatNet!
       </p>
 

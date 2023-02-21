@@ -4,6 +4,8 @@ const ACTION_SHOP = "shop";
 
 self.addEventListener('push', async (event) => {
   const data = event.data.json();
+
+  // TODO: Allow actions to be passed as parameters (instead of hard-coding)
   let actions = [];
 
   if (data.loginURL !== undefined) {
@@ -20,16 +22,19 @@ self.addEventListener('push', async (event) => {
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Notification/data
-  self.registration.showNotification(
-    data.title,
-    {
-      body: data.body,
-      image: data.image,
-      actions: actions,
-      tag: data.tag,
-      icon: data.iconURL || "https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg",
-      data: data  // Stores a whole copy of all data passed to the notification
-    });
+  event.waitUntil(
+    self.registration.showNotification(
+      data.title,
+      {
+        body: data.body,
+        image: data.image,
+        actions: actions,
+        tag: data.tag,
+        icon: data.iconURL || "https://splatnet-alerts.netlify.app/_next/static/media/main_logo.c894548d.svg",
+        data: data  // Stores a whole copy of all data passed to the notification
+      }
+    )
+  );
 });
 
 /**

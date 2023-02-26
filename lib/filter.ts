@@ -87,11 +87,11 @@ export default class Filter {
 	}
 
 	public serialize(): string {
-		return JSON.stringify(this);
+		return encodeURIComponent(JSON.stringify(this));
 	}
 
 	public static deserialize(jsonString: string): Filter {
-		let jsonObject = JSON.parse(jsonString);
+		let jsonObject = JSON.parse(decodeURIComponent(jsonString));
 		return Filter.deserializeObject(jsonObject);
 	}
 

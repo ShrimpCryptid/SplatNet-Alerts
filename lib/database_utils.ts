@@ -58,7 +58,7 @@ import {
 
 /**Removes whitespace and other SQL-sensitive characters from column names.*/
 function formatCol(input: string): string {
-	return input.replace(/\(| |\)|-/g, "").toLowerCase(); // Remove (, ), whitespace, and - characters.
+	return input.replaceAll(/\(| |\)|\+|-/g, "").toLowerCase(); // Remove (, ), whitespace, and - characters.
 }
 
 function arrayEqual(arr1: any[], arr2: any[]): boolean {

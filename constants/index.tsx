@@ -69,6 +69,7 @@ export const GEAR_BRANDS = [
 	"Toni Kensa",
 	"Zekko",
 	"Zink",
+  "Z+F",
 ];
 export const IGNORED_GEAR_BRANDS = ["Grizzco", "amiibo"];
 export const GEAR_RARITY_MAX = 2;

@@ -62,6 +62,13 @@ async function parseRowToGear(
 
 	ability = $(children[4]).text().trim();
 
+  // Handle case where brand image is missing, so the brand name is repeated
+  // (such as for new brands, like Z+F)
+  let splitBrands = brand.split(" ");
+  if (splitBrands.length > 1 && splitBrands[0] === splitBrands[1]) {
+    brand = splitBrands[0];
+  }
+
 	// Calculate rarity by counting the number of full stars
 	children[5].children.forEach((value) => {
 		// img
@@ -70,15 +77,28 @@ async function parseRowToGear(
 		}
 	});
   
-	// Check if this is an item we should ignore based on ability or brand, or if
-  // it can't be purchased with coins (ex: amiibo or singleplayer)
+	// Check if this is an item we should ignore based on ability or brand
 	if (
 		IGNORED_GEAR_BRANDS.includes(brand) ||
-		IGNORED_GEAR_ABILITIES.includes(ability) ||
-    !(/^[0-9]*$/).test(cost)
+		IGNORED_GEAR_ABILITIES.includes(ability)
 	) {
 		return null;
 	}
+  // Check if item can't be purchased with coins (ex: amiibo or singleplayer)
+  // (except for TBA prices)
+  if (!(/^[0-9]*$/).test(cost) && cost !== "TBA") {
+    return null;
+  } else if (cost === "TBA") {  // Handle yet-to-be-announced items
+    cost = "0";
+  }
+
+  // Check if this item is valid based on known brands and abilities
+  if (!GEAR_BRANDS.includes(brand)) {
+    console.error(`No such brand '${brand}' known!`);
+  }
+  if (!GEAR_ABILITIES.includes(ability)) {
+    console.error(`No such ability '${ability}' known!`);
+  }
 
 	// Fetch link to the full page for this gear item
 	if (children[1].firstChild) {
@@ -95,9 +115,12 @@ async function parseRowToGear(
 
 		// Get the image URL from the infobox
 		let imgSrc = $("div.infobox.S3 > div.infobox-image > a > img").attr("src");
-		imageLink = "https:" + imgSrc;
+    if (imgSrc === undefined) {
+      imageLink = ""
+    } else {
+		  imageLink = "https:" + imgSrc;
+    }
 	}
-
 	return new Gear(
 		"", // id (SplatNet gear only)
 		Number.parseInt(cost), // cost
@@ -124,10 +147,10 @@ async function scrapeGearDataFromWikiPage(
 		const $ = cheerio.load(await response.text());
 
 		// Traverse every gear item in the main table of gear items
-		let promises: Promise<void>[] = [];
+		let promises: Promise<any>[] = [];
 		let gear: Gear[] = [];
 		let gearSkippedCount = 0;
-		let gearCount = $("div table tbody tr").length;
+		let gearCount = $("div table tbody tr").length - 1;
 
 		// Generate progress bar
 		const progressBar = new cliProgress.SingleBar({
@@ -152,8 +175,7 @@ async function scrapeGearDataFromWikiPage(
 			}
 
 			// Add a delay before each request starts processing.
-			promises.push(
-				sleep(REQUEST_DELAY_MS * (_idx - 1)).then(() => {
+			let promise = sleep(REQUEST_DELAY_MS * (_idx)).then(() => {
 					parseRowToGear($, rowElement, gearType).then((result) => {
 						if (result !== null) {
 							gear.push(result);
@@ -164,10 +186,14 @@ async function scrapeGearDataFromWikiPage(
 						progressBar.update({ skipped: gearSkippedCount });
 						progressBar.increment();
 					});
-				})
-			);
-		});
+      });
+      promises.push(promise);
+    });
 		await Promise.all(promises);
+    // Weird hack because otherwise the last item index won't be included
+    // in the array of promises and will get dropped from the final gear list.
+    // TODO: Investigate source of race condition bug
+    await sleep(REQUEST_DELAY_MS * 2);
 		progressBar.update(gearCount);
 		progressBar.stop();
 
@@ -212,7 +238,6 @@ async function updateLocalGearJSON(filepath: string) {
 	for (let gear of gearData) {
 		gearDict[gear.name] = Gear.serializeCompact(gear);
 	}
-	// TODO: Save image data separately so it doesn't take up extra bandwidth?
 	let jsonString = JSON.stringify(gearDict);
 
 	try {

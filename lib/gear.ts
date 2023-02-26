@@ -3,9 +3,16 @@
  */
 
 import { GEAR_ABILITIES, GEAR_BRANDS, GEAR_TYPES } from "../constants";
+import { mapGetWithDefault } from "./shared_utils";
 
-const WIKI_IMAGE_PREFIX = "https://cdn.wikimg.net/en/splatoonwiki/images/thumb/";
-const PREFIX_PLACEHOLDER = "{@}";
+const WIKI_LINK_ABBREVIATIONS = new Map<string, string>(Object.entries({
+  "{1}": "https://cdn.wikimg.net/en/splatoonwiki/images/thumb/",
+  "{2}": "S3_Gear_Shoes_",
+  "{3}": "S3_Gear_Headgear_",
+  "{4}": "S3_Gear_Clothing_",
+  "{5}": ".png/128px-",
+}));
+
 
 /** A compacted form of gear data, useful for file storage. Note that this
  * WILL break if changes are made to {@link GEAR_ABILITIES},
@@ -91,6 +98,25 @@ export class Gear {
     return a.name.localeCompare(b.name);
   }
 
+  private static shortenImageURL(url: string, gearName: string) {
+    let newURL = url;
+    for (let key of WIKI_LINK_ABBREVIATIONS.keys()) {
+      newURL = newURL.replaceAll(mapGetWithDefault(WIKI_LINK_ABBREVIATIONS, key, "[ERROR]"), key);
+    }
+    // Abbreviate the gear name as well
+    newURL = newURL.replaceAll(gearName.replaceAll(" ", "_"), "{n}");
+    return newURL;
+  }
+
+  private static unshortenImageURL(url: string, gearName: string) {
+    let newURL = url;
+    for (let key of WIKI_LINK_ABBREVIATIONS.keys()) {
+      newURL = newURL.replaceAll(key, mapGetWithDefault(WIKI_LINK_ABBREVIATIONS, key, "[ERROR]"));
+    }
+    newURL = newURL.replaceAll("{n}", gearName.replaceAll(" ", "_"));
+    return newURL;
+  }
+
   /**
    * Creates a new object with shortened keys and type/brand/ability values,
    * useful for reducing file sizes. Removes the name, price, expiration, and id
@@ -99,7 +125,7 @@ export class Gear {
    * {@link deserializeCompact()} back into Gear objects.
    */
   static serializeCompact(gear: Gear): CompactGearData {
-    let newImageURL = gear.image.replace(WIKI_IMAGE_PREFIX, PREFIX_PLACEHOLDER);
+    let newImageURL = Gear.shortenImageURL(gear.image, gear.name);
     return {
       t: GEAR_TYPES.indexOf(gear.type),
       a: GEAR_ABILITIES.indexOf(gear.ability),
@@ -122,6 +148,6 @@ export class Gear {
       GEAR_ABILITIES[data.a],
       data.r,
       0,
-      data["i"]?.replace(PREFIX_PLACEHOLDER, WIKI_IMAGE_PREFIX));
+      Gear.unshortenImageURL(data["i"], name));
   }
 }

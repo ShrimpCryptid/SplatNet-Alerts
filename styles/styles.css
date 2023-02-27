@@ -286,3 +286,43 @@ textarea:focus, select:focus, input:focus {
 /* Rules for using icons as white on a dark background. */
 .md-light { color: rgba(255, 255, 255, 1); }
 .md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
+/* Sliders */
+.slider {
+  max-width: 100%;
+  width: 100%;
+  margin: auto;
+  position: relative;
+  --thumb-height: 20px;
+  --track-height: 8px;
+}
+
+.slider > .track { 
+  height: var(--track-height);
+  top: calc((var(--thumb-height) - var(--track-height)) / 2);
+  border-radius: calc(var(--track-height) / 2);
+  background: var(--item-hover);
+}
+
+.slider > .track-0 {
+  background: var(--button-background);
+}
+
+.slider > .thumb {
+  cursor: pointer;
+  background: var(--button-background);
+  width: var(--thumb-height);
+  height: var(--thumb-height);
+  border-radius: 100%;
+  outline: none;
+}
+
+.slider > .thumb:hover {
+  background: var(--button-hover);
+  box-shadow: 0 0 0 var(--track-height) #ffffff10
+}
+
+.slider > .thumb:active {
+  background: var(--button-hover);
+  box-shadow: 0 0 0 var(--track-height) #ffffff10
+}

@@ -8,8 +8,8 @@
 
 .bigIconContainer {
   position: relative !important;
-  width: 5.5vmin;
-  height: 5.5vmin;
+  width: calc(5vmin + 10px);
+  height: calc(5vmin + 10px);
 }
 
 .bigIcon {
@@ -21,8 +21,10 @@
 }
 
 .smallIconContainer {
-  width: 4vmin;
-  height: 4vmin;
+  --width: calc(3.5vmin + 5px);
+  --outlineWidth: 2px;
+  width: var(--width);
+  height: var(--width);
   position: relative !important;
   margin-left: 2px;
 
@@ -32,9 +34,11 @@
 }
 
 .smallIconContainer.outline {
+  width: calc(var(--width) - var(--outlineWidth) * 2);
+  height: calc(var(--width) - var(--outlineWidth) * 2);
   border-radius: 100%;
-  border-width: 2px;
-  border-color: white;
+  border-width: var(--outlineWidth);
+  border-color: black;
   border-style: dashed;
 }
 

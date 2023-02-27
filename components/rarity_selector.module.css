@@ -1,0 +1,27 @@
+.raritySelectorContainer {
+  background-color: var(--background-alt);
+  border-radius: 10px;
+  padding: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.raritySliderAndLabel {
+  gap: 10px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.raritySliderContainer {
+  width: 60%
+}
+
+.rarityLabelContainer {
+  width: 40%;
+}
+
+.rarityMeterContainer {
+  width: fit-content;
+
+}

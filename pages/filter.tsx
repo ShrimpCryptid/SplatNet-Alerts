@@ -10,6 +10,7 @@ import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
 import GearSelector, { GearTile } from "../components/gear_selector";
 import LoadingButton from "../components/loading-button";
+import { RaritySelector } from "../components/rarity_selector";
 import Selector from "../components/selector";
 import { TriangleDivider } from "../components/triangle_divider";
 import {
@@ -174,6 +175,7 @@ export default function FilterPage({
         setSelectedAbilities(selectedListToMap(GEAR_ABILITIES, loadedFilter.gearAbilities));
         setSelectedBrands(selectedListToMap(GEAR_BRANDS, loadedFilter.gearBrands));
         setSelectedTypes(selectedListToMap(GEAR_TYPES, loadedFilter.gearTypes));
+        setSelectedRarity(loadedFilter.minimumRarity);
         setCanSaveFilter(true);
         setCurrFilter(loadedFilter);
       }
@@ -444,6 +446,12 @@ export default function FilterPage({
       <h2 className={""}>Gear Properties</h2>
 			<div className={styles.selectorGroup}>
 				<div className={styles.selectorContainer}>
+          <RaritySelector
+            rarity={selectedRarity}
+            onRarityChanged={(newRarity, index) => {
+              updateFilter(GEAR_PROPERTY.RARITY, newRarity);
+            }}
+          />
 					<Selector
 						title={"Types"}
 						category={GEAR_PROPERTY.TYPE}

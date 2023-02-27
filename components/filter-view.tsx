@@ -13,7 +13,7 @@ import styles from "./filter-view.module.css";
 import { RarityMeter } from "./rarity_meter";
 import { GEAR_NAME_TO_IMAGE } from "../lib/geardata";
 import LoadingButton, { ButtonStyle } from "./loading-button";
-import { GEAR_ABILITIES, GEAR_BRANDS } from "../constants";
+import { GEAR_ABILITIES, GEAR_BRANDS, GEAR_RARITY_MAX } from "../constants";
 
 function getStringSelectionCount(selections: string[], sourceOptions: string[], isSelected: boolean): JSX.Element {
   let ret = "(";
@@ -181,13 +181,12 @@ const FilterView: FunctionComponent<Props> = ({
 						/>
 					</div>
 				</div>
-        {/*<div className={styles.rarityMeter}>
+        <div className={styles.rarityMeter}>
 					<RarityMeter
 						minRarity={filter.minimumRarity}
-						maxRarity={filter.minimumRarity}
+						maxRarity={GEAR_RARITY_MAX}
 					/>
 				</div>
-      */}
 
 			</div>
 			<div className={styles.rcontainer}>

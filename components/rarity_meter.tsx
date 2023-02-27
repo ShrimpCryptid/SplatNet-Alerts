@@ -1,6 +1,5 @@
 import { FunctionComponent } from "react";
 import Image from "next/image";
-
 import styles from "./rarity_meter.module.css";
 import { unknownIcon } from "../public/icons/utils";
 import { GEAR_RARITY_MAX, GEAR_RARITY_MIN } from "../constants";

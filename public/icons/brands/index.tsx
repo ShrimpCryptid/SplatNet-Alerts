@@ -23,6 +23,7 @@ import tentatek from './tentatek.png';
 import toniKensa from './toni_kensa.png';
 import zekko from './zekko.png';
 import zink from './zink.png';
+import zf from './zf.png';
 
 export const brandIcons = new Map(Object.entries({
 	'amiibo': amiibo,
@@ -45,5 +46,5 @@ export const brandIcons = new Map(Object.entries({
 	'Toni Kensa': toniKensa,
 	'Zekko': zekko,
 	'Zink': zink,
-  'Z+F': unknown,
+  'Z+F': zf,
 }));

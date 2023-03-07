@@ -11,6 +11,7 @@ const WIKI_LINK_ABBREVIATIONS = new Map<string, string>(Object.entries({
   "{3}": "S3_Gear_Headgear_",
   "{4}": "S3_Gear_Clothing_",
   "{5}": ".png/128px-",
+  "{6}": "https://cdn.wikimg.net/en/splatoonwiki/images/"
 }));
 
 

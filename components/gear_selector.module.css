@@ -103,3 +103,10 @@
 .hidden {
   visibility: hidden;
 }
+
+.helpText {
+  line-height: 10px;
+  align-items: center;
+  vertical-align: middle;
+  gap: 5px;
+}

@@ -20,7 +20,7 @@
   padding: 15px;
   position: absolute;
   transform: translateY(-50%) translateX(-50%);
-  top: calc(50vh - 40px);
+  top: calc(50vh + 20px);
   left: 50%;
   z-index: 4;
 }

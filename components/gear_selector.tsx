@@ -7,6 +7,9 @@ import { unknownIcon } from "../public/icons/utils";
 import { brandIcons } from "../public/icons/brands";
 import { mapGetWithDefault } from "../lib/shared_utils";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
+import { makeIcon, makeLink } from "../lib/frontend_utils";
+import Link from "next/link";
+import CollapsibleHelpBox from "./collapsible_box";
 
 type GearTileProps = {
 	/** Gear to render. If null or undefined, shows an unknown icon. */
@@ -80,6 +83,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 }) => {
 	const gearArray = [...GEAR_NAME_TO_DATA.values()];
 	const [searchText, setSearchText] = useState("");
+  const [showMissingItemPrompt, setShowMissingItemPrompt] = useState(false);
 
 	const [isRenderingGear, setIsRenderingGear] = useState(false);
 	const [renderedGearList, setRenderedGearList] = useState(<></>);
@@ -189,6 +193,19 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 					{renderedGearList}
 				</div>
 			</div>
+      
+      <CollapsibleHelpBox
+      header={"Why are some items missing?"}
+      showFullText={showMissingItemPrompt}
+      onClick={() => setShowMissingItemPrompt(!showMissingItemPrompt)}      
+      >
+        <p>Items that cannot be purchased from the SplatNet store are not shown here.
+        This includes gear received from amiibo, Salmon Run, Wandercrust, and singleplayer.
+        <br/><br/>If an item seems to be incorrectly missing, please submit an {makeLink("issue on GitHub", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues")}.
+        You can check the {makeLink("Splatoon Wiki", "https://splatoonwiki.org/wiki/Gear")} for a complete list of gear items.
+        </p>
+      </CollapsibleHelpBox>
+      
 		</div>
 	);
 };

@@ -1,0 +1,41 @@
+.box {
+  border-style: dashed;
+  padding: 5px 10px;
+  border-color: gray;
+  border-radius: 10px;
+  height: fit-content;
+  width: fit-content;
+  margin: 10px 0;
+  transition: height 2s;
+}
+
+.headerText {
+  line-height: 10px;
+  align-items: center;
+  vertical-align: middle;
+  gap: 5px;
+  padding: 0;
+  background-color: #00000000;
+  cursor: pointer;
+  height: fit-content;
+  width: fit-content;
+}
+
+.headerText:active:enabled {
+  background-color: #00000000;
+  text-decoration: underline;
+}
+
+.headerText:hover:enabled {
+  background-color: #00000000;
+  text-decoration: underline;
+
+}
+
+.headerText > p {
+  padding: 0;
+  margin: 0;
+}
+
+.contents {
+}

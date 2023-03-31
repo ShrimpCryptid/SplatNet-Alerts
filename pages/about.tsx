@@ -104,8 +104,11 @@ export default function About({}: DefaultPageProps) {
 
       <h3 className={styles.h3}>How is this website made?</h3>
       <p>
-        SSA's website is made using React and NextJS, and the backend is built
-        using NodeJS.
+        The SplatNet Alerts website is made using NEXT.js, which incorporates
+        both the front-end (React) and the backend (NodeJS). Recurring jobs for
+        tasks like sending notifications are handled by AWS Lambda functions.
+        <br/><br/> Additional images were made by me using Inkscape, a free
+        vector editing software!
       </p>
 
       <h3 className={styles.h3}>I want to give you all my money.</h3>

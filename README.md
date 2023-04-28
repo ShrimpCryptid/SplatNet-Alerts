@@ -12,7 +12,7 @@ Splatoon 3 comes with a companion app, SplatNet 3, which has its own shop and a 
 
 This is an unofficial web app for the game Splatoon 3 that alerts you about SplatNet gear you're interested in! You can view updates on my [Twitter (@ShrimpCryptid)](https://twitter.com/shrimpcryptid) and via the roadmap below, which I'll update as I make progress.
 
-It's made using NEXT.js, which is a framework for React and Node.js, and the database is built on PostgresSQL.
+It's made using NEXT.js, which is a framework for React and Node.js, and the database is built on PostgreSQL.
 
 ## Features
 - Filter by any combination of gear item, type (hats, clothing, shoes), ability, and brand.

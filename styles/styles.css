@@ -279,6 +279,10 @@ textarea:focus, select:focus, input:focus {
 
 .font-ui { font-family: var(--font-family-ui);}
 
+.icon-inline {
+  vertical-align: bottom;
+}
+
 /* Rules for using icons as black on a light background. */
 .md-dark { color: rgba(0, 0, 0, 0.54); }
 .md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }

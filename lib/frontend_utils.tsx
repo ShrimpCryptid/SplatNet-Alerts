@@ -70,3 +70,34 @@ export function isIOS() {
   // from a Mac, since they look the same
   || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 }
+
+/**
+ * Returns whether the website is being run as a web app.
+ */
+export function isStandalone(): boolean {
+  return ('standalone' in window.navigator) && (window.navigator['standalone'] !== undefined);
+}
+
+export function getIOSVersion() {
+  if (isIOS()) {
+    var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+    if (v !== null) { 
+      return [parseInt(v[1], 10), parseInt(v[2], 10)];
+    }
+  }
+  return [-1, -1];
+}
+
+export function isSupportedIOSVersion(): boolean {
+  if (isIOS()) {
+    let version = getIOSVersion();
+    if (version[0] === -1) {
+      return false;
+    } else if (version[0] === 16 && version[1] >= 4) {
+      return true;
+    } else if (version[0] > 16) {
+      return true;
+    }
+  }
+  return false;
+}

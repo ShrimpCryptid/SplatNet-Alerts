@@ -5,7 +5,7 @@ import styles from "./alertbox.module.css";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 import notificationImage from "../public/images/notifications-forever.jpg";
 import Image from "next/image";
-import { makeLink } from "../lib/frontend_utils";
+import { getIOSVersion, makeIcon, makeLink } from "../lib/frontend_utils";
 import { UserIDField } from "./user_id_field";
 
 type AlertboxProps = {
@@ -200,24 +200,39 @@ export function NotificationAlertbox(props: NotificationAlertboxProps) {
   )
 }
 
-export function IOSAlertbox(props: {onClickClose: MouseEventHandler}) {
+export function IOSIncompatibleVersionAlertbox(props: {onClickClose: MouseEventHandler}) {
+  let version = getIOSVersion();
+  let versionText = version[0] + "." + version[1];
   return (
     <LabeledAlertbox
-      header="iOS Device Detected"
+      header="Incompatible iOS Version"
       onClickClose={props.onClickClose}
       primaryButton="Got It"
       primaryButtonOnClick={props.onClickClose}
     >
       <p>
-        Thanks for your interest in SplatNet Alerts!<br/>You're welcome to use the
-        site, but please know that <span className="highlight">push notifications will not work on your device.</span>
-        <br/><br/>
-        Apple doesn't support the push notification standard yet on iOS browsers.
-        This should change in 2023, but until then <span className="highlight">use another device</span> to receive notifications.
-        (All your content will still sync!)
-        <br/><br/>
-        You can read more about this on
-        this {makeLink("project's GitHub page", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}.
+        <span className="highlight">SplatNet Alerts uses the web push API to send notifications, which is only
+        supported in iOS 16.4 or above.</span>
+        {
+          version[0] !== -1 ?
+          <>
+            <br/><br/>
+            Currently detected version: <span className="highlight">{versionText}</span>
+            <br/><br/>
+            You'll need to either update your iOS version or use a different device to receive alerts. The rest of the website
+            will still work on your device, just without notifications.
+            <br/><br/>
+            You can read more about this on
+            the {makeLink("project's GitHub page", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}.
+          </> :
+          <>
+            <br/><br/>
+            It looks like you might be using an incompatible iOS device, but the version can't be detected so I don't know for sure.
+            Please check your iOS version, then come back if there aren't any issues.
+            <br/><br/>
+            If you think you've incorrectly received this message, please {makeLink("report it on GitHub", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues")} so I can issue a fix!
+          </>
+        }
       </p>
 
     </LabeledAlertbox>

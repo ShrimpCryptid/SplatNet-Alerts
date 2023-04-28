@@ -13,7 +13,7 @@ import {
 	API_SUBSCRIPTION,
 	API_USER_CODE,
 	FE_ERROR_INVALID_USERCODE,
-	FE_HAS_SHOWN_IOS_WARNING,
+	FE_HAS_SHOWN_IOS_WARNING as FE_HAS_SHOWN_IOS_VERSION_WARNING,
 	FE_LOCAL_SUBSCRIPTION_INFO,
 	FE_UNKNOWN_MSG,
 } from "../constants";
@@ -26,9 +26,9 @@ import {
 import SuperJumpLoadAnimation from "../components/superjump/superjump";
 import { fetchWithAttempts, getRandomTitle, isValidNickname, isValidUserCode, printStandardErrorMessage, sanitizeNickname, sleep } from "../lib/shared_utils";
 import LoadingButton, { ButtonStyle } from "../components/loading-button";
-import LabeledAlertbox, { IOSAlertbox, NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
+import LabeledAlertbox, { IOSIncompatibleVersionAlertbox, NotificationAlertbox, WelcomeAlertbox } from "../components/alertbox";
 import Switch from "../components/switch";
-import { isIOS, makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
+import { isIOS, isStandalone, isSupportedIOSVersion, makeIcon, makeIconHeader, makeLink } from "../lib/frontend_utils";
 import { UserIDField } from "../components/user_id_field";
 import { TriangleDivider } from "../components/triangle_divider";
 
@@ -70,7 +70,7 @@ export default function Home({
   let [notificationsLoading, setNotificationsLoading] = useState(false);
 
   let [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
-  let [showIOSPrompt, setShowIOSPrompt] = useState(false);
+  let [showIOSVersionPrompt, setShowIOSVersionPrompt] = useState(false);
 
 	let [loginUserCode, setLoginUserCode] = useState("");
 
@@ -184,16 +184,40 @@ export default function Home({
           // User closed notification prompt without selecting an option
           return null;
         } else if (Notification.permission !== "granted") {
-          // User denied notifications
-          toast.error(
-            <div>
+          if (isIOS() && isSupportedIOSVersion() && !isStandalone) {
+            // Compatible iOS version, but is not installed as a web app
+            toast.warning(
+              <div>
+                <p>
+                  Web notifications on iOS requires adding SplatNet Alerts to your Home Screen.
+                  <br/><span className="highlight">Tap <b>Share</b> {makeIcon("ios_share", "icon-inline")} and <b>Add to Home Screen {makeIcon("add_box", "icon-inline")}</b>, then try again.</span>
+                </p>
+              </div>
+            , {autoClose: 10000})
+          } else if (isIOS() && !isSupportedIOSVersion()) {
+            // Incompatible iOS version
+            toast.error(
+              <div>
+              <p>
+                It looks like you're using an incompatible iOS version. Please update your device to iOS 16.4 or above,
+                or use another device for notifications.
+              </p>
+              {makeLink("More Info (GitHub)", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}
+            </div>
+            , {autoClose: 10000});
+            return false;
+          } else {
+            // User denied notifications
+            toast.error(
+              <div>
               <p>
                 Notifications are currently disabled by your browser. Check the webpage settings to reenable them.
               </p>
-              {makeLink("See the Help Guide", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/3")}
+              {makeLink("See the Help Guide (GitHub)", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/3")}
             </div>
             , {autoClose: 5000});
-          return false;
+            return false;
+          }
         }
 
         await registerServiceWorker();
@@ -384,22 +408,22 @@ export default function Home({
 
   // Check if we should show the iOS Alert box
   useEffect(() => {
-    if (isIOS() && window.localStorage.getItem(FE_HAS_SHOWN_IOS_WARNING) === null) {
-      setShowIOSPrompt(true);
+    if (isIOS() && !isSupportedIOSVersion && window.localStorage.getItem(FE_HAS_SHOWN_IOS_VERSION_WARNING) === null) {
+      setShowIOSVersionPrompt(true);
     }
   })
 
   const onClickCloseIOSPrompt = () => {
     if (window) {
-      window.localStorage.setItem(FE_HAS_SHOWN_IOS_WARNING, "");
-      setShowIOSPrompt(false);
+      window.localStorage.setItem(FE_HAS_SHOWN_IOS_VERSION_WARNING, "");
+      setShowIOSVersionPrompt(false);
     }
   }
 
 	return (
 		<div className={styles.main}>
-      {showIOSPrompt
-        ? <IOSAlertbox onClickClose={onClickCloseIOSPrompt} />
+      {showIOSVersionPrompt
+        ? <IOSIncompatibleVersionAlertbox onClickClose={onClickCloseIOSPrompt} />
         : <></>
       }
 

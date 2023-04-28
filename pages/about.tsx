@@ -2,7 +2,7 @@ import { DefaultPageProps } from "./_app";
 import styles from "../styles/about.module.css";
 import mainLogo from "../public/images/main_logo.svg";
 import Image from "next/image";
-import { LinkWithChildren, makeHomeLink, makeLink } from "../lib/frontend_utils";
+import { LinkWithChildren, makeHomeLink, makeIcon, makeLink } from "../lib/frontend_utils";
 import kofiButton from "../public/images/ko-fi_button.png";
 
 export default function About({}: DefaultPageProps) {
@@ -41,6 +41,13 @@ export default function About({}: DefaultPageProps) {
       <div className="panel">
 
       <h2 className={styles.h2}>Frequently Asked Questions (FAQ):</h2>
+
+      <h3 className={styles.h3}>How do I enable notifications on iOS devices?</h3>
+      <p>
+      iOS was only recently updated to support web push, so you'll need to be on iOS 16.4 or higher.
+      <br/><br/>Tap <b>Share</b> {makeIcon("ios_share", "icon-inline")} and <b>Add to Home Screen {makeIcon("add_box", "icon-inline")}</b>, then
+      hit the notifications toggle at the bottom of the home page once you've made a new account.
+      </p>
 
       <h3 className={styles.h3}>What data does this website store?</h3>
       <p>Your user ID is stored locally in the browser so you don't have to log

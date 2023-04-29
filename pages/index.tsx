@@ -162,7 +162,7 @@ export default function Home({
    * the backend.
    * 
    * Returns true if the operation was completed successfully. Returns false if
-   * an explicit error was encountered. Returns null if the operation was
+   * an explicit error was encountered, or if the operation was
    * cancelled by the user but could be reattempted.
    */
 	const toggleNotifications = async (newState: boolean) => {
@@ -180,34 +180,7 @@ export default function Home({
         if (Notification.permission !== "granted") {
           await requestNotificationPermission();
         }
-        if (Notification.permission === "default") {
-          // User closed notification prompt without selecting an option
-          return null;
-        } else if (Notification.permission !== "granted") {
-          if (isIOS() && isSupportedIOSVersion() && !isStandalone()) {
-            // Compatible iOS version, but is not installed as a web app
-            toast.warning(
-              <div>
-                <p>
-                  Web notifications on iOS require adding SplatNet Alerts to your Home Screen.
-                  <br/><span className="highlight">Tap <b>Share</b> {makeIcon("ios_share", "icon-inline")} and <b>Add to Home Screen {makeIcon("add_box", "icon-inline")}</b>, then try again.</span>
-                </p>
-              </div>
-            , {autoClose: 10000});
-            return false;
-          } else if (isIOS() && !isSupportedIOSVersion()) {
-            // Incompatible iOS version
-            toast.error(
-              <div>
-              <p>
-                It looks like you're using an incompatible iOS version. Please update your device to iOS 16.4 or above,
-                or use another device for notifications.
-              </p>
-              {makeLink("More Info (GitHub)", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}
-            </div>
-            , {autoClose: 10000});
-            return false;
-          } else {
+        if (Notification.permission !== "granted") {
             // User denied notifications
             toast.error(
               <div>
@@ -218,7 +191,6 @@ export default function Home({
             </div>
             , {autoClose: 5000});
             return false;
-          }
         }
 
         await registerServiceWorker();
@@ -252,8 +224,33 @@ export default function Home({
         }
       } catch (e) {
         console.log(e);
-        toast.error(FE_UNKNOWN_MSG);
-        return false;
+        if (isIOS() && isSupportedIOSVersion() && !isStandalone()) {
+          // Compatible iOS version, but is not installed as a web app
+          toast.warning(
+            <div>
+              <p>
+                Web notifications on iOS require adding SplatNet Alerts to your Home Screen.
+                <br/><span className="highlight">Tap <b>Share</b> {makeIcon("ios_share", "icon-inline")} and <b>Add to Home Screen {makeIcon("add_box", "icon-inline")}</b>, then try again.</span>
+              </p>
+            </div>
+          , {autoClose: 10000});
+          return false;
+        } else if (isIOS() && !isSupportedIOSVersion()) {
+          // Incompatible iOS version
+          toast.error(
+            <div>
+            <p>
+              It looks like you're using an incompatible iOS version. Please update your device to iOS 16.4 or above,
+              or use another device for notifications.
+            </p>
+            {makeLink("More Info (GitHub)", "https://github.com/ShrimpCryptid/SplatNet-Alerts/issues/2")}
+          </div>
+          , {autoClose: 10000});
+          return false;
+        } else {
+          toast.error(FE_UNKNOWN_MSG);
+          return false;
+        }
       } finally {
         // Add a slight delay so users know that something is happening
         sleep(500).then(() => setNotificationsLoading(false));

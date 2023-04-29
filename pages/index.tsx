@@ -237,7 +237,7 @@ export default function Home({
           return false;
         } else if (isIOS() && !isSupportedIOSVersion()) {
           // Incompatible iOS version
-          toast.error(
+          toast.warning(
             <div>
             <p>
               It looks like you're using an incompatible iOS version. Please update your device to iOS 16.4 or above,

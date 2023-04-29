@@ -64,7 +64,8 @@ export function isIOS() {
     'iPod Simulator',
     'iPad',
     'iPhone',
-    'iPod'
+    'iPod',
+    'iPod touch'
   ].includes(navigator.platform)
   // iPad on iOS 13 detection -- check if there's a touch object to distinguish
   // from a Mac, since they look the same
@@ -82,7 +83,7 @@ export function getIOSVersion() {
   if (isIOS()) {
     var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
     if (v !== null) { 
-      return [parseInt(v[1], 10), parseInt(v[2], 10)];
+      return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] ? v[3] : '0', 10)];
     }
   }
   return [-1, -1];

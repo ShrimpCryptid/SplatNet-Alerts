@@ -184,16 +184,17 @@ export default function Home({
           // User closed notification prompt without selecting an option
           return null;
         } else if (Notification.permission !== "granted") {
-          if (isIOS() && isSupportedIOSVersion() && !isStandalone) {
+          if (isIOS() && isSupportedIOSVersion() && !isStandalone()) {
             // Compatible iOS version, but is not installed as a web app
             toast.warning(
               <div>
                 <p>
-                  Web notifications on iOS requires adding SplatNet Alerts to your Home Screen.
+                  Web notifications on iOS require adding SplatNet Alerts to your Home Screen.
                   <br/><span className="highlight">Tap <b>Share</b> {makeIcon("ios_share", "icon-inline")} and <b>Add to Home Screen {makeIcon("add_box", "icon-inline")}</b>, then try again.</span>
                 </p>
               </div>
-            , {autoClose: 10000})
+            , {autoClose: 10000});
+            return false;
           } else if (isIOS() && !isSupportedIOSVersion()) {
             // Incompatible iOS version
             toast.error(

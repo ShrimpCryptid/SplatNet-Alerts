@@ -52,7 +52,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="hdiv" style={{gap: "10px", marginLeft: "auto"}}>
           <Link href="/about">
             <a className={styles.aboutLink}>
-              {makeIcon("help", styles.aboutIcon)}About
+              {makeIcon("help", styles.aboutIcon + " icon-inline")}About
             </a>
           </Link>
         </div>

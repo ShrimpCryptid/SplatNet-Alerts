@@ -47,7 +47,7 @@
   font-family: var(--font-family-ui);
   text-decoration: none;
   font-size: 18px;
-  vertical-align: center;
+  vertical-align: bottom;
   display: flex;
   align-items: center;
   margin: 0 10px;

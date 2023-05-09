@@ -48,12 +48,14 @@ function isValidGear(gear: Gear) {
 
 /**
  * Returns a list of gear items where invalid gear is removed, and image URLs
- * are replaced with links to scraped wiki images.
+ * are replaced with links to scraped wiki images. Also trims whitespace on gear
+ * names.
  */
 function sanitizeGearInput(gearItems: Gear[]): Gear[] {
   let retGear: Gear[] = [];
 
   for (let gear of gearItems) {  // Check that this is valid
+    gear.name = gear.name.trim();
     if (isValidGear(gear)) {
       // Replace URL from Splatoon3.ink with internal URL scraped from the wiki
       // for data safety/sanitization reasons!

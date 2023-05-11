@@ -25,3 +25,7 @@
   width: fit-content;
 
 }
+
+.disabled {
+  filter: brightness(50%);
+}

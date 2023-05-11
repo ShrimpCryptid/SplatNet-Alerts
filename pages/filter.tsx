@@ -3,14 +3,14 @@
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import LabeledAlertbox from "../components/alertbox";
 import FilterView from "../components/filter-view";
 import GearSelector, { GearTile } from "../components/gear_selector";
 import LoadingButton from "../components/loading-button";
-import { RaritySelector } from "../components/rarity_selector";
+import RaritySelector from "../components/rarity_selector";
 import Selector from "../components/selector";
 import { TriangleDivider } from "../components/triangle_divider";
 import {
@@ -175,18 +175,16 @@ export default function FilterPage({
     }
   }
 
+  // Initialize filter values
+	const [currFilter, setCurrFilter] = useState(initFilter);
 	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
 	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
-
-  // This check is necessary because selectedListToMap treats empty arrays as
-  // the wildcard (everything is selected). In order to have empty (unselected)
-  // values for a new filter, the maps have to be initialized with makeSelectedMap.
 	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
 	const [selectedBrands, setSelectedBrands] = useState(initBrands);
 	const [selectedTypes, setSelectedTypes] = useState(initTypes);
 
-	const [currFilter, setCurrFilter] = useState(initFilter);
-
+  // Create a static ref to the searchbar which is updated by the
+  // GearSelector. This is used to focus the searchbar when the menu is opened.
   const gearSelectorSearchbarRef = useRef<HTMLInputElement>(null);
 
 	const [canSaveFilter, setCanSaveFilter] = useState(false);
@@ -196,8 +194,9 @@ export default function FilterPage({
 	const [isSaving, setIsSaving] = useState(false);
 
 
-	// Update the filter values using new state. This is called whenever
-	// a selection is changed on the page.
+	/** Update the filter values using new state. This is called whenever
+  *   a selection is changed on the page.
+  */
 	const updateFilter = (category: GEAR_PROPERTY, newValue: any) => {
 		let newGearName = selectedGearName;
 		let newRarity = selectedRarity;
@@ -251,8 +250,8 @@ export default function FilterPage({
 		}
 	}; // updateFilter
 
+  /** Try saving the filter to the database. */
 	const onClickSave = () => {
-		// Try saving the filter to the database.
 		// Note that no filter cleanup/validation happens here.
 
 		async function saveFilter() {
@@ -342,7 +341,7 @@ export default function FilterPage({
 
 	// Resize the group of selectors so they are either a row or column based on
 	// the window width.
-	const handleResize = () => {
+	const handleResize = useCallback(() => {
 		const selectorGroup = document.querySelector("." + styles.selectorGroup);
 		if (selectorGroup) {
 			// Check the width of all the contained items. If they're too large,
@@ -360,21 +359,18 @@ export default function FilterPage({
 				selectorGroup.classList.add(styles.directionColumn);
 			}
 		}
-	};
+	}, []);
 
 	// Add as a listener for resizing
 	React.useEffect(() => {
 		handleResize(); // run once on page load.
 		window.addEventListener("resize", handleResize, false);
-	});
+	}, []);
 
   // Memoize the selection callback to prevent unnecessary rerenders.
-  const updateFilterRef = useRef(updateFilter);
-  updateFilterRef.current = updateFilter;
-
   const onGearSelection = useMemo(() => {
     return (selectedGear: Gear) => {
-      updateFilterRef.current(GEAR_PROPERTY.NAME, selectedGear.name);
+      updateFilter(GEAR_PROPERTY.NAME, selectedGear.name);
       setShowGearSelection(false);
     };
   }, [setShowGearSelection]);
@@ -461,9 +457,11 @@ export default function FilterPage({
 				<div className={styles.selectorContainer}>
           <RaritySelector
             rarity={selectedRarity}
-            onRarityChanged={(newRarity, index) => {
+            onRarityChanged={(newRarity: number, index: number) => {
               updateFilter(GEAR_PROPERTY.RARITY, newRarity);
             }}
+            disabled={selectedGearName !== ""}
+            override={GEAR_NAME_TO_DATA.get(selectedGearName)?.rarity}
           />
 					<Selector
 						title={"Types"}

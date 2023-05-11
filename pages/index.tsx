@@ -135,7 +135,7 @@ export default function Home({
 	};
 
   // Update the serviceworker only once when the page loads
-  const updateServiceWorker = useMemo(() => {
+  useEffect(() => {
     if (typeof navigator !== "undefined" && navigator.serviceWorker) {
       navigator.serviceWorker.getRegistration().then((registration) => {
         registration?.update();

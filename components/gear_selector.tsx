@@ -83,10 +83,10 @@ type GearListProps = {
 export const GearList: FunctionComponent<GearListProps> = memo(function GearList(props: GearListProps) {
   const gearArray = useMemo(() => [...GEAR_NAME_TO_DATA.values()], []);
   const [fullGearList, setFullGearList] = useState(<></>);
+  const [isInitiallyRenderingGearList, startInitialGearListRender] = useTransition();
   useEffect(() => {
-    // Hack to get an async function-- set state asynchronously so we don't block
-    // the main render
-    setTimeout(() => {
+    // Set state asynchronously so we don't block the main render
+    startInitialGearListRender(() => {
       setFullGearList(
         <>
         {[...GEAR_NAME_TO_DATA.values()].map((gear) => {
@@ -94,7 +94,7 @@ export const GearList: FunctionComponent<GearListProps> = memo(function GearList
         })}
       </>
     );
-  }, 0);
+  });
   }, [])
   let showFullList =  props.filteredGear === undefined || gearArray.length === props.filteredGear.length;
 

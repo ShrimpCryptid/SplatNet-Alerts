@@ -43,6 +43,7 @@ const REQUEST_DELAY_MS = 200;
 // ==============
 // Helper Methods
 // ==============
+
 function makeSelectedMap(allValues: string[]): Map<string, boolean> {
 	let boolArr: [string, boolean][] = allValues.map((value) => {
 		return [value, false];
@@ -147,16 +148,46 @@ export default function FilterPage({
   setIsUserNew,
 	setUserFilters,
 }: DefaultPageProps) {
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-	const [selectedGearName, setSelectedGearName] = useState("");
-	const [selectedRarity, setSelectedRarity] = useState(0);
-	const [selectedAbilities, setSelectedAbilities] = useState(makeSelectedMap(GEAR_ABILITIES));
-	const [selectedBrands, setSelectedBrands] = useState(makeSelectedMap(GEAR_BRANDS));
-	const [selectedTypes, setSelectedTypes] = useState(makeSelectedMap(GEAR_TYPES));
-	const [currFilter, setCurrFilter] = useState(() => {return new Filter()});
+  // Determine whether this is the initial render
+  const isInitializing = useRef(true);
+  const isNewFilter = useRef(true);
+  let initFilter = useMemo(() => new Filter("", 0, [], [], []), []);
+  let initAbilities = useMemo(() => {return makeSelectedMap(GEAR_ABILITIES);}, []);
+  let initBrands = useMemo(() => {return makeSelectedMap(GEAR_BRANDS);}, []);
+  let initTypes = useMemo(() => {return makeSelectedMap(GEAR_TYPES);}, []);
 
-  const [gearSelectorSearchbarRef, setGearSelectorSearchbarRef] = useState(React.createRef<HTMLInputElement>());
+  
+  // If so, check if we're editing an existing filter and load the filter's values.
+  if (isInitializing) {
+    isInitializing.current = false;  // don't trigger this behavior again
+
+    if (editingFilterIndex !== null && userFilters) {
+      // Load existing filter because we're editing one
+      let loadedFilter = userFilters[editingFilterIndex];
+      if (loadedFilter) {
+        initFilter = loadedFilter;
+        isNewFilter.current = false;
+        initAbilities = selectedListToMap(GEAR_ABILITIES, initFilter.gearAbilities);
+        initBrands = selectedListToMap(GEAR_BRANDS, initFilter.gearBrands);
+        initTypes = selectedListToMap(GEAR_TYPES, initFilter.gearTypes);
+      }
+    }
+  }
+
+	const [selectedGearName, setSelectedGearName] = useState(initFilter.gearName);
+	const [selectedRarity, setSelectedRarity] = useState(initFilter.minimumRarity);
+
+  // This check is necessary because selectedListToMap treats empty arrays as
+  // the wildcard (everything is selected). In order to have empty (unselected)
+  // values for a new filter, the maps have to be initialized with makeSelectedMap.
+	const [selectedAbilities, setSelectedAbilities] = useState(initAbilities);
+	const [selectedBrands, setSelectedBrands] = useState(initBrands);
+	const [selectedTypes, setSelectedTypes] = useState(initTypes);
+
+	const [currFilter, setCurrFilter] = useState(initFilter);
+
+  const gearSelectorSearchbarRef = useRef<HTMLInputElement>(null);
 
 	const [canSaveFilter, setCanSaveFilter] = useState(false);
 	const [pageSwitchReady, setPageSwitchReady] = useState(false);
@@ -164,24 +195,6 @@ export default function FilterPage({
 	const [showGearSelection, setShowGearSelection] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    // Load in filter values (either default or otherwise)
-    if (isInitialLoad) {
-      if (editingFilterIndex !== null && userFilters) {
-        // Load existing filter because we're editing one
-        let loadedFilter = userFilters[editingFilterIndex];
-        // Have existing filter, populate values in page state.
-        setSelectedGearName(loadedFilter.gearName);
-        setSelectedAbilities(selectedListToMap(GEAR_ABILITIES, loadedFilter.gearAbilities));
-        setSelectedBrands(selectedListToMap(GEAR_BRANDS, loadedFilter.gearBrands));
-        setSelectedTypes(selectedListToMap(GEAR_TYPES, loadedFilter.gearTypes));
-        setSelectedRarity(loadedFilter.minimumRarity);
-        setCanSaveFilter(true);
-        setCurrFilter(loadedFilter);
-      }
-      setIsInitialLoad(false);
-    }
-  })
 
 	// Update the filter values using new state. This is called whenever
 	// a selection is changed on the page.

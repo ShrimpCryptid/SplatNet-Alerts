@@ -1,5 +1,5 @@
 import styles from "./selector.module.css";
-import { FunctionComponent } from "react";
+import { FunctionComponent, memo } from "react";
 import Image, { StaticImageData } from "next/image";
 import { FE_WILDCARD, GEAR_PROPERTY } from "../constants";
 import { mapGetWithDefault } from "../lib/shared_utils";
@@ -119,7 +119,7 @@ function countSelected(selections: Map<string, boolean>): number {
  * Displays a list of selectable items with image icons. Includes optional
  *  behavior for wildcard/Any selections.
  */
-const Selector: FunctionComponent<SelectorProps> = ({
+const Selector: FunctionComponent<SelectorProps> = memo(function Selector({
 	title,
 	category,
 	items,
@@ -128,8 +128,8 @@ const Selector: FunctionComponent<SelectorProps> = ({
 	useWildcard,
 	onChanged,
 	selectionOverride,
-  disabledItems
-}) => {
+  disabledItems}: SelectorProps
+) {
 	// check if items includes wildcard. if not, insert into our list of items and map of what
 	// items are selected.
 	if (useWildcard && items.indexOf(FE_WILDCARD) !== 0) {
@@ -218,6 +218,6 @@ const Selector: FunctionComponent<SelectorProps> = ({
 			</div>
 		</div>
 	);
-};
+});
 
 export default Selector;

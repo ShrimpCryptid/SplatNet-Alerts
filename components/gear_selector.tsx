@@ -1,4 +1,4 @@
-import React, { FunctionComponent, RefObject, useMemo, useRef, useState, useTransition } from "react";
+import React, { FunctionComponent, RefObject, memo, useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Gear } from "../lib/gear";
 import styles from "./gear_selector.module.css";
 import Fuse from "fuse.js";
@@ -6,7 +6,7 @@ import Image from "next/image";
 import { loadingIcon, unknownIcon } from "../public/icons/utils";
 import { brandIcons } from "../public/icons/brands";
 import { mapGetWithDefault } from "../lib/shared_utils";
-import { GEAR_NAME_TO_DATA } from "../lib/geardata";
+import { GEAR_NAMES, GEAR_NAME_TO_DATA } from "../lib/geardata";
 import { makeLink } from "../lib/frontend_utils";
 import CollapsibleHelpBox from "./collapsible_box";
 
@@ -17,9 +17,10 @@ type GearTileProps = {
 	onSelection?: (selectedGear: Gear) => void;
 };
 
-export const GearTile: FunctionComponent<GearTileProps> = (
-	props: GearTileProps
-) => {
+// Memoized to reduce re-renders
+export const GearTile: FunctionComponent<GearTileProps> = memo(function GearTile(
+    props: GearTileProps
+  ) {
 	let imageSrc, gearName, gearBrand;
 	let onSelection = undefined;
 
@@ -70,7 +71,48 @@ export const GearTile: FunctionComponent<GearTileProps> = (
 			</div>
 		</div>
 	);
-};
+});
+
+
+type GearListProps = {
+  filteredGear: Gear[],
+	/** Callback function when clicked. If none is provided, disables hover */
+	onSelection?: (selectedGear: Gear) => void;
+}
+
+export const GearList: FunctionComponent<GearListProps> = memo(function GearList(props: GearListProps) {
+  const gearArray = useMemo(() => [...GEAR_NAME_TO_DATA.values()], []);
+  const [fullGearList, setFullGearList] = useState(<></>);
+  useEffect(() => {
+    // Hack to get an async function-- set state asynchronously so we don't block
+    // the main render
+    setTimeout(() => {
+      setFullGearList(
+        <>
+        {[...GEAR_NAME_TO_DATA.values()].map((gear) => {
+          return <GearTile gear={gear} onSelection={props.onSelection} key={gear.name}/>;
+        })}
+      </>
+    );
+  }, 0);
+  }, [])
+  let showFullList =  props.filteredGear === undefined || gearArray.length === props.filteredGear.length;
+
+  // The full gear list is always present but is sometimes invisible
+  // (display: none) to ensure it appears faster when search is cleared.
+  return <>
+    <div className={styles.list} style={{ display: showFullList ? "grid" : "none" }} >
+      {fullGearList}
+    </div>
+    { !showFullList? 
+      <div className={styles.list} >
+        {props.filteredGear.map((gear) => {
+          return <GearTile gear={gear} onSelection={props.onSelection} />;
+        })}
+      </div> : <></> }
+  </>
+});
+
 
 type GearSelectorProps = {
 	onSelection: (selectedGear: Gear) => void;
@@ -82,26 +124,15 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	onSelection,
   searchbarReference
 }) => {
-	const gearArray = [...GEAR_NAME_TO_DATA.values()];
+	const gearArray = useMemo(() => {return [...GEAR_NAME_TO_DATA.values()]}, []);
 	const [searchText, setSearchText] = useState("");
   const [showMissingItemPrompt, setShowMissingItemPrompt] = useState(false);
 
-	const [isRenderingGear, startRenderingGear] = useTransition();
-
-  const [isFinishedInitialGearRender, setIsFinishedInitialGearRender] = useState(true);
-	const [renderedGearList, setRenderedGearList] = useState(<></>);
-	const [fullRenderedGearList, setFullRenderedGearList] = useState(
-		useMemo(() => {
-			// Optimization for the searchbar
-			return (
-				<>
-					{[...GEAR_NAME_TO_DATA.values()].map((gear) => {
-						return <GearTile gear={gear} onSelection={onSelection} key={gear.name}/>;
-					})}
-				</>
-			);
-		}, [onSelection])  // onSelection handler is a prop! This should run once
-	);
+  // Using useDeferredValue to deprioritize rendering of the gear lists.
+  // This allows React to throw out a re-render process if the search changes
+  // again. See https://react.dev/reference/react/useDeferredValue#deferring-re-rendering-for-a-part-of-the-ui
+  const [filteredGear, setFilteredGear] = useState<Gear[]>(gearArray);
+  const deferredFilteredGear = useDeferredValue(filteredGear);
 
 	// Set up fuzzy search
 	// TODO: Combine both name and brand in searches? https://stackoverflow.com/questions/47436817/search-in-two-properties-using-one-search-query
@@ -118,45 +149,23 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 			return;
 		} else if (newSearchText.replaceAll(" ", "") === "") {
 			// Exit early if the search text is blank
-      setIsFinishedInitialGearRender(true);
+      setFilteredGear(gearArray);
 			setSearchText(newSearchText);
 			return;
 		}
 
-    // We are rendering the first character, which usually takes the longest.
-    // Set a flag so we don't update the displayed gear list yet.
-    if (searchText === "" && isFinishedInitialGearRender) {
-      setIsFinishedInitialGearRender(false);
-    }
-
-		// Update the search text.
-		setSearchText(newSearchText);
-
-		// Run the update asynchronously, using useTransition to prevent blocking.
-    // Render all of the gear as items in a displayable list.
-    startRenderingGear(() => {
-      // Get the new set of items we need to represent.
-      let filteredGear;
-      // Modify search text so it doesn't include spaces-- this can cause
-      // unexpected behavior because the fuse searcher will try to match with it
-      let searchTextNoSpace = newSearchText.replaceAll(" ", "");
-      let searchResults = fuzzySearcher.search(searchTextNoSpace);
-      filteredGear = searchResults.map((result) => {
-        return result.item;
-      });
-
-      setRenderedGearList(
-        <>
-          {filteredGear.map((gear) => {
-            return <GearTile gear={gear} onSelection={onSelection} />;
-          })}
-        </>
-      );
-      setIsFinishedInitialGearRender(true);
+    // Get the new set of items we need to represent.
+    let filteredGear;
+    // Modify search text so it doesn't include spaces-- this can cause
+    // unexpected behavior because the fuse searcher will try to match with it
+    let searchTextNoSpace = newSearchText.replaceAll(" ", "");
+    let searchResults = fuzzySearcher.search(searchTextNoSpace);
+    filteredGear = searchResults.map((result) => {
+      return result.item;
     });
+    setFilteredGear(filteredGear);
+    setSearchText(newSearchText);
 	};
-
-	let showFullList = searchText.replaceAll(" ", "") === "" || !isFinishedInitialGearRender;
 
 	return (
 		<div className={styles.container}>
@@ -187,25 +196,17 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 			</div>
 
 			<div className={styles.listContainer}>
-        {isRenderingGear ? 
+        {deferredFilteredGear !== filteredGear ?  /** Show loading spinner */
           <div className={styles.loadingIcon}>
             <div className={styles.loadingFiller}>
               <Image src={loadingIcon} layout="fill" priority={true}/>
             </div>
 					</div> : <></>
         }
-				<div
-					className={styles.list}
-					style={{ display: showFullList ? "grid" : "none" }}
-				>
-					{fullRenderedGearList}
-				</div>
-				<div
-					className={styles.list}
-					style={{ display: showFullList ? "none" : "grid" }}
-				>
-					{renderedGearList}
-				</div>
+        <GearList
+          filteredGear={deferredFilteredGear}
+          onSelection={onSelection}
+        />
 			</div>
       
       <CollapsibleHelpBox

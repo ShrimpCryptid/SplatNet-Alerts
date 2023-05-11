@@ -110,3 +110,28 @@
   vertical-align: middle;
   gap: 5px;
 }
+
+.loadingIcon {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  transform: translateX(-50%) translateY(-50%) rotateZ(0deg);
+  top: 50%;
+  left: 50%;
+  background-color: transparent;
+  animation: spin 3s infinite linear;
+  opacity: 50%;
+  z-index: 3;
+}
+
+@keyframes spin {
+  0% {
+    transform: translateX(-50%) translateY(-50%) rotateZ(0deg);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-50%) rotateZ(180deg);
+  }
+  100% {
+    transform: translateX(-50%) translateY(-50%) rotateZ(360deg);
+  }
+}

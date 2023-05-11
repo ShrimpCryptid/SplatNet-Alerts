@@ -1,14 +1,13 @@
-import React, { FunctionComponent, RefObject, useMemo, useState } from "react";
+import React, { FunctionComponent, RefObject, useMemo, useRef, useState, useTransition } from "react";
 import { Gear } from "../lib/gear";
 import styles from "./gear_selector.module.css";
 import Fuse from "fuse.js";
 import Image from "next/image";
-import { unknownIcon } from "../public/icons/utils";
+import { loadingIcon, unknownIcon } from "../public/icons/utils";
 import { brandIcons } from "../public/icons/brands";
 import { mapGetWithDefault } from "../lib/shared_utils";
 import { GEAR_NAME_TO_DATA } from "../lib/geardata";
-import { makeIcon, makeLink } from "../lib/frontend_utils";
-import Link from "next/link";
+import { makeLink } from "../lib/frontend_utils";
 import CollapsibleHelpBox from "./collapsible_box";
 
 type GearTileProps = {
@@ -40,6 +39,8 @@ export const GearTile: FunctionComponent<GearTileProps> = (
 	}
 
 	let disabled = onSelection === undefined;
+  const ref = useRef(Date.now());
+
 
   // TODO: Replace gear selector divs with buttons for keyboard accessibility
 	return (
@@ -85,7 +86,9 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	const [searchText, setSearchText] = useState("");
   const [showMissingItemPrompt, setShowMissingItemPrompt] = useState(false);
 
-	const [isRenderingGear, setIsRenderingGear] = useState(false);
+	const [isRenderingGear, startRenderingGear] = useTransition();
+
+  const [isFinishedInitialGearRender, setIsFinishedInitialGearRender] = useState(true);
 	const [renderedGearList, setRenderedGearList] = useState(<></>);
 	const [fullRenderedGearList, setFullRenderedGearList] = useState(
 		useMemo(() => {
@@ -97,7 +100,7 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 					})}
 				</>
 			);
-		}, [onSelection])
+		}, [onSelection])  // onSelection handler is a prop! This should run once
 	);
 
 	// Set up fuzzy search
@@ -110,46 +113,50 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 	const fuzzySearcher = new Fuse([...gearArray.values()], searchOptions);
 
 	const handleSearchChanged = (newSearchText: string) => {
-		const updateFilteredGear = async () => {
-			// Get the new set of items we need to represent.
-			let filteredGear;
-			// Modify search text so it doesn't include spaces-- this can cause
-			// unexpected behavior because the fuse searcher will try to match with it
-			let searchTextNoSpace = newSearchText.replaceAll(" ", "");
-			let searchResults = fuzzySearcher.search(searchTextNoSpace);
-			filteredGear = searchResults.map((result) => {
-				return result.item;
-			});
-
-			// Render all of the gear as items in a displayable list.
-			setRenderedGearList(
-				<>
-					{filteredGear.map((gear) => {
-						return <GearTile gear={gear} onSelection={onSelection} />;
-					})}
-				</>
-			);
-			setIsRenderingGear(false);
-		};
-
 		if (searchText === newSearchText) {
 			// Skip update if no changes made.
 			return;
 		} else if (newSearchText.replaceAll(" ", "") === "") {
 			// Exit early if the search text is blank
+      setIsFinishedInitialGearRender(true);
 			setSearchText(newSearchText);
 			return;
 		}
 
-		// Flag that we're currently rendering new gear, and update.
-		setIsRenderingGear(true);
+    // We are rendering the first character, which usually takes the longest.
+    // Set a flag so we don't update the displayed gear list yet.
+    if (searchText === "" && isFinishedInitialGearRender) {
+      setIsFinishedInitialGearRender(false);
+    }
+
+		// Update the search text.
 		setSearchText(newSearchText);
 
-		// Run the update asynchronously
-		updateFilteredGear();
+		// Run the update asynchronously, using useTransition to prevent blocking.
+    // Render all of the gear as items in a displayable list.
+    startRenderingGear(() => {
+      // Get the new set of items we need to represent.
+      let filteredGear;
+      // Modify search text so it doesn't include spaces-- this can cause
+      // unexpected behavior because the fuse searcher will try to match with it
+      let searchTextNoSpace = newSearchText.replaceAll(" ", "");
+      let searchResults = fuzzySearcher.search(searchTextNoSpace);
+      filteredGear = searchResults.map((result) => {
+        return result.item;
+      });
+
+      setRenderedGearList(
+        <>
+          {filteredGear.map((gear) => {
+            return <GearTile gear={gear} onSelection={onSelection} />;
+          })}
+        </>
+      );
+      setIsFinishedInitialGearRender(true);
+    });
 	};
 
-	let showFullList = searchText.replaceAll(" ", "") === "";
+	let showFullList = searchText.replaceAll(" ", "") === "" || !isFinishedInitialGearRender;
 
 	return (
 		<div className={styles.container}>
@@ -180,6 +187,13 @@ const GearSelector: FunctionComponent<GearSelectorProps> = ({
 			</div>
 
 			<div className={styles.listContainer}>
+        {isRenderingGear ? 
+          <div className={styles.loadingIcon}>
+            <div className={styles.loadingFiller}>
+              <Image src={loadingIcon} layout="fill" priority={true}/>
+            </div>
+					</div> : <></>
+        }
 				<div
 					className={styles.list}
 					style={{ display: showFullList ? "grid" : "none" }}

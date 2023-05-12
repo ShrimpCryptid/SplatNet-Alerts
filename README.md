@@ -37,7 +37,7 @@ It's made using NEXT.js, which is a framework for React and Node.js, and the dat
   - [ ] Show favored/unfavored abilities for brands
   - [x] Replace some UI buttons with clickable icons
   - [x] Loading animations for database actions
-  - [ ] Rarity selector for filter page
+  - [x] Rarity selector for filter page
   - [x] Background image assets
   - [ ] Custom toast notification animations and styling
   - [x] Notification on/off slider, options for stopping all notifications
@@ -46,7 +46,7 @@ It's made using NEXT.js, which is a framework for React and Node.js, and the dat
 - [x] Configure server/database options, key security
 - [x] Web hosting setup
 - [x] **WEBSITE GOES LIVE** 🎉
-- [ ] User testing (50%)
+- [x] User testing
 - [ ] Contributor tutorial + documentation (💖)
 - [ ] Translation support
 

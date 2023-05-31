@@ -22,6 +22,8 @@ export const API_MAX_SUBSCRIPTIONS = 5;
 /** The maximum number of filters allowed per user. */
 export const API_MAX_FILTERS = 100;
 
+export const FETCH_BACKOFF_MS = [1, 10, 100, 1000];
+
 export const FE_WILDCARD = "All";
 export const FE_LOCAL_USER_CODE = DB_USER_ID;
 export const FE_LOCAL_SUBSCRIPTION_INFO = "subscription_info";
@@ -34,7 +36,7 @@ export const FE_ERROR_500_MSG =
 export const FE_ERROR_INVALID_USERCODE =
 	"Sorry, that usercode doesn't look right. Please check it and try again.";
 export const FE_UNKNOWN_MSG =
-	"Sorry, something went wrong. Please try again in a few seconds.";
+	"Sorry, something went wrong. Please try again in a few seconds or refresh the page.";
 
 export const FE_HAS_SHOWN_IOS_WARNING = "has_shown_ios_version_warning";
 

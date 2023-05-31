@@ -1,6 +1,6 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear";
-import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES } from "../constants";
+import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES, FETCH_BACKOFF_MS } from "../constants";
 import {
 	DB_GEAR_NAME,
 	DB_GEAR_RARITY,
@@ -38,6 +38,7 @@ import {
 	isValidUserCode,
 	generateRandomUserCode,
 	isValidNickname,
+  sleep,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from "web-push";
@@ -938,36 +939,46 @@ export async function trySendNotification(
 	client: Pool | PoolClient,
 	subscription: Subscription,
 	notification: string,
-  options = {}
+  options = {},
+  maxAttempts = 3,
 ): Promise<webpush.SendResult | undefined> {
-  // TODO: Make multiple attempts at notifying users?
-	try {
-		let result = await webpush.sendNotification(
-			subscription,
-			notification,
-      options
-			// {timeout: 5}
-		);
-		return result;
-	} catch (error) {
-		if (error instanceof webpush.WebPushError) {
-			if (
-				error.statusCode === 404 ||
-				error.statusCode === 410 ||
-				error.statusCode === 403
-			) {
-				// 404: endpoint not found, 410: push subscription expired
-				// 403: incorrect/changed keys
-				// Remove this subscription from the database.
-				await deletePushSubscription(client, subscription);
-				return;
-			} else {
-				console.log(error.statusCode);
-				throw error;
-			}
-		}
-		throw error;
-	}
+  for (let attempts = 0; attempts < maxAttempts; attempts++) {
+    try {
+      let result = await webpush.sendNotification(
+        subscription,
+        notification,
+        options
+        // {timeout: 5}
+      );
+      return result;
+    } catch (error) {
+      // Handle webpush subscription-related errors
+      if (error instanceof webpush.WebPushError) {
+        if (
+          error.statusCode === 404 ||
+          error.statusCode === 410 ||
+          error.statusCode === 403
+        ) {
+          // 404: endpoint not found, 410: push subscription expired
+          // 403: incorrect/changed keys
+          // Remove this subscription from the database.
+          await deletePushSubscription(client, subscription);
+          return;
+        }
+      }
+      // General error handling case
+      if (attempts < maxAttempts - 1) {
+        // Reattempt after a delay, with exponential backoff.
+        let timeoutMs = attempts < FETCH_BACKOFF_MS.length ? FETCH_BACKOFF_MS[attempts] : FETCH_BACKOFF_MS[FETCH_BACKOFF_MS.length - 1];
+        await sleep(timeoutMs);
+        continue;
+      } else {
+        // Print error without throwing
+        console.error(error);
+        break;
+      }
+    }
+  }
 }
 
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS

@@ -34,9 +34,9 @@ export class NoSuchFilterError extends Error {
 	}
 }
 
-/** Returns a promise that resolves once the timeout is completed. */
-export async function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+/** Returns a promise that resolves once the timeout (give in ms) is completed. */
+export async function sleep(timeoutMs: number) {
+	return new Promise((resolve) => setTimeout(resolve, timeoutMs));
 }
 
 /**

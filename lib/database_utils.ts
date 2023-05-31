@@ -751,7 +751,8 @@ export async function getUserFilters(
 		// userFilters is a temporary table used to index into the Filters table
 		`WITH userFilters(${DB_FILTER_ID}) AS 
         (SELECT ${DB_FILTER_ID} FROM ${DB_TABLE_USERS_TO_FILTERS}
-        WHERE ${DB_USER_ID} = ${userID})
+        WHERE ${DB_USER_ID} = ${userID}
+        ORDER BY ${DB_PAIR_ID} ASC)
       SELECT * FROM ${DB_TABLE_FILTERS}, userFilters
       WHERE ${DB_TABLE_FILTERS}.${DB_FILTER_ID} = userFilters.${DB_FILTER_ID}`
 	);

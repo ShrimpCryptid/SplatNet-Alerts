@@ -189,11 +189,11 @@ async function scrapeGearDataFromWikiPage(
       });
       promises.push(promise);
     });
-		await Promise.all(promises);
+		await Promise.allSettled(promises);
     // Weird hack because otherwise the last item index won't be included
     // in the array of promises and will get dropped from the final gear list.
     // TODO: Investigate source of race condition bug
-    await sleep(REQUEST_DELAY_MS * 2);
+    await sleep(REQUEST_DELAY_MS * 5);
 		progressBar.update(gearCount);
 		progressBar.stop();
 

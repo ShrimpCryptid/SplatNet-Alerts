@@ -4,6 +4,7 @@ import { CompactGearData, Gear } from "./gear";
 import {
 	GEAR_ABILITIES,
 	GEAR_BRANDS,
+	GEAR_NAMES_ALLOWED_REGEXP,
 	GEAR_TYPES,
 	IGNORED_GEAR_ABILITIES,
 	IGNORED_GEAR_BRANDS,
@@ -239,6 +240,13 @@ async function updateLocalGearJSON(filepath: string) {
 		gearDict[gear.name] = Gear.serializeCompact(gear);
 	}
 	let jsonString = JSON.stringify(gearDict);
+
+  // Check all values against allowed regular expression
+  for (let gear of gearData) {
+    if (!GEAR_NAMES_ALLOWED_REGEXP.test(gear.name)) {
+      console.warn(`Gear '${gear.name}' has banned special characters.`);
+    }
+  }
 
 	try {
 		fs.writeFileSync(filepath, jsonString);

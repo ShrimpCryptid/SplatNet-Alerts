@@ -1,6 +1,6 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear";
-import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES, FETCH_BACKOFF_MS } from "../constants";
+import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES, FETCH_BACKOFF_MS, GEAR_NAMES_ALLOWED_REGEXP } from "../constants";
 import {
 	DB_GEAR_NAME,
 	DB_GEAR_RARITY,
@@ -887,8 +887,7 @@ export async function getUsersToBeNotified(
 ): Promise<Map<number, string>> {
 	// Prevent SQL injection attacks.
 	// Allow only alphanumeric characters, spaces, and -, +, (, and ) chars.
-	const allowedCharsPattern = new RegExp(/^[A-Za-z0-9-+()&' ]*$/);
-	if (!allowedCharsPattern.test(gear.name)) {
+	if (!GEAR_NAMES_ALLOWED_REGEXP.test(gear.name)) {
 		throw new IllegalArgumentError(
 			"Gear name '" + gear.name + "' contains special characters."
 		);

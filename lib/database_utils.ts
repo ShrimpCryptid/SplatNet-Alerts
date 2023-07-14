@@ -889,7 +889,7 @@ export async function getUsersToBeNotified(
 	// Allow only alphanumeric characters, spaces, and -, +, (, and ) chars.
 	if (!GEAR_NAMES_ALLOWED_REGEXP.test(gear.name)) {
 		throw new IllegalArgumentError(
-			"Gear name '" + gear.name + "' contains special characters."
+			"!!! Gear name '" + gear.name + "' contains special characters."
 		);
 	}
 	// Match filters by properties, either by specific brand/ability/type or by

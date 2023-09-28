@@ -55,7 +55,7 @@ export const GEAR_TYPES = ["HeadGear", "ClothingGear", "ShoesGear"];
 export const GEAR_BRANDS = [
 	"Annaki",
 	"Barazushi",
-  "Cuttlegear",
+	"Cuttlegear",
 	"Emberz",
 	"Enperry",
 	"Firefin",
@@ -71,7 +71,7 @@ export const GEAR_BRANDS = [
 	"Toni Kensa",
 	"Zekko",
 	"Zink",
-  "Z+F",
+	"Z+F",
 ];
 export const IGNORED_GEAR_BRANDS = ["Grizzco", "amiibo"];
 export const GEAR_RARITY_MAX = 2;
@@ -106,10 +106,26 @@ export const GEAR_ABILITIES = [
 ];
 
 let typeExclusiveAbilities: Map<string, string[]> = new Map();
-typeExclusiveAbilities.set("HeadGear", ["Opening Gambit", "Last-Ditch Effort", "Tenacity", "Comeback"]);
-typeExclusiveAbilities.set("ClothingGear", ["Ninja Squid",	"Haunt", "Thermal Ink", "Respawn Punisher"]);
-typeExclusiveAbilities.set("ShoesGear", ["Stealth Jump", "Object Shredder", "Drop Roller"])
+typeExclusiveAbilities.set("HeadGear", [
+	"Opening Gambit",
+	"Last-Ditch Effort",
+	"Tenacity",
+	"Comeback",
+]);
+typeExclusiveAbilities.set("ClothingGear", [
+	"Ninja Squid",
+	"Haunt",
+	"Thermal Ink",
+	"Respawn Punisher",
+]);
+typeExclusiveAbilities.set("ShoesGear", [
+	"Stealth Jump",
+	"Object Shredder",
+	"Drop Roller",
+]);
 export const TYPE_EXCLUSIVE_ABILITIES = typeExclusiveAbilities;
 
 export const IGNORED_GEAR_ABILITIES = ["Ability Doubler"];
-export const GEAR_NAMES_ALLOWED_REGEXP = new RegExp(/^[A-Za-z0-9-+()&', ]*$/);
+export const GEAR_NAMES_ALLOWED_REGEXP = new RegExp(
+	/^[A-Za-z0-9-+()&', \\/]*$/
+);

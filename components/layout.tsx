@@ -23,11 +23,11 @@ export default function Layout({ children }: LayoutProps) {
 			<Head>
 				<meta
 					name="description"
-					content="Get notified for drops of the Splatoon gear you want!"
+					content="Get push notifications when the Splatoon gear items you want arrive on SplatNet!"
 				/>
 				<meta
 					property="og:description"
-					content="Get notified for drops of the Splatoon gear you want!"
+					content="Get push notifications when the Splatoon gear items you want arrive on SplatNet!"
 				/>
 				<meta
 					name="keywords"

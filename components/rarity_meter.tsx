@@ -16,6 +16,7 @@ export const RarityMeter: FunctionComponent<Props> = ({
 	let elements = (
 		<div className={styles.bigIconContainer}>
 			<Image
+				alt={"Large question mark"}
 				className={`${styles.bigIcon}`}
 				src={unknownIcon}
 				layout={"fill"}
@@ -37,6 +38,7 @@ export const RarityMeter: FunctionComponent<Props> = ({
 				{elements}
 				<div className={`${styles.smallIconContainer} ${iconStyle}`}>
 					<Image
+						alt={"Small question mark"}
 						className={`${styles.smallIcon} ${iconStyle}`}
 						src={unknownIcon}
 						layout={"fill"}

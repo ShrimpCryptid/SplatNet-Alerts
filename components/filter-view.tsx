@@ -15,18 +15,24 @@ import { GEAR_NAME_TO_IMAGE } from "../lib/geardata";
 import LoadingButton, { ButtonStyle } from "./loading-button";
 import { GEAR_ABILITIES, GEAR_BRANDS, GEAR_RARITY_MAX } from "../constants";
 
-function getStringSelectionCount(selections: string[], sourceOptions: string[], isSelected: boolean): JSX.Element {
-  let ret = "(";
-  if (selections.length === 0 && isSelected) {
-    ret += sourceOptions.length;
-  } else if (isSelected) {
-    ret += selections.length;
-  } else {
-    ret += "0"
-  }
-  return <span className={styles.categoryCountLabel}>
-    {ret + "/" + sourceOptions.length + ")"}
-  </span>
+function getStringSelectionCount(
+	selections: string[],
+	sourceOptions: string[],
+	isSelected: boolean
+): JSX.Element {
+	let ret = "(";
+	if (selections.length === 0 && isSelected) {
+		ret += sourceOptions.length;
+	} else if (isSelected) {
+		ret += selections.length;
+	} else {
+		ret += "0";
+	}
+	return (
+		<span className={styles.categoryCountLabel}>
+			{ret + "/" + sourceOptions.length + ")"}
+		</span>
+	);
 }
 
 type Props = {
@@ -67,6 +73,7 @@ const FilterView: FunctionComponent<Props> = ({
 			filter.gearName,
 			unknownIcon
 		);
+		iconAlt = filter.gearName;
 
 		// Gear item has a specific name, so we show it
 		gearNameElements = (
@@ -76,12 +83,14 @@ const FilterView: FunctionComponent<Props> = ({
 		// Filter is by gear TYPE, not a specific item. Render 1, 2, or any icons.
 		if (filter.gearTypes.length == 0 || filter.gearTypes.length == 3) {
 			iconURL = GEAR_TYPE_ANY_ICON;
+			iconAlt = "Gear type: Any";
 		} else if (filter.gearTypes.length == 1) {
 			iconURL = mapGetWithDefault(
 				typeIcons,
 				filter.gearTypes[0],
 				GEAR_TYPE_ANY_ICON
 			);
+			iconAlt = "Gear types: " + filter.gearTypes.join(", ");
 		} else {
 			// 2 types
 			iconURL = mapGetWithDefault(
@@ -89,12 +98,20 @@ const FilterView: FunctionComponent<Props> = ({
 				filter.gearTypes[0] + filter.gearTypes[1],
 				GEAR_TYPE_ANY_ICON
 			);
+			iconAlt = "Gear types: " + filter.gearTypes.join(", ");
 		}
 		// Put brands name inside of the gear name elements for formatting (matches
 		// up nicely with the edit/delete buttons)
-		gearNameElements = <h3 className={styles.categoryLabel}>Brands {
-      getStringSelectionCount(filter.gearBrands, GEAR_BRANDS, brandsSelected)
-    }</h3>;
+		gearNameElements = (
+			<h3 className={styles.categoryLabel}>
+				Brands{" "}
+				{getStringSelectionCount(
+					filter.gearBrands,
+					GEAR_BRANDS,
+					brandsSelected
+				)}
+			</h3>
+		);
 
 		// Override icon if no type is defined
 		if (!typesSelected) {
@@ -109,6 +126,7 @@ const FilterView: FunctionComponent<Props> = ({
 					<div className={styles.brandIconContainer}>
 						<div className={styles.abilityIcon}>
 							<Image
+								alt={brandsSelected ? "Any brand" : "No brands chosen"}
 								src={brandsSelected ? unknownIcon : noneIcon}
 								layout={"fill"}
 							/>
@@ -124,6 +142,7 @@ const FilterView: FunctionComponent<Props> = ({
 							return (
 								<div className={styles.brandIcon} key={index}>
 									<Image
+										alt={value}
 										src={mapGetWithDefault(brandIcons, value, unknownIcon)}
 										layout={"fill"}
 									/>
@@ -143,6 +162,7 @@ const FilterView: FunctionComponent<Props> = ({
 			<div className={styles.abilityIcon}>
 				<Image
 					key={0}
+					alt={abilitiesSelected ? "Any ability" : "No abilities chosen"}
 					src={abilitiesSelected ? unknownIcon : noneIcon}
 					layout={"fill"}
 				/>
@@ -154,6 +174,7 @@ const FilterView: FunctionComponent<Props> = ({
 			return (
 				<div className={styles.abilityIcon} key={index}>
 					<Image
+						alt={item}
 						src={mapGetWithDefault(abilityIcons, item, unknownIcon)}
 						layout={"fill"}
 					/>
@@ -166,7 +187,7 @@ const FilterView: FunctionComponent<Props> = ({
 		<div className={styles.container}>
 			<div className={styles.lcontainer}>
 				<div className={styles.gearIcon}>
-					<Image src={iconURL} layout={"fill"} />
+					<Image src={iconURL} layout={"fill"} alt={iconAlt} />
 					<div
 						className={styles.gearIconBrand}
 						style={{ visibility: isItem ? "visible" : "hidden" }}
@@ -177,17 +198,17 @@ const FilterView: FunctionComponent<Props> = ({
 								filter.gearBrands[0],
 								unknownIcon
 							)}
+							alt={filter.gearBrands[0]}
 							layout={"fill"}
 						/>
 					</div>
 				</div>
-        <div className={styles.rarityMeter}>
+				<div className={styles.rarityMeter}>
 					<RarityMeter
 						minRarity={filter.minimumRarity}
 						maxRarity={GEAR_RARITY_MAX}
 					/>
 				</div>
-
 			</div>
 			<div className={styles.rcontainer}>
 				<div className={styles.gearNameContainer}>
@@ -220,7 +241,14 @@ const FilterView: FunctionComponent<Props> = ({
 				</div>
 				{brandElements}
 
-				<h3 className={styles.categoryLabel}>Abilities {getStringSelectionCount(filter.gearAbilities, GEAR_ABILITIES, abilitiesSelected)}</h3>
+				<h3 className={styles.categoryLabel}>
+					Abilities{" "}
+					{getStringSelectionCount(
+						filter.gearAbilities,
+						GEAR_ABILITIES,
+						abilitiesSelected
+					)}
+				</h3>
 				<div className={styles.abilityIconContainer}>{abilityElements}</div>
 			</div>
 		</div>

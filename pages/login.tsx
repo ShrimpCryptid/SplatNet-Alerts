@@ -10,13 +10,19 @@ import Image from "next/image";
 import { loadingIcon } from "../public/icons/utils";
 import Filter from "../lib/filter";
 
-export default function Login({ userCode, setUserCode, getUserData}: DefaultPageProps) {
+export default function Login({
+	userCode,
+	setUserCode,
+	getUserData,
+}: DefaultPageProps) {
 	// Wait until we receive the usercode to show the alert box.
 	const [showAlertbox, setShowAlertbox] = useState(false);
 	const [newUserCode, setNewUserCode] = useState("");
 	const [canChangePage, setCanChangePage] = useState(false);
 
-  const [newUserData, setNewUserData] = useState<[Filter[], string]|null>(null);
+	const [newUserData, setNewUserData] = useState<[Filter[], string] | null>(
+		null
+	);
 
 	const [useCurrentSelected, setUseCurrentSelected] = useState(false);
 	const [useNewSelected, setUseNewSelected] = useState(false);
@@ -40,20 +46,19 @@ export default function Login({ userCode, setUserCode, getUserData}: DefaultPage
 					setUserCode(urlUserCode);
 					router.push("/");
 				} else if (urlUserCode && userCode) {
-					// There are two usercodes, so check that the user exists and then 
-          // prompt the user about which one they want to use.
-          setNewUserCode(urlUserCode);
-          getUserData(urlUserCode).then((result) => {
-            if (result == null) {
-              // The new user does not exist (or server encountered an error),
-              // so ignore them.
-              router.push("/");
-            } else {
-              setNewUserData(result);
-              setShowAlertbox(true);
-            }
-          })
-          
+					// There are two usercodes, so check that the user exists and then
+					// prompt the user about which one they want to use.
+					setNewUserCode(urlUserCode);
+					getUserData(urlUserCode).then((result) => {
+						if (result == null) {
+							// The new user does not exist (or server encountered an error),
+							// so ignore them.
+							router.push("/");
+						} else {
+							setNewUserData(result);
+							setShowAlertbox(true);
+						}
+					});
 				}
 			}
 		}
@@ -72,7 +77,9 @@ export default function Login({ userCode, setUserCode, getUserData}: DefaultPage
 					<p>
 						It looks like the link you used is from a{" "}
 						<b className="highlight">different user account.</b>
-            <br/>Do you want to use your existing user ID, or log in with the new one?
+						<br />
+						Do you want to use your existing user ID, or log in with the new
+						one?
 					</p>
 
 					<div className={styles.mainContent}>
@@ -122,7 +129,12 @@ export default function Login({ userCode, setUserCode, getUserData}: DefaultPage
 				</LabeledAlertbox>
 			) : (
 				<div className={styles.loadingSpinner}>
-					<Image src={loadingIcon} layout="fill" priority={true} />
+					<Image
+						src={loadingIcon}
+						layout="fill"
+						priority={true}
+						alt={"Loading"}
+					/>
 				</div>
 			)}
 		</div>

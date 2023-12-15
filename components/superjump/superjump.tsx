@@ -39,7 +39,12 @@ const SuperJumpLoadAnimation = ({
 		//@ts-ignore
 		<div className={styles.holder} style={{ "--face-count": totalFaces }}>
 			<div className={styles.bigIconHolder}>
-				<Image src={superjumpMarker} layout={"fill"} priority={true} />
+				<Image
+					src={superjumpMarker}
+					layout={"fill"}
+					priority={true}
+					alt={"Splatoon superjump marker"}
+				/>
 			</div>
 
 			<div className={styles.cylinder}>
@@ -52,20 +57,26 @@ const SuperJumpLoadAnimation = ({
 								style={{ "--index": index }}
 								key={index}
 							>
-								<Image src={value} layout={"fill"} priority={true} />
+								<Image
+									src={value}
+									layout={"fill"}
+									priority={true}
+									alt={"Splatoon superjump marker"}
+								/>
 							</div>
 						);
 					}
 				})}
 			</div>
 			<div className={styles.label}>
-        {Array.isArray(filterText)
-          ? <>
-            <h3>{filterText[0]}</h3>
-            <p>{filterText[1]}</p>
-          </>
-          : <h3>{filterText}</h3>
-        }
+				{Array.isArray(filterText) ? (
+					<>
+						<h3>{filterText[0]}</h3>
+						<p>{filterText[1]}</p>
+					</>
+				) : (
+					<h3>{filterText}</h3>
+				)}
 			</div>
 		</div>
 	);

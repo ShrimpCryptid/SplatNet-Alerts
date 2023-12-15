@@ -40,15 +40,23 @@ export default function LoadingButton({
 				}}
 				style={style}
 			>
-				<div className={"hdiv gap " + (loading ? styles.hidden : "")} style={{alignItems: "center"}}>
-          {children}
-        </div>
+				<div
+					className={"hdiv gap " + (loading ? styles.hidden : "")}
+					style={{ alignItems: "center" }}
+				>
+					{children}
+				</div>
 				{loading ? (
 					<div
 						className={`${styles.loadingIcon} ${loading ? "" : styles.hidden}`}
 					>
 						<div className={styles.loadingFiller}></div>
-						<Image src={loadingIcon} layout="fill" priority={true}/>
+						<Image
+							src={loadingIcon}
+							layout="fill"
+							priority={true}
+							alt={"Loading"}
+						/>
 					</div>
 				) : (
 					<> </>

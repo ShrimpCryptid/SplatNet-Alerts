@@ -330,3 +330,11 @@ textarea:focus, select:focus, input:focus {
   background: var(--button-hover);
   box-shadow: 0 0 0 var(--track-height) #ffffff10
 }
+
+.navLink {
+  text-decoration: none;
+}
+
+.navLink:hover p {
+  text-decoration: underline;
+}

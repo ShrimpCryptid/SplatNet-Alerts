@@ -68,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
 						</div>
 					</Link>
 					<div>
-						<Link href="/">
+						<Link href="/" className={styles.headerMainText}>
 							<h1 className={styles.headerMainText}>SplatNet Alerts</h1>
 						</Link>
 						<p className={styles.headerSubText}>

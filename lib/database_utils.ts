@@ -1,6 +1,12 @@
 import { Pool, PoolClient, QueryResult } from "pg";
 import { Gear } from "./gear";
-import { GEAR_BRANDS, GEAR_TYPES, GEAR_ABILITIES, FETCH_BACKOFF_MS, GEAR_NAMES_ALLOWED_REGEXP } from "../constants";
+import {
+	GEAR_BRANDS,
+	GEAR_TYPES,
+	GEAR_ABILITIES,
+	FETCH_BACKOFF_MS,
+	GEAR_NAMES_ALLOWED_REGEXP,
+} from "../constants";
 import {
 	DB_GEAR_NAME,
 	DB_GEAR_RARITY,
@@ -38,7 +44,7 @@ import {
 	isValidUserCode,
 	generateRandomUserCode,
 	isValidNickname,
-  sleep,
+	sleep,
 } from "./shared_utils";
 import { Subscription } from "./notifications";
 import webpush from "web-push";
@@ -251,13 +257,13 @@ export async function setupDatabaseTables(client: Pool | PoolClient) {
 		)
 	);
 
-  // Wait for the users and filters tables to finish being created before
-  // creating the subscriptions and userstofilters tables, which have
-  // dependencies on them due to constraints.
-  await Promise.all(promises);
-  promises = [];  // clear promises
+	// Wait for the users and filters tables to finish being created before
+	// creating the subscriptions and userstofilters tables, which have
+	// dependencies on them due to constraints.
+	await Promise.all(promises);
+	promises = []; // clear promises
 
-  // Create user subscriptions table.
+	// Create user subscriptions table.
 	promises.push(
 		queryAndLog(
 			client,
@@ -321,7 +327,7 @@ export async function hasCachedData(
 		`SELECT FROM ${DB_TABLE_SERVER_CACHE} WHERE ${DB_CACHE_KEY} = $1`,
 		[key] // passed as parameter to prevent SQL insertion attack
 	);
-	return result.rowCount > 0;
+	return result.rowCount !== null && result.rowCount > 0;
 }
 
 export async function getCachedData(
@@ -534,7 +540,7 @@ export async function addUserPushSubscription(
 				subscription.keys.auth,
 				subscription.keys.p256dh,
 				getTimestamp(),
-        subscriptionID
+				subscriptionID,
 			]
 		);
 	} else {
@@ -782,7 +788,7 @@ export async function removeUserPushSubscription(
 	userID: number,
 	subscription: Subscription
 ) {
-  await queryAndLog(
+	await queryAndLog(
 		client,
 		`DELETE FROM ${DB_TABLE_SUBSCRIPTIONS}
       WHERE ${DB_ENDPOINT} = $1 AND ${DB_USER_ID} = $2;`,
@@ -894,7 +900,7 @@ export async function getUsersToBeNotified(
 	}
 	// Match filters by properties, either by specific brand/ability/type or by
 	// wildcard selectors. Then, select all users that match any of those filters.
-  // TODO: Ignore users who have already been notified via timestamp param?
+	// TODO: Ignore users who have already been notified via timestamp param?
 	let result = await client.query(
 		`WITH matchingUserIDs(_${DB_USER_ID}) AS (
       WITH matchingFilters(_${DB_FILTER_ID}) AS (
@@ -939,46 +945,49 @@ export async function trySendNotification(
 	client: Pool | PoolClient,
 	subscription: Subscription,
 	notification: string,
-  options = {},
-  maxAttempts = 3,
+	options = {},
+	maxAttempts = 3
 ): Promise<webpush.SendResult | undefined> {
-  for (let attempts = 0; attempts < maxAttempts; attempts++) {
-    try {
-      let result = await webpush.sendNotification(
-        subscription,
-        notification,
-        options
-        // {timeout: 5}
-      );
-      return result;
-    } catch (error) {
-      // Handle webpush subscription-related errors
-      if (error instanceof webpush.WebPushError) {
-        if (
-          error.statusCode === 404 ||
-          error.statusCode === 410 ||
-          error.statusCode === 403
-        ) {
-          // 404: endpoint not found, 410: push subscription expired
-          // 403: incorrect/changed keys
-          // Remove this subscription from the database.
-          await deletePushSubscription(client, subscription);
-          return;
-        }
-      }
-      // General error handling case
-      if (attempts < maxAttempts - 1) {
-        // Reattempt after a delay, with exponential backoff.
-        let timeoutMs = attempts < FETCH_BACKOFF_MS.length ? FETCH_BACKOFF_MS[attempts] : FETCH_BACKOFF_MS[FETCH_BACKOFF_MS.length - 1];
-        await sleep(timeoutMs);
-        continue;
-      } else {
-        // Print error without throwing
-        console.error(error);
-        break;
-      }
-    }
-  }
+	for (let attempts = 0; attempts < maxAttempts; attempts++) {
+		try {
+			let result = await webpush.sendNotification(
+				subscription,
+				notification,
+				options
+				// {timeout: 5}
+			);
+			return result;
+		} catch (error) {
+			// Handle webpush subscription-related errors
+			if (error instanceof webpush.WebPushError) {
+				if (
+					error.statusCode === 404 ||
+					error.statusCode === 410 ||
+					error.statusCode === 403
+				) {
+					// 404: endpoint not found, 410: push subscription expired
+					// 403: incorrect/changed keys
+					// Remove this subscription from the database.
+					await deletePushSubscription(client, subscription);
+					return;
+				}
+			}
+			// General error handling case
+			if (attempts < maxAttempts - 1) {
+				// Reattempt after a delay, with exponential backoff.
+				let timeoutMs =
+					attempts < FETCH_BACKOFF_MS.length
+						? FETCH_BACKOFF_MS[attempts]
+						: FETCH_BACKOFF_MS[FETCH_BACKOFF_MS.length - 1];
+				await sleep(timeoutMs);
+				continue;
+			} else {
+				// Print error without throwing
+				console.error(error);
+				break;
+			}
+		}
+	}
 }
 
 // #endregion USER SUBSCRIPTION AND NOTIFICATION ACCESS
@@ -999,7 +1008,7 @@ export function getDBClient(): Pool {
 	}
 }
 
-/** 
+/**
  * // Uncomment this and run this lib file to set up your database for the first
  * // time.
  * setupDatabaseTables(new Pool(

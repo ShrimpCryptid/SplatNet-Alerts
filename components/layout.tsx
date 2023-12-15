@@ -77,10 +77,9 @@ export default function Layout({ children }: LayoutProps) {
 					</div>
 				</div>
 				<div className="hdiv" style={{ gap: "10px", marginLeft: "auto" }}>
-					<Link href="/about">
-						<a className={styles.aboutLink}>
-							{makeIcon("help", styles.aboutIcon + " icon-inline")}About
-						</a>
+					<Link href="/about" className={styles.aboutLink}>
+						{makeIcon("help", styles.aboutIcon + " icon-inline")}
+						<span className={styles.aboutLinkText}>About</span>
 					</Link>
 				</div>
 			</div>
@@ -100,8 +99,8 @@ export default function Layout({ children }: LayoutProps) {
 
 			<div className={styles.footer}>
 				<div className={"hdiv " + styles.footerLinkContainer}>
-					<Link href="/about">
-						<a className={styles.link}>About</a>
+					<Link href="/about" className={styles.link}>
+						About
 					</Link>
 					<p>|</p>
 					{makeLink(

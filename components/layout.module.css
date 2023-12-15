@@ -39,10 +39,6 @@
   margin-right: 4px;
 }
 
-.aboutLink > .aboutIcon {
-  text-decoration: none;
-}
-
 .aboutLink {
   font-family: var(--font-family-ui);
   text-decoration: none;
@@ -53,7 +49,7 @@
   margin: 0 10px;
 }
 
-.aboutLink:hover {
+.aboutLink:hover > .aboutLinkText{
   text-decoration: underline;
 }
 

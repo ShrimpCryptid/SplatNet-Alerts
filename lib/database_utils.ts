@@ -341,7 +341,7 @@ export async function getCachedData(
       WHERE ${DB_CACHE_KEY} = $1`,
 		[key]
 	);
-	if (result.rowCount > 0) {
+	if (result.rowCount) {
 		return result.rows[0][DB_CACHE_DATA];
 	} else {
 		return defaultValue;
@@ -400,7 +400,7 @@ export async function getMatchingFilterID(
 	);
 
 	if (results) {
-		if (results.rowCount > 0) {
+		if (results.rowCount) {
 			return results.rows[0][DB_FILTER_ID]; // get first matching filter ID
 		}
 	}
@@ -417,7 +417,7 @@ async function hasFilterID(
 		`SELECT FROM ${DB_TABLE_FILTERS} WHERE ${DB_FILTER_ID} = ${filterID}`
 	);
 	// Check where there are any rows in the results.
-	return result ? result.rowCount > 0 : false;
+	return result.rowCount !== null && result.rowCount > 0;
 }
 
 /**
@@ -522,7 +522,7 @@ export async function addUserPushSubscription(
 	);
 
 	// Check whether we need to update the entry or make a new one.
-	if (result.rowCount > 0) {
+	if (result.rowCount) {
 		// Already has this entry, so we update it
 		let subscriptionID = result.rows[0][DB_SUBSCRIPTION_ID];
 		await queryAndLog(
@@ -587,7 +587,7 @@ async function hasUser(
 		`SELECT FROM ${DB_TABLE_USERS} WHERE ${DB_USER_ID} = $1`,
 		[userID]
 	);
-	return result ? result.rowCount > 0 : false;
+	return result.rowCount !== null && result.rowCount > 0;
 }
 
 /**
@@ -608,10 +608,10 @@ export async function getUserIDFromCode(
       WHERE ${DB_USER_CODE} = $1`,
 		[userCode] // passed as parameter so postgres can handle attack prevention
 	);
-	if (result.rowCount == 0) {
-		return -1;
-	} else {
+	if (result.rowCount) {
 		return result.rows[0][DB_USER_ID];
+	} else {
+		return -1;
 	}
 }
 
@@ -656,7 +656,7 @@ export async function getUserData(
       WHERE ${DB_USER_ID} = $1;`,
 		[userID]
 	);
-	if (result.rowCount > 0) {
+	if (result.rowCount !== null && result.rowCount > 0) {
 		return {
 			usercode: result.rows[0][DB_USER_CODE],
 			nickname: result.rows[0][DB_NICKNAME],
@@ -686,11 +686,7 @@ async function doesUserHaveFilter(
 		`SELECT FROM ${DB_TABLE_USERS_TO_FILTERS}
       WHERE ${DB_FILTER_ID} = ${filterID} AND ${DB_USER_ID} = ${userID};`
 	);
-	if (result) {
-		return result.rowCount > 0;
-	} else {
-		return false;
-	}
+	return result.rowCount !== null && result.rowCount > 0;
 }
 
 /**
@@ -843,6 +839,7 @@ export async function getLastNotifiedExpiration(
 		[userID]
 	);
 	if (
+		result.rowCount &&
 		result.rowCount > 0 &&
 		result.rows[0][DB_LAST_NOTIFIED_EXPIRATION] !== null
 	) {
@@ -867,7 +864,7 @@ export async function getUserSubscriptions(
       WHERE ${DB_USER_ID} = ${userID}`
 	);
 
-	if (result && result.rowCount > 0) {
+	if (result.rowCount !== null && result.rowCount > 0) {
 		// Parse each row into its own subscription object.
 		let subscriptions = [];
 		for (let row of result.rows) {
@@ -922,7 +919,7 @@ export async function getUsersToBeNotified(
 
 	// Return user data as a map from ID to code.
 	let userMap = new Map<number, string>();
-	if (result && result.rowCount > 0) {
+	if (result.rowCount !== null && result.rowCount > 0) {
 		for (let row of result.rows) {
 			userMap.set(row[DB_USER_ID], row[DB_USER_CODE]);
 		}

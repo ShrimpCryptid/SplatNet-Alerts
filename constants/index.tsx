@@ -127,5 +127,5 @@ export const TYPE_EXCLUSIVE_ABILITIES = typeExclusiveAbilities;
 
 export const IGNORED_GEAR_ABILITIES = ["Ability Doubler"];
 export const GEAR_NAMES_ALLOWED_REGEXP = new RegExp(
-	/^[A-Za-z0-9-+()&', \\/]*$/
+	/^[A-Za-z0-9-+()&'ω., \\/]*$/
 );

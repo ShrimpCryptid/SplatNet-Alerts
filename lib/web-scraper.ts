@@ -59,16 +59,16 @@ async function parseRowToGear(
 	name = $(children[1]).text().trim();
 	brand = $(children[2]).text().trim();
 	cost = $(children[3]).text().trim(); // note, can be amiibo and not num
-  cost = cost.replaceAll(',', '');
+	cost = cost.replaceAll(",", "");
 
 	ability = $(children[4]).text().trim();
 
-  // Handle case where brand image is missing, so the brand name is repeated
-  // (such as for new brands, like Z+F)
-  let splitBrands = brand.split(" ");
-  if (splitBrands.length > 1 && splitBrands[0] === splitBrands[1]) {
-    brand = splitBrands[0];
-  }
+	// Handle case where brand image is missing, so the brand name is repeated
+	// (such as for new brands, like Z+F)
+	let splitBrands = brand.split(" ");
+	if (splitBrands.length > 1 && splitBrands[0] === splitBrands[1]) {
+		brand = splitBrands[0];
+	}
 
 	// Calculate rarity by counting the number of full stars
 	children[5].children.forEach((value) => {
@@ -77,7 +77,7 @@ async function parseRowToGear(
 			rarity++;
 		}
 	});
-  
+
 	// Check if this is an item we should ignore based on ability or brand
 	if (
 		IGNORED_GEAR_BRANDS.includes(brand) ||
@@ -85,21 +85,22 @@ async function parseRowToGear(
 	) {
 		return null;
 	}
-  // Check if item can't be purchased with coins (ex: amiibo or singleplayer)
-  // (except for TBA prices)
-  if (!(/^[0-9]*$/).test(cost) && cost !== "TBA") {
-    return null;
-  } else if (cost === "TBA") {  // Handle yet-to-be-announced items
-    cost = "0";
-  }
+	// Check if item can't be purchased with coins (ex: amiibo or singleplayer)
+	// (except for TBA prices)
+	if (!/^[0-9]*$/.test(cost) && cost !== "TBA") {
+		return null;
+	} else if (cost === "TBA") {
+		// Handle yet-to-be-announced items
+		cost = "0";
+	}
 
-  // Check if this item is valid based on known brands and abilities
-  if (!GEAR_BRANDS.includes(brand)) {
-    console.error(`No such brand '${brand}' known!`);
-  }
-  if (!GEAR_ABILITIES.includes(ability)) {
-    console.error(`No such ability '${ability}' known!`);
-  }
+	// Check if this item is valid based on known brands and abilities
+	if (!GEAR_BRANDS.includes(brand)) {
+		console.error(`No such brand '${brand}' known!`);
+	}
+	if (!GEAR_ABILITIES.includes(ability)) {
+		console.error(`No such ability '${ability}' known!`);
+	}
 
 	// Fetch link to the full page for this gear item
 	if (children[1].firstChild) {
@@ -114,13 +115,19 @@ async function parseRowToGear(
 		let gearPageResponse = await fetchWithBotHeader(pageLink);
 		const $ = cheerio.load(await gearPageResponse.text());
 
-		// Get the image URL from the infobox
-		let imgSrc = $("div.infobox.S3 > div.infobox-image > a > img").attr("src");
-    if (imgSrc === undefined) {
-      imageLink = ""
-    } else {
-		  imageLink = "https:" + imgSrc;
-    }
+		// Get the image URL from the infobox. Check S3 and then S2, in order.
+		let imgSrc;
+		for (const game of ["S3", "S2", "S1"]) {
+			imgSrc = $(`div.infobox.${game} > div.infobox-image a img`).attr("src");
+			if (imgSrc !== undefined) {
+				break;
+			}
+		}
+		if (imgSrc === undefined) {
+			imageLink = "";
+		} else {
+			imageLink = "https:" + imgSrc;
+		}
 	}
 	return new Gear(
 		"", // id (SplatNet gear only)
@@ -176,29 +183,29 @@ async function scrapeGearDataFromWikiPage(
 			}
 
 			// Add a delay before each request starts processing.
-			let promise = sleep(REQUEST_DELAY_MS * (_idx)).then(() => {
-					parseRowToGear($, rowElement, gearType).then((result) => {
-						if (result !== null) {
-							gear.push(result);
-						} else {
-							// mark that we skipped gear
-							gearSkippedCount++;
-						}
-						progressBar.update({ skipped: gearSkippedCount });
-						progressBar.increment();
-					});
-      });
-      promises.push(promise);
-    });
+			let promise = sleep(REQUEST_DELAY_MS * _idx).then(() => {
+				parseRowToGear($, rowElement, gearType).then((result) => {
+					if (result !== null) {
+						gear.push(result);
+					} else {
+						// mark that we skipped gear
+						gearSkippedCount++;
+					}
+					progressBar.update({ skipped: gearSkippedCount });
+					progressBar.increment();
+				});
+			});
+			promises.push(promise);
+		});
 		await Promise.allSettled(promises);
-    // Weird hack because otherwise the last item index won't be included
-    // in the array of promises and will get dropped from the final gear list.
-    // TODO: Investigate source of race condition bug
-    await sleep(REQUEST_DELAY_MS * 5);
+		// Weird hack because otherwise the last item index won't be included
+		// in the array of promises and will get dropped from the final gear list.
+		// TODO: Investigate source of race condition bug
+		await sleep(REQUEST_DELAY_MS * 5);
 		progressBar.update(gearCount);
 		progressBar.stop();
 
-    gear.sort(Gear.gearNameComparator); // Sort by name
+		gear.sort(Gear.gearNameComparator); // Sort by name
 		return gear;
 	} catch (error) {
 		throw error;
@@ -241,12 +248,12 @@ async function updateLocalGearJSON(filepath: string) {
 	}
 	let jsonString = JSON.stringify(gearDict);
 
-  // Check all values against allowed regular expression
-  for (let gear of gearData) {
-    if (!GEAR_NAMES_ALLOWED_REGEXP.test(gear.name)) {
-      console.warn(`Gear '${gear.name}' has banned special characters.`);
-    }
-  }
+	// Check all values against allowed regular expression
+	for (let gear of gearData) {
+		if (!GEAR_NAMES_ALLOWED_REGEXP.test(gear.name)) {
+			console.warn(`Gear '${gear.name}' has banned special characters.`);
+		}
+	}
 
 	try {
 		fs.writeFileSync(filepath, jsonString);

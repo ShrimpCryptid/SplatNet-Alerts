@@ -255,6 +255,35 @@ async function updateLocalGearJSON(filepath: string) {
 		}
 	}
 
+	// Compare against existing file, if it exists
+	try {
+		if (fs.existsSync(filepath)) {
+			console.log("Existing file found. Comparing against new data...");
+			const oldJsonData = fs.readFileSync(filepath);
+			const oldGearNames = Object.keys(JSON.parse(oldJsonData.toString()));
+			const newGearNames = Object.keys(gearDict);
+			const addedGearNames = newGearNames.filter(
+				(name) => !oldGearNames.includes(name)
+			);
+			const removedGearNames = oldGearNames.filter(
+				(name) => !newGearNames.includes(name)
+			);
+			console.log(
+				`Added ${addedGearNames.length} gear items: ${addedGearNames.join(
+					", "
+				)}`
+			);
+			console.log(
+				`Removed ${removedGearNames.length} gear items: ${removedGearNames.join(
+					", "
+				)}`
+			);
+		}
+	} catch (err) {
+		console.warn("An error occurred when comparing against existing file.");
+		console.error(err);
+	}
+
 	try {
 		fs.writeFileSync(filepath, jsonString);
 		let timeElapsedSeconds = (Date.now() - startTime) / 1000.0;

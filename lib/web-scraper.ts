@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { Element } from "domhandler";
 import fs from "fs";
 import { CompactGearData, Gear } from "./gear";
 import {
@@ -36,7 +37,7 @@ const REQUEST_DELAY_MS = 200;
  */
 async function parseRowToGear(
 	$: cheerio.CheerioAPI,
-	el: cheerio.Element,
+	el: Element,
 	gearType: string
 ): Promise<Gear | null> {
 	let pageLink,

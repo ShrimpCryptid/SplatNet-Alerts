@@ -202,7 +202,7 @@ async function scrapeGearDataFromWikiPage(
 		// Weird hack because otherwise the last item index won't be included
 		// in the array of promises and will get dropped from the final gear list.
 		// TODO: Investigate source of race condition bug
-		await sleep(REQUEST_DELAY_MS * 5);
+		await sleep(REQUEST_DELAY_MS * 10);
 		progressBar.update(gearCount);
 		progressBar.stop();
 
